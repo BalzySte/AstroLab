@@ -154,7 +154,8 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 		QObject* tmpMdiArea = (parent())->parent();
 		FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 		//There's only a Stretch box child, no need to name it.
-		tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(NULL);	
+	//	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(NULL);
+		tmpMainWin->getFocusedWindow();
 	}
 	closeEvent->accept();
 }
@@ -164,9 +165,12 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 	std::cout << "Focused" << std::endl;
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-	
+	/*
 	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(this);	//There's only a Stretch box child, no need to name it.
 	std::cout << "QFitsDock found and updated with current Sub Window" << std::endl;
+	*/
+	tmpMainWin->setFocusedWindow(this);
+	tmpMainWin->updateStretchDock();
 //	QMdiSubWindow::focusInEvent(focusInEvent);
 }
 
@@ -202,16 +206,16 @@ QImage* generateQImage(FitsPhoto& fitsPhoto, std::vector<uchar>& charVector)
 QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
 {
 	_fitsWindowParent = parent;
-	connect(this, SIGNAL(focusInEvent(QFocusEvent)), _fitsWindowParent, SLOT(focusInEvent(QFocusEvent)));
+	//connect(this, SIGNAL(focusInEvent(QFocusEvent)), _fitsWindowParent, SLOT(focusInEvent(QFocusEvent)));
 }
 
-
+/*
 void QFitsLabel::focusInEvent(QFocusEvent * focusInEvent)
 {
 	//_fitsWindowParent->setFocus();
 	std::cout << "Focusing from Label" << std::endl;
 }
-
+*/
 
 // --- QFitsScrollArea ---
 QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
@@ -223,9 +227,11 @@ QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 
 void QFitsScrollArea::focusInEvent(QFocusEvent * focusInEvent)
 {
-	QObject* tmpMdiArea = (_fitsWindowParent->parent())->parent();
+	QObject* tmpMdiArea = (parent()->parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-	if (tmpMainWin!=0) //check if dynamic_cast worked properly.
-		tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(_fitsWindowParent);	//There's only a Stretch box child, no need to name it.
+//	if (tmpMainWin!=0) //check if dynamic_cast worked properly.
+//		tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(_fitsWindowParent);	//There's only a Stretch box child, no need to name it.
 	std::cout << "Focusing from Scroll Area" << std::endl;
+
+	tmpMainWin->setFocusedWindow(_fitsWindowParent);	
 }

@@ -3,8 +3,7 @@
 #include <string>
 //#include <unistd.h>
 
-QFitsStretchDock::QFitsStretchDock(QWidget* parent) :
-	_currentFitsImage(NULL)
+QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 {
 	setParent(parent);
 	_topSlider = new QStretchSlider(Qt::Vertical, this);
@@ -62,27 +61,21 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent) :
 }
 
 
-void QFitsStretchDock::setActiveFitsImage(QFitsWindow* fitsWindow)
+void QFitsStretchDock::update()
 {
-	_currentFitsImage = fitsWindow;
+	QFitsWindow* fitsWindow = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
 	std::cout << "Active Fits windows set properly" << std::endl;
 	
-	if (_currentFitsImage != NULL)
+	if (fitsWindow != NULL)
 	{
-		_maxValueBox->setText(QString::fromStdString(std::to_string(_currentFitsImage->getCurrentMaxStretch())));
-		_minValueBox->setText(QString::fromStdString(std::to_string(_currentFitsImage->getCurrentMinStretch())));
+		_maxValueBox->setText(QString::fromStdString(std::to_string(dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch())));
+		_minValueBox->setText(QString::fromStdString(std::to_string(dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch())));
 	}
 	else
 	{
 		_maxValueBox->setText("-");
 		_minValueBox->setText("-");
 	}
-}
-
-
-QFitsWindow* QFitsStretchDock::getActiveFitsImage()
-{
-	return _currentFitsImage;
 }
 
 
@@ -97,17 +90,18 @@ void QFitsStretchDock::previewImage()
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
 
-	if (_currentFitsImage != NULL)
+	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
 	{
 		//	TODO: update stretch image
-		pixelT currentMax = _currentFitsImage->getCurrentMaxStretch();
-		pixelT currentMin = _currentFitsImage->getCurrentMinStretch();
+		pixelT currentMax = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMaxStretch();
+		pixelT currentMin = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMinStretch();
+		std::cout << "passed" << std::endl;
 		pixelT stretch = currentMax - currentMin;
 		
 		pixelT maxVariation = (_topSlider->value() - 500) * stretch / stretchResolution;
 		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / stretchResolution;
 		
-		_currentFitsImage->previewStretch(currentMin + minVariation, currentMax + maxVariation);
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->previewStretch(currentMin + minVariation, currentMax + maxVariation);
 
 		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
 		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
@@ -121,16 +115,16 @@ void QFitsStretchDock::updateImage()
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
 
-	if (_currentFitsImage != NULL)
+	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
 	{
-		pixelT currentMax = _currentFitsImage->getCurrentMaxStretch();
-		pixelT currentMin = _currentFitsImage->getCurrentMinStretch();
+		pixelT currentMax = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
+		pixelT currentMin = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
 		pixelT maxVariation = (_topSlider->value() - 500) * stretch / stretchResolution;
 		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / stretchResolution;
 				
-		_currentFitsImage->updateStretch(currentMin + minVariation, currentMax + maxVariation);
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->updateStretch(currentMin + minVariation, currentMax + maxVariation);
 		
 		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
 		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
@@ -200,7 +194,7 @@ QStretchSlider::QStretchSlider(Qt::Orientation orientation, QWidget* parent) :
 void QStretchSlider::onSliderChange(/*int newValue*/)
 {
 	if (_dockPtr != NULL)
-	//if (change == QAbstractSlider::SliderValueChange/* && dock->_currentFitsImage != NULL*/)
+	//if (change == QAbstractSlider::SliderValueChange/* && dock->dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL*/)
 		_dockPtr->previewImage();
 }
 

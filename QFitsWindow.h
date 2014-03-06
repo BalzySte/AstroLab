@@ -6,6 +6,7 @@
 
 #include "FitsPhoto.h"
 #include "QFitsStretchDock.h"
+#include "fitsviewer.h"
 //#include "common.h"
 
 // 8 bit monocolor FitsPhoto
@@ -82,7 +83,7 @@ private:
 	QFitsWindow* _fitsWindowParent;
 	
 private slots:
-	void focusInEvent(QFocusEvent * focusInEvent);
+	//void focusInEvent(QFocusEvent * focusInEvent);
 };
 
 

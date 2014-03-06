@@ -5,7 +5,7 @@
 #include <iostream>
 #include <QtGui>
 
-FitsViewer::FitsViewer()
+FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 {
 	workspace = new QMdiArea(this);
 	workspace->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -21,6 +21,25 @@ FitsViewer::FitsViewer()
 	setWindowTitle("Fits Viewer");
 	
 	resize(800, 600);
+}
+
+
+void FitsViewer::setFocusedWindow(QFitsWindow* window)
+{
+	_currentFitsImage = window;
+}
+
+
+QFitsWindow* FitsViewer::getFocusedWindow() const
+{
+	return _currentFitsImage;
+}
+
+
+void FitsViewer::updateStretchDock()
+{
+	if (stretchDock != NULL)
+		stretchDock->update();
 }
 
 
@@ -77,8 +96,7 @@ void FitsViewer::addition()
 	QListWidget* selectionList = new QListWidget;
 	
 	// Check wheter an image is focused:
-	const QFitsWindow* currentImg = stretchDock->getActiveFitsImage();
-	if (currentImg == NULL)
+	if (_currentFitsImage == NULL)
 		return;
 	
 	for (std::list<QFitsWindow*>::iterator it = imageWindowsList.begin(); it != imageWindowsList.end(); ++it)
@@ -115,7 +133,7 @@ void FitsViewer::addition()
 	{
 		std::cout << selectionList->currentItem() << std::endl;
 		// Create new image
-		FitsPhoto newFitsPhoto = (currentImg->getFitsPhoto()) + const_cast<const QFitsWindow*>(dynamic_cast<
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() + const_cast<const QFitsWindow*>(dynamic_cast<
 				QFitsListWidgetItem*>(selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
 		
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -135,8 +153,7 @@ void FitsViewer::subtraction()
 	QListWidget* selectionList = new QListWidget;
 	
 	// Check wheter an image is focused:
-	const QFitsWindow* currentImg = stretchDock->getActiveFitsImage();
-	if (currentImg == NULL)
+	if (_currentFitsImage == NULL)
 		return;
 	
 	for (std::list<QFitsWindow*>::iterator it = imageWindowsList.begin(); it != imageWindowsList.end(); ++it)
@@ -173,7 +190,7 @@ void FitsViewer::subtraction()
 	{
 		std::cout << selectionList->currentItem() << std::endl;
 		// Create new image
-		FitsPhoto newFitsPhoto = (currentImg->getFitsPhoto()) - const_cast<const QFitsWindow*>(dynamic_cast<
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() - const_cast<const QFitsWindow*>(dynamic_cast<
 		QFitsListWidgetItem*>(selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
 		
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -193,11 +210,10 @@ void FitsViewer::multiplication()
 									   tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
 	if (ok)
 	{
-		const QFitsWindow* currentImg = stretchDock->getActiveFitsImage();
-		if (currentImg == NULL)
+		if (_currentFitsImage == NULL)
 			return;
 		
-		FitsPhoto newFitsPhoto = (currentImg->getFitsPhoto()) * factor;
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() * factor;
 		
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "ProductImage");
@@ -212,8 +228,7 @@ void FitsViewer::division()
 											tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
 	if (ok)
 	{
-		const QFitsWindow* currentImg = stretchDock->getActiveFitsImage();
-		if (currentImg == NULL)
+		if (_currentFitsImage == NULL)
 			return;
 
 		if (divisor == 0.)
@@ -225,7 +240,7 @@ void FitsViewer::division()
 			return;
 		}
 
-		FitsPhoto newFitsPhoto = (currentImg->getFitsPhoto()) / divisor;
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() / divisor;
 		
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "DivisionImage");

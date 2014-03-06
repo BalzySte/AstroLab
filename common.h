@@ -3,5 +3,6 @@
 
 class QFitsWindow;
 class QFitsStretchDock;
+class fitsviewer;
 
 #endif

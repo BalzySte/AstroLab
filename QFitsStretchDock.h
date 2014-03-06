@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "QFitsWindow.h"
 #include "settings.h"
+#include "fitsviewer.h"
 
 #include "common.h"
 
@@ -17,8 +18,7 @@ class QFitsStretchDock : public QDockWidget
 	
 public:
 	QFitsStretchDock(QWidget* parent = 0);
-	void setActiveFitsImage(QFitsWindow* fitsWindow);
-	QFitsWindow* getActiveFitsImage();
+	void update();
 	void previewImage();
 	void updateImage();
 //	void setSliders(pixelT min, pixelT max);
@@ -26,7 +26,6 @@ public:
 //	pixelT getCurrentMax();
 
 private:
-	QFitsWindow* _currentFitsImage;
 	QWidget* _container;
 	QGridLayout* _containerLayout;
 	QStretchSlider* _topSlider;

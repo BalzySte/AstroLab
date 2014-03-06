@@ -7,6 +7,7 @@
 
 #include "QFitsWindow.h"
 #include "QFitsStretchDock.h"
+#include "common.h"
 
 
 class QAction;
@@ -22,6 +23,9 @@ class FitsViewer : public QMainWindow
   
 public:
   FitsViewer();
+  void setFocusedWindow(QFitsWindow* window);
+  QFitsWindow* getFocusedWindow() const;
+  void updateStretchDock();
   
 private slots:
   void open();
@@ -38,7 +42,9 @@ private:
   void createActions();
   void createStretchSlider();
 
+  // Fits image windows list and pointer to active window
   std::list<QFitsWindow*> imageWindowsList;
+  QFitsWindow* _currentFitsImage;
   
   QMdiArea *workspace;
   QBoxLayout *mainLayout;
