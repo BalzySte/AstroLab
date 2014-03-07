@@ -22,58 +22,66 @@ class FitsViewer : public QMainWindow
   Q_OBJECT
   
 public:
-  FitsViewer();
-  void setFocusedWindow(QFitsWindow* window);
-  QFitsWindow* getFocusedWindow() const;
-  void updateStretchDock();
+	FitsViewer();
+	
+	// Set currently selected image window
+	void setFocusedWindow(QFitsWindow* window);
+	
+	// Get currently selected image window
+	QFitsWindow* getFocusedWindow() const;
+	
+	// Updates stretch dock when focus changes
+//	void updateStretchDock();
   
 private slots:
-  void open();
-  void save();
-  void addition();
-  void subtraction();
-  void multiplication();
-  void division();
-  void quit();
-  void about();
+	void open();
+	void save();
+	void addition();
+	void subtraction();
+	void multiplication();
+	void division();
+	void quit();
+	void about();
     
 private:
-  void createMenus();
-  void createActions();
-  void createStretchSlider();
+	void createMenus();
+	void createActions();
 
-  // Fits image windows list and pointer to active window
-  std::list<QFitsWindow*> imageWindowsList;
-  QFitsWindow* _currentFitsImage;
-  
-  QMdiArea *workspace;
-  QBoxLayout *mainLayout;
-  QFitsStretchDock *stretchDock;
-  
-  QAction *openAct;
-  QAction *exitAct;
+	// Fits image windows list and pointer to active window
+	std::list<QFitsWindow*> imageWindowsList;
+	QFitsWindow* _currentFitsImage;
+	
+	QMdiArea *workspace;
+	QBoxLayout *mainLayout;
+	QFitsStretchDock *stretchDock;
+	
+	// File menu actions
+	QAction *openAct;
+	QAction *exitAct;
 
-  // Operations
-  QAction *addAct;
-  QAction *subtractAct;
-  QAction *multiplyAct;
-  QAction *divideAct;
-  
-/*
-  QAction *zoomInAct;
-  QAction *zoomOutAct;
-  QAction *normalSizeAct;
-  QAction *fitToWindowAct;
-*/
+	// Operations menu actions
+	QAction *addAct;
+	QAction *subtractAct;
+	QAction *multiplyAct;
+	QAction *divideAct;
+	
+	/* View menu actions
+	QAction *zoomInAct;
+	QAction *zoomOutAct;
+	QAction *normalSizeAct;
+	QAction *fitToWindowAct;
+	*/
 
-  QAction *aboutAct;
+	// Help Menu actions
+	QAction *aboutAct;
 
-  QMenu *fileMenu;
-  QMenu *viewMenu;
-  QMenu *operationsMenu;
-  QMenu *helpMenu;
+	// Menus
+	QMenu *fileMenu;
+	QMenu *viewMenu;
+	QMenu *operationsMenu;
+	QMenu *helpMenu;
 
-  double scaleFactor;
+	double scaleFactor;
 };
   
 #endif // __fitsviewer_h__

@@ -4,13 +4,12 @@
 
 #include <sstream>
 #include <stdlib.h>
-// Debug Includes
-/*
-#include <iostream>
-#include <utility>
-*/
 
-FitsPhoto::FitsPhoto()
+// Default Constructor, sets image position to default value (0,0)
+// Unless performing particular operations, such as aligning images
+// and the adding them up, position is not relevant and must be set
+// to (0,0).
+FitsPhoto::FitsPhoto() : _x(0), _y(0)
 {
 	_valid = false;
 }
@@ -25,9 +24,7 @@ void FitsPhoto::open(const std::string &filename)
 	primaryHDU.readAllKeys();
 	primaryHDU.read(_imageArray);
 
-	// _width _height _resolution and other important values must be assigned
 	// reading FITS keywords
-
 	int axisNum = static_cast<int> (primaryHDU.axes());
 	if (axisNum != 2)	//Checks if reading a bi-dimensional array
 		return;
@@ -36,7 +33,7 @@ void FitsPhoto::open(const std::string &filename)
 	_width = static_cast<int> (primaryHDU.axis(0));
 	_height = static_cast<int> (primaryHDU.axis(1));
 
-//  --- Importing non default keywords ---
+//  TODO: Import other non essential keywords (i.e.: EXPOSURE, CCDTEMP)
 //	primaryHDU.keyWord("NAXIS").value<int>(_bitpix);
 //	primaryHDU.readKey<int>("BITPIX", _bitpix);
 //	primaryHDU.readKey<int>("NAXIS1", _width);
@@ -44,7 +41,7 @@ void FitsPhoto::open(const std::string &filename)
 	
 	_pixelNumber = _width * _height;
 	
-	_valid = true;	//Setting open flag
+	_valid = true;	//File opened and read, setting validity flag
 
 	inFitsFile.~FITS();	//Fits object is destroyed
 }
@@ -79,7 +76,7 @@ void FitsPhoto::write(const std::string &filename, bool overwrite)
 }
 
 
-std::string& FitsPhoto::getHeaderStr()
+std::string FitsPhoto::getHeaderStr()
 {
 	//Fills Header String
 	std::stringstream hstream;
@@ -87,8 +84,7 @@ std::string& FitsPhoto::getHeaderStr()
 			<< _bitpix << " naxis = 2" << std::endl << "Axis Lengths:" << std::endl
 			<< " axis[0] " << _width << std::endl <<  " axis[1] " << _height << std::endl;
 
-	_headerStr = hstream.str();	//is _headerStr private member useful?
-	return _headerStr;	
+	return hstream.str();	
 }
 
 
@@ -138,6 +134,21 @@ bool FitsPhoto::isValid() const
 {
 	return _valid;
 }
+
+
+// (X,Y) Coordinates access methods
+// ATTENTION: No control on bounds. It's for performance, not laziness
+pixelT& FitsPhoto::operator() (int x, int y)
+{
+	return _imageArray[x + (_width * y)];
+}
+
+
+const pixelT& FitsPhoto::operator() (int x, int y) const
+{
+	return _imageArray[x + (_width * y)];
+}
+
 
 
 // Basic Operations with FITS Images

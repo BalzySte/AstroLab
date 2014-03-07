@@ -7,14 +7,18 @@
 
 FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 {
+	// Creates main area, containing Fits images Windows
 	workspace = new QMdiArea(this);
 	workspace->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+	// Connects signals to slots and creates menus
 	createActions();  
 	createMenus();
 
+	// Creates sliders dock, which is used to stretch the focused image.
 	stretchDock = new QFitsStretchDock(this);
-		
+	
+	// Adds created widget to the main window
 	setCentralWidget(workspace);
 	addDockWidget(Qt::RightDockWidgetArea, stretchDock);
 	
@@ -27,6 +31,7 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 void FitsViewer::setFocusedWindow(QFitsWindow* window)
 {
 	_currentFitsImage = window;
+	stretchDock->update();
 }
 
 
@@ -35,20 +40,21 @@ QFitsWindow* FitsViewer::getFocusedWindow() const
 	return _currentFitsImage;
 }
 
-
+/*
 void FitsViewer::updateStretchDock()
 {
 	if (stretchDock != NULL)
 		stretchDock->update();
 }
-
+*/
 
 void FitsViewer::open()
 {
-
+	// Prompt the user to select file(s) to open
 	QStringList openFileNames = QFileDialog::getOpenFileNames(this,
                                      "Open Images", QDir::currentPath());
-  
+	
+	// If user selected at least 1 file opens it creating a FitsWindow.
 	if (!openFileNames.isEmpty())
 	{
 		//Creates images
@@ -62,24 +68,16 @@ void FitsViewer::open()
 	}
 	
 	imageWindowsList.back()->setFocus();
-/*  
-  if (image.isNull())
-  {
-    QMessageBox::information(this, "Image Viewer",
-                            QString("Cannot load %1.").arg(fileName));
-    return;
-  }
-*/
 
-//		QImage image(fileName);
+// TODO: Show a proper message in case of error	
 
+//    QMessageBox::information(this, "Image Viewer",
+//						QString("Cannot load %1.").arg(fileName));
 
+// TODO: Implement zoom functionality
 //   scaleFactor = 1.0;
-  
-
 //   fitToWindowAct->setEnabled(true);
 //   updateActions();
-
 //   if (!fitToWindowAct->isChecked())
 }
 
@@ -106,13 +104,13 @@ void FitsViewer::addition()
 											// they are destroied aas the function
 											// returns together with their father
 
-		selectionList->addItem((_imageEntry)); //Maybe needs a dynamic cast to QListWidgetItem?
+		selectionList->addItem((_imageEntry));
 	}
 
 	// Selection list was populated, now creating dialog to prompt the user
 	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
 
-	// Add a layout for QDialog
+	// Creates a layout for QDialog
 	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
 	dialog_layout->addWidget(selectionList);
 	
@@ -132,10 +130,13 @@ void FitsViewer::addition()
 	if (result == QDialog::Accepted)
 	{
 		std::cout << selectionList->currentItem() << std::endl;
-		// Create new image
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() + const_cast<const QFitsWindow*>(dynamic_cast<
-				QFitsListWidgetItem*>(selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+		// Creates new sum image
+		// TODO: Simply this unreadable messy assignment.
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() +
+				const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
+				selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
 		
+		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "SumImage");
 	}
@@ -143,7 +144,7 @@ void FitsViewer::addition()
 	{
 		// Do nothing
 	}
-	delete imgDialog;	// Delete object from heap
+	delete imgDialog;	// Delete image dialog object from heap
 }
 
 
@@ -163,13 +164,13 @@ void FitsViewer::subtraction()
 		// they are destroied aas the function
 		// returns together with their father
 		
-		selectionList->addItem((_imageEntry)); //Maybe needs a dynamic cast to QListWidgetItem?
+		selectionList->addItem((_imageEntry));
 	}
 	
 	// Selection list was populated, now creating dialog to prompt the user
 	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
 	
-	// Add a layout for QDialog
+	// Creates a layout for QDialog
 	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
 	dialog_layout->addWidget(selectionList);
 	
@@ -189,10 +190,12 @@ void FitsViewer::subtraction()
 	if (result == QDialog::Accepted)
 	{
 		std::cout << selectionList->currentItem() << std::endl;
-		// Create new image
+		// Creates new difference image
+		// TODO: Simply this unreadable messy assignment.
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() - const_cast<const QFitsWindow*>(dynamic_cast<
 		QFitsListWidgetItem*>(selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
 		
+		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "SubtractImage");
 	}
@@ -200,21 +203,26 @@ void FitsViewer::subtraction()
 	{
 		// Do nothing
 	}
-	delete imgDialog;	// Delete object from heap
+	delete imgDialog;	// Delete image dialog object from heap
 }
+
 
 void FitsViewer::multiplication()
 {
+	// Asking user factor value. Variable ok is used to remember user choice.
+	// If user confirmed it is set to TRUE, otherwise to FALSE. 
 	bool ok;
 	double factor = QInputDialog::getDouble(this, "Multiply by:",
 									   tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
-	if (ok)
+	if (ok)		//Checks if user confirmed operation
 	{
 		if (_currentFitsImage == NULL)
 			return;
 		
+		// Creates multiplied new image
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() * factor;
 		
+		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "ProductImage");
 	}
@@ -223,6 +231,7 @@ void FitsViewer::multiplication()
 
 void FitsViewer::division()
 {
+	// Same as FitsViewer::multiplication method.
 	bool ok = 0;
 	double divisor = QInputDialog::getDouble(this, "Multiply by:",
 											tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
@@ -231,7 +240,7 @@ void FitsViewer::division()
 		if (_currentFitsImage == NULL)
 			return;
 
-		if (divisor == 0.)
+		if (divisor == 0.)	// Makes sure dumb user does not divide by 0
 		{
 			QMessageBox msgBox(QMessageBox::Warning, "Division by 0",
 							   "You cannot divide by <b><i>0</i></b>", 0, this);
@@ -249,7 +258,7 @@ void FitsViewer::division()
 
 void FitsViewer::quit()
 {
-  
+	//TODO: Check for windows with unsaved content
 }
 
 
@@ -263,6 +272,7 @@ void FitsViewer::about()
 }
 
 
+// Populates menu bar with menus and functions
 void FitsViewer::createMenus()
 { 
 	fileMenu = new QMenu("File", this);
@@ -293,6 +303,7 @@ void FitsViewer::createMenus()
 }
 
 
+// Connects menu functions' signals to relative implemented methods (slots)
 void FitsViewer::createActions()
 {
 	openAct = new QAction("Open...", this);
@@ -338,10 +349,4 @@ void FitsViewer::createActions()
 */
 	aboutAct = new QAction(tr("About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-}
-
-
-void FitsViewer::createStretchSlider()
-{
-	
 }

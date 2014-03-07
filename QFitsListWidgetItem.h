@@ -9,6 +9,12 @@
 #include "common.h"
 
 
+// QFitsListWidgetItem class is a simple QListWidgetItem
+// which contains in addition a pointer to a QFitsWindow
+// object, necessary to connect each QListWidget to its
+// QFitsWindow it represents.
+
+
 class QFitsListWidgetItem : public QListWidgetItem
 {
 public:

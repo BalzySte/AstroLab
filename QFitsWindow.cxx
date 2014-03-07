@@ -93,6 +93,7 @@ pixelT QFitsWindow::getCurrentMinStretch()
 }
 
 
+// ATTENTION: Function "steal" FitsPhoto parameter through std::move
 void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 {
 	// TODO: Should rename images with same name.
@@ -155,7 +156,7 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 		FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 		//There's only a Stretch box child, no need to name it.
 	//	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(NULL);
-		tmpMainWin->getFocusedWindow();
+		tmpMainWin->setFocusedWindow(NULL);
 	}
 	closeEvent->accept();
 }
@@ -170,7 +171,7 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 	std::cout << "QFitsDock found and updated with current Sub Window" << std::endl;
 	*/
 	tmpMainWin->setFocusedWindow(this);
-	tmpMainWin->updateStretchDock();
+//	tmpMainWin->updateStretchDock();
 //	QMdiSubWindow::focusInEvent(focusInEvent);
 }
 

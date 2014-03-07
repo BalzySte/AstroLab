@@ -37,7 +37,7 @@ public:
 	// Private members access methods
 	std::valarray<pixelT>& getImageArray();
 	const std::valarray<pixelT>& getImageArray() const;
-	std::string& getHeaderStr();
+	std::string getHeaderStr();
 	std::string getFileName();
 
 	// Image keywords access
@@ -45,6 +45,10 @@ public:
 	int getWidth() const;
 	int getHeight() const;
 	int getPixelNum() const;
+	
+	// (X,Y) Coordinates access operator
+	pixelT& operator() (int x, int y);
+	const pixelT& operator() (int x, int y) const;
 
 	// Basic Operations with FITS Images
 	void move(int xShift, int yShift);
@@ -73,16 +77,9 @@ private:
 	int _bitpix;				// Bitpix 
 	std::valarray<pixelT> _imageArray;  // Pixels value array
 	std::string _filename;
-	std::string _headerStr;
 
 	int _x;
 	int _y;
-		
-	// Build and return a new image array resized to the given value
-	// Note: No scaling in performed, image is either cropped or expanded
-	// with empty pixels on right/bottom edges.
-	//NOT NEEDED
-//	std::valarray<pixelT> _resizedImageArray (int newWidth, int newHeight) const;
 };
 
 #endif // __FitsPhoto__

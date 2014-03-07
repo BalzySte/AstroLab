@@ -1,7 +1,7 @@
 #include "QFitsStretchDock.h"
 #include <iostream>
 #include <string>
-//#include <unistd.h>
+
 
 QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 {
