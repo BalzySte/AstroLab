@@ -8,7 +8,7 @@
 #include <iostream>
 
 QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
-					subWindowsList(winList), QMdiSubWindow(parent)
+					subWindowsList(winList), QMdiSubWindow(parent), _zoomFactor(1.)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 	subWindowsList.push_back(this);
@@ -16,7 +16,7 @@ QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
 	_imageLabel = new QFitsLabel(this);
 	_imageLabel->setBackgroundRole(QPalette::Base);
 	_imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	//_imageLabel->setScaledContents(true);		// Would stretch the image and it's not desirable
+ 	_imageLabel->setScaledContents(true);		// Would stretch the image and it's not desirable
 	
 	_scrollArea = new QFitsScrollArea(this);
 	_scrollArea->setBackgroundRole(QPalette::Dark);
@@ -41,9 +41,19 @@ void QFitsWindow::open(QString filename)
 	_8bitImageArray.resize(_fitsPhoto.getPixelNum());
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto);
 	
-	_image = generateQImage(_fitsPhoto, _8bitImageArray);
+	_image = QImage(_8bitImageArray.data(), _fitsPhoto.getWidth(), _fitsPhoto.getHeight(),
+				 _fitsPhoto.getWidth(), QImage::Format_Indexed8);
 	
-	_imageLabel->setPixmap(QPixmap::fromImage(*_image));
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	_image.setColorCount(256);	
+	_image.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(_image);
+	
+	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 		
 	setWindowTitle(_imageTitle);
@@ -55,10 +65,22 @@ void QFitsWindow::open(QString filename)
 void QFitsWindow::previewStretch(pixelT min, pixelT max)
 {
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto, min, max);
+	int _width = _image.width();
+	int _height = _image.height();
 	
-	_image = generateQImage(_fitsPhoto, _8bitImageArray);
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+									 static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::FastTransformation);
 	
-	_imageLabel->setPixmap(QPixmap::fromImage(*_image));
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	
+	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 	
 	show();
@@ -72,9 +94,73 @@ void QFitsWindow::updateStretch(pixelT min, pixelT max)
 	
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto, min, max);
 	
-	_image = generateQImage(_fitsPhoto, _8bitImageArray);
+	_image = QImage(_8bitImageArray.data(), _fitsPhoto.getWidth(), _fitsPhoto.getHeight(),
+				 _fitsPhoto.getWidth(), QImage::Format_Indexed8);
+
+	int _width = _image.width();
+	int _height = _image.height();
 	
-	_imageLabel->setPixmap(QPixmap::fromImage(*_image));
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+		static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	
+	_imageLabel->setPixmap(imagePixmap);
+	_imageLabel->adjustSize();
+	
+	show();
+}
+
+
+void QFitsWindow::previewZoom(double zoomFactor)
+{		
+	int _width = _image.width();
+	int _height = _image.height();
+	
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*zoomFactor),
+								 static_cast<int>(_height*zoomFactor), Qt::KeepAspectRatio, Qt::FastTransformation);
+
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	_imageLabel->setPixmap(imagePixmap);
+	_imageLabel->adjustSize();
+	
+	show();
+}
+
+
+void QFitsWindow::updateZoom(double zoomFactor)
+{
+	_zoomFactor = zoomFactor;
+	
+	int _width = _image.width();
+	int _height = _image.height();
+	
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+		static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 	
 	show();
@@ -107,11 +193,15 @@ void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 	_currentMaxStretch = _fitsPhoto.getImageMaxValue();
 	
 	_8bitImageArray.resize(_fitsPhoto.getPixelNum());
+	
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto);
 	
-	_image = generateQImage(_fitsPhoto, _8bitImageArray);
-	
-	_imageLabel->setPixmap(QPixmap::fromImage(*_image));
+	_image = QImage(_8bitImageArray.data(), _fitsPhoto.getWidth(), _fitsPhoto.getHeight(),
+ 				 _fitsPhoto.getWidth(), QImage::Format_Indexed8);
+
+	QPixmap imagePixmap = QPixmap::fromImage(_image);
+		
+	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 	
 	setWindowTitle(_imageTitle);
@@ -154,8 +244,6 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 	{
 		QObject* tmpMdiArea = (parent())->parent();
 		FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-		//There's only a Stretch box child, no need to name it.
-	//	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(NULL);
 		tmpMainWin->setFocusedWindow(NULL);
 	}
 	closeEvent->accept();
@@ -166,63 +254,23 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 	std::cout << "Focused" << std::endl;
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-	/*
-	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(this);	//There's only a Stretch box child, no need to name it.
-	std::cout << "QFitsDock found and updated with current Sub Window" << std::endl;
-	*/
 	tmpMainWin->setFocusedWindow(this);
-//	tmpMainWin->updateStretchDock();
-//	QMdiSubWindow::focusInEvent(focusInEvent);
-}
-
-/*
-void QFitsWindow::focusOutEvent ( QFocusEvent * focusOutEvent )
-{
-	std::cout << "Defocused" << std::endl;
-	QObject* tmpMdiArea = (parent())->parent();
-	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-	
-	tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(NULL);	//There's only a Stretch box child, no need to name it.
-	std::cout << "QFitsDock found and updated with current Sub Window" << std::endl;
-}
-*/
-
-QImage* generateQImage(FitsPhoto& fitsPhoto, std::vector<uchar>& charVector)
-{
-	QImage* imagePtr = new QImage(charVector.data(), fitsPhoto.getWidth(),
-		fitsPhoto.getHeight(), fitsPhoto.getWidth(), QImage::Format_Indexed8);
-
-	QVector<QRgb> colorTable(256);
-	for(int i = 0; i < 256; ++i)
-		colorTable[i] = qRgb(i,i,i);
-	
-	imagePtr->setColorCount(256);	
-	imagePtr->setColorTable(colorTable);
-	
-	return imagePtr;
 }
 
 
-// --- QFitsLabel --- // NOT NECESSARY
+// --- QFitsLabel ---
+
 QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
 {
 	_fitsWindowParent = parent;
 	//connect(this, SIGNAL(focusInEvent(QFocusEvent)), _fitsWindowParent, SLOT(focusInEvent(QFocusEvent)));
 }
 
-/*
-void QFitsLabel::focusInEvent(QFocusEvent * focusInEvent)
-{
-	//_fitsWindowParent->setFocus();
-	std::cout << "Focusing from Label" << std::endl;
-}
-*/
 
 // --- QFitsScrollArea ---
 QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 {
-	_fitsWindowParent = fitsWinPtr;
-	//connect(this, SIGNAL(focusInEvent(QFocusEvent)), _fitsWindowParent, SLOT(focusInEvent(QFocusEvent)));
+	_fitsWindowParent = fitsWinPtr;		//Useless, should use parent.
 }
 
 
@@ -230,9 +278,6 @@ void QFitsScrollArea::focusInEvent(QFocusEvent * focusInEvent)
 {
 	QObject* tmpMdiArea = (parent()->parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-//	if (tmpMainWin!=0) //check if dynamic_cast worked properly.
-//		tmpMainWin->findChild<QFitsStretchDock*>("")->setActiveFitsImage(_fitsWindowParent);	//There's only a Stretch box child, no need to name it.
-	std::cout << "Focusing from Scroll Area" << std::endl;
 
 	tmpMainWin->setFocusedWindow(_fitsWindowParent);	
 }

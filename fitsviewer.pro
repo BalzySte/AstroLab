@@ -1,11 +1,12 @@
- HEADERS       = fitsviewer.h QFitsStretchDock.h QFitsWindow.h
+ HEADERS       = fitsviewer.h QFitsStretchDock.h QFitsZoomDock.h QFitsWindow.h
  SOURCES       = fitsviewer.cxx \
                  main.cxx \
                  QFitsWindow.cxx \
                  FitsPhoto.cxx \
                  FitsToImage.cxx \
                  QFitsStretchDock.cxx \
-                 QFitsListWidgetItem.cxx
+                 QFitsListWidgetItem.cxx \
+                 QFitsZoomDock.cxx
                  
 LIBS += -L"/usr/include/CCfits" -lCCfits -lcfitsio
 INCLUDEPATH += -I"/usr/include/CCfits"

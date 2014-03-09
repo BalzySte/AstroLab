@@ -18,9 +18,14 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 	// Creates sliders dock, which is used to stretch the focused image.
 	stretchDock = new QFitsStretchDock(this);
 	
+	// Creates zoom dock
+	zoomDock = new QFitsZoomDock(this);
+	
 	// Adds created widget to the main window
 	setCentralWidget(workspace);
+	
 	addDockWidget(Qt::RightDockWidgetArea, stretchDock);
+	addDockWidget(Qt::BottomDockWidgetArea, zoomDock);
 	
 	setWindowTitle("Fits Viewer");
 	

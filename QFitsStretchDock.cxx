@@ -92,10 +92,8 @@ void QFitsStretchDock::previewImage()
 
 	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
 	{
-		//	TODO: update stretch image
 		pixelT currentMax = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMaxStretch();
 		pixelT currentMin = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMinStretch();
-		std::cout << "passed" << std::endl;
 		pixelT stretch = currentMax - currentMin;
 		
 		pixelT maxVariation = (_topSlider->value() - 500) * stretch / stretchResolution;

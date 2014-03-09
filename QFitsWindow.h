@@ -25,16 +25,27 @@ public:
 	QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent = 0);
 	void open(QString filename);
 	void createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName = "New Image");
+	
+	// Previews and updates image stretch 
 	void previewStretch(pixelT min, pixelT max);
 	void updateStretch(pixelT min, pixelT max);
+	
+	// Previews and updates image zoom
+	void previewZoom(double zoomFactor);
+	void updateZoom(double zoomFactor);
+	
+	// Methods for accessing private FitsPhoto member.
 	FitsPhoto& getFitsPhoto();
 	const FitsPhoto& getFitsPhoto() const;
+	
+	// Accessing image window title
 	const QString& getImageTitle() const;
 	QString& getImageTitle();
 	
-	
+	// Methods returning the current rendering values
 	pixelT getCurrentMaxStretch();
 	pixelT getCurrentMinStretch();
+	double getCurrentZoom();
 	
 private:	
 	// Reference to opened Fits Windows list container
@@ -52,13 +63,17 @@ private:
 	// Qt Widget drawn inside fits window
 	QFitsLabel* _imageLabel;
 	QFitsScrollArea* _scrollArea;
-	QImage* _image;
+	
+	QImage _image;
 	
 	// Fits Image
 	FitsPhoto _fitsPhoto;
 	
 	// 8 bit gray shades Fits Image representation
 	std::vector<uchar> _8bitImageArray;
+
+	// Zoom value
+	double _zoomFactor;
 	
 private slots:	
 	// Slots	
@@ -68,8 +83,9 @@ private slots:
 	
 };
 
+
 // Function for creating QImage from 8bit values vector
-QImage* generateQImage(FitsPhoto& fitsPhoto, std::vector<uchar>& charVector);
+void generateQPixmap(QPixmap& pixmap);
 
 
 class QFitsLabel : public QLabel	// NOT NECESSARY

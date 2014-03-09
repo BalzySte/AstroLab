@@ -18,12 +18,9 @@ class QFitsStretchDock : public QDockWidget
 	
 public:
 	QFitsStretchDock(QWidget* parent = 0);
-	void update();
+	void update();	// Updates text boxes when image window is focused
 	void previewImage();
 	void updateImage();
-//	void setSliders(pixelT min, pixelT max);
-//	pixelT getCurrentMin();
-//	pixelT getCurrentMax();
 
 private:
 	QWidget* _container;

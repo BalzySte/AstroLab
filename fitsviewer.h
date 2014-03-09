@@ -7,6 +7,7 @@
 
 #include "QFitsWindow.h"
 #include "QFitsStretchDock.h"
+#include "QFitsZoomDock.h"
 #include "common.h"
 
 
@@ -54,6 +55,7 @@ private:
 	QMdiArea *workspace;
 	QBoxLayout *mainLayout;
 	QFitsStretchDock *stretchDock;
+	QFitsZoomDock *zoomDock;
 	
 	// File menu actions
 	QAction *openAct;
@@ -80,8 +82,6 @@ private:
 	QMenu *viewMenu;
 	QMenu *operationsMenu;
 	QMenu *helpMenu;
-
-	double scaleFactor;
 };
   
 #endif // __fitsviewer_h__
