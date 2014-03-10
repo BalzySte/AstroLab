@@ -286,7 +286,6 @@ void FitsViewer::createMedianFilter()
 			return;
 		}
 		
-		std::cout << "|||||||| PASS ||||||||" << std::endl;
 		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractMedianFiltered(n);
 		
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -299,13 +298,57 @@ void FitsViewer::createMedianFilter()
 }
 
 
+void FitsViewer::createLowPassFilter()
+{
+	/*
+	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getWidth(),
+							 const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getHeight());
+	bool ok = 0;
+	int n = QInputDialog::getInt(this, "Insert square matrix dimension (odd integer value)",
+								 tr("Value:"), 1, 1, maxN, 3, &ok);
+	if (ok)
+	{
+		
+		if ( % 2 == 0)	// Makes sure dumb user does not divide by 0
+		{
+			QMessageBox msgBox(QMessageBox::Warning, "Invalid Value",
+							   "Odd Integer Required", 0, this);
+			msgBox.addButton(tr("&Continue"), QMessageBox::AcceptRole);
+			//msgBox.exec();
+			return;
+		}
+		*/
+		if (_currentFitsImage == NULL)
+			return;
+
+		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractLowPassFilter3x3();
+		
+		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+		
+		// Creates and sets Image title
+		std::stringstream newTitle;
+		newTitle << "LowPassFiltered_" << 3 <<'x' << 3;
+		newFitsWindow->createFromFitsPhoto(newFitsPhoto, newTitle.str().c_str()); // no std::string temp var?
+//	}
+	
+}
+
+
 void FitsViewer::findStars()
 {
-	if (_currentFitsImage == NULL)
-		return;
-	
-	double treshold = 1.4;
-	detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), treshold);
+	bool ok;
+	double treshold = QInputDialog::getDouble(this, "Multiply by:",
+											tr("Factor:"), 0.4, 0.01, 1., 3, &ok);
+	if (ok)		//Checks if user confirmed operation
+	{	
+		if (_currentFitsImage == NULL)
+			return;
+		
+		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), treshold);
+		
+		for (std::vector<star>::iterator it = starVector.begin(); it != starVector.end(); ++it)
+			_currentFitsImage->circleStars(starVector, 10);
+	}		
 }
 
 
@@ -336,7 +379,7 @@ void FitsViewer::createMenus()
 	viewMenu = new QMenu("View", this);
 	viewMenu->addAction(zoomInAct);
 	viewMenu->addAction(zoomOutAct);
-	viewMenu->addAction(normalSizeAct);
+	viewMenu->addActiMedia(normalSizeAct);
 	viewMenu->addSeparator();
 	viewMenu->addAction(fitToWindowAct);
 */
@@ -348,6 +391,7 @@ void FitsViewer::createMenus()
 	
 	filtersMenu = new QMenu("Filters", this);
 	filtersMenu->addAction(createMedianFilterAct);
+	filtersMenu->addAction(createLowPassFilterAct);
 	
 	analysisMenu = new QMenu("Analysis", this);
 	analysisMenu->addAction(findStarsAct);
@@ -389,6 +433,9 @@ void FitsViewer::createActions()
 	
 	createMedianFilterAct = new QAction("Extract Median Filtered ...", this);
 	connect(createMedianFilterAct, SIGNAL(triggered()), this, SLOT(createMedianFilter()));
+	
+	createLowPassFilterAct = new QAction("Extract Low Pass 3x3 Filtered ...", this);
+	connect(createLowPassFilterAct, SIGNAL(triggered()), this, SLOT(createLowPassFilter()));	
 	
 	findStarsAct = new QAction("Find Stars ...", this);
 	connect(findStarsAct, SIGNAL(triggered()), this, SLOT(findStars()));

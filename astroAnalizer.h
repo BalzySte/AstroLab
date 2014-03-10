@@ -4,21 +4,23 @@
 
 #include <iostream>
 #include <string>
-
+#include <vector>
 #include "FitsPhoto.h"
 
-struct coordinates
+struct star
 {
 public:
-	coordinates();
-	coordinates(int xCoord,int yCoord);
+	star();
+	star(int xCoord,int yCoord, pixelT intensity);
+	bool operator< (star otherStar) const;
 	int x;
 	int y;
+	pixelT intensity;
 	std::string print() const;
 };
 
 
-void detectStars(const FitsPhoto& astroImage, double treshold);
+std::vector<star> detectStars(const FitsPhoto& astroImage, double treshold, int medianMatrixSize = 9);
 
 
 #endif //__astroAnalizer_h__

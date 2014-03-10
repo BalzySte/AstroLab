@@ -42,6 +42,7 @@ private slots:
 	void multiplication();
 	void division();
 	void createMedianFilter();
+	void createLowPassFilter();
 	void findStars();
 	void quit();
 	void about();
@@ -78,6 +79,7 @@ private:
 	
 	QAction *findStarsAct;
 	QAction *createMedianFilterAct;
+	QAction *createLowPassFilterAct;
 
 	// Help Menu actions
 	QAction *aboutAct;

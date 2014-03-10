@@ -62,7 +62,8 @@ public:
 	FitsPhoto& operator/= (double divisor);
 	
 	// Filters
-	FitsPhoto extractMedianFiltered(int n) const;	// Median filter, returns a new FitsPhoto object
+	FitsPhoto extractMedianFiltered(int dim) const;	// Median filter, returns a new FitsPhoto object
+	FitsPhoto extractLowPassFilter3x3() const;		// Should be implemented with n parameter
 	
 	// Image Useful data
 	pixelT getImageMaxValue() const;

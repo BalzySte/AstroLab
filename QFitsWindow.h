@@ -7,6 +7,8 @@
 #include "FitsPhoto.h"
 #include "QFitsStretchDock.h"
 #include "fitsviewer.h"
+#include "astroAnalizer.h"
+
 //#include "common.h"
 
 // 8 bit monocolor FitsPhoto
@@ -46,6 +48,12 @@ public:
 	pixelT getCurrentMaxStretch();
 	pixelT getCurrentMinStretch();
 	double getCurrentZoom();
+	
+	// Directly drawing on image
+	void circleStars(std::vector<star>& vector, int radius);
+																	// Used to temporarily point out something
+																	// on an image. Drawn circle will disappear
+																	// upon QLabel redrawing.
 	
 private:	
 	// Reference to opened Fits Windows list container

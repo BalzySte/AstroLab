@@ -260,14 +260,14 @@ FitsPhoto FitsPhoto::operator- (const FitsPhoto& photo) const
 	int y_dst = _y - ySubtrPos;		//y distance of 1st image reference from sumImage reference
 	for (int col = 0; col < _width; ++col)
 		for (int line = 0; line < _height; ++line)
-			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] -=
+			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] +=
 						getImageArray()[col + (line * _width)];
 
 	x_dst = photo._x - xSubtrPos;		//x distance of 2nd image reference from sumImage reference
 	y_dst = photo._y - ySubtrPos;		//y distance of 2nd image reference from sumImage reference
 	for (int col = 0; col < photo._width; ++col)
 		for (int line = 0; line < photo._height; ++line)
-			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] +=
+			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] -=
 						photo.getImageArray()[col + (line * photo._width)];
 
 	return subtrImage;
@@ -346,13 +346,13 @@ pixelT FitsPhoto::getImageMinValue() const
 
 // Filters
 
-
-FitsPhoto FitsPhoto::extractMedianFiltered(int n) const
+FitsPhoto FitsPhoto::extractMedianFiltered(int dim) const
 {
+	int n = (dim - 1) / 2;
 	// ATTENTION: With this implementation borders are not processed
 	FitsPhoto medianImage;
 	medianImage.create(_width, _height);	//Image position is not reported but instead set to (0,0)
-	int medianIndex = n*n/2;
+	int medianIndex = dim*dim/2;
 	// Applying N x N Median filter to imageArray to obtain backgroundArray
 	std::vector<pixelT> subArray;
 
@@ -369,6 +369,22 @@ FitsPhoto FitsPhoto::extractMedianFiltered(int n) const
 			medianImage._imageArray[x + (y * _width)] = subArray[medianIndex];	// Median value
 			subArray.clear();
 		}
-		return medianImage;
-		std::cout << "|| PASS ||" << std::endl;
+	
+	return medianImage;
+}
+
+
+FitsPhoto FitsPhoto::extractLowPassFilter3x3() const
+{
+	FitsPhoto filteredImage;
+	filteredImage.create(_width, _height);
+	
+	for (int x = 1; x < _width - 1; ++x)
+		for (int y = 1; y < _height - 1; ++y)
+			filteredImage._imageArray[x + (y * _width)] =
+			(operator()(x-1, y-1) + operator()(x-1, y+1) + operator()(x+1, y+1) + operator()(x+1, y-1)) / 16	// Corner pixels
+		+	(operator()(x-1, y) + operator()(x, y-1) + operator()(x+1, y) + operator()(x, y+1)) / 8		// N, S, E, W pixels
+		+	(operator()(x, y)) / 4;		// Central pixel
+			
+	return filteredImage;
 }

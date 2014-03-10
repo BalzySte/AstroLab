@@ -180,7 +180,7 @@ pixelT QFitsWindow::getCurrentMinStretch()
 }
 
 
-// ATTENTION: Function "steal" FitsPhoto parameter through std::move
+// ATTENTION: Function "steals" FitsPhoto parameter through std::move
 void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 {
 	// TODO: Should rename images with same name.
@@ -200,6 +200,14 @@ void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 	_image = QImage(_8bitImageArray.data(), _fitsPhoto.getWidth(), _fitsPhoto.getHeight(),
  				 _fitsPhoto.getWidth(), QImage::Format_Indexed8);
 
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	_image.setColorCount(256);	
+	_image.setColorTable(colorTable);
+	
+	
 	QPixmap imagePixmap = QPixmap::fromImage(_image);
 		
 	_imageLabel->setPixmap(imagePixmap);
@@ -256,6 +264,44 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 	tmpMainWin->setFocusedWindow(this);
+}
+
+
+void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
+{
+	int _width = _image.width();
+	int _height = _image.height();
+	
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+		static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
+															// optimised by compiler
+	QPainter painter(&imagePixmap);
+	painter.setPen(Qt::blue);
+	
+	int startAngle = 0;
+	int spanAngle = 5760;
+	
+	for (std::vector<star>::iterator it = vector.begin(); it != vector.end(); ++it)
+	{
+		QRectF rectangle((it->x-radius)*_zoomFactor, (it->y-radius)*_zoomFactor, (2*radius)*_zoomFactor, (2*radius)*_zoomFactor);	
+		painter.drawArc(rectangle, startAngle, spanAngle);
+	}
+	
+	painter.end();
+		
+	_imageLabel->setPixmap(imagePixmap);
+	_imageLabel->adjustSize();
+	
+	show();
 }
 
 
