@@ -6,7 +6,8 @@
                  FitsToImage.cxx \
                  QFitsStretchDock.cxx \
                  QFitsListWidgetItem.cxx \
-                 QFitsZoomDock.cxx
+                 QFitsZoomDock.cxx \
+                 astroAnalizer.cxx
                  
 LIBS += -L"/usr/include/CCfits" -lCCfits -lcfitsio
 INCLUDEPATH += -I"/usr/include/CCfits"

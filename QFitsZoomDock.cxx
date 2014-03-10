@@ -7,6 +7,12 @@
 QFitsZoomDock::QFitsZoomDock(QWidget* parent)
 {
 	setParent(parent);
+	setFeatures(QDockWidget::NoDockWidgetFeatures);
+	
+	QWidget* fakeTitleBar = new QWidget();
+	
+	setTitleBarWidget (fakeTitleBar);
+	
 	_zoomSlider = new QZoomSlider(Qt::Horizontal, this);
 	
 	_zoomSlider->setMinimum(25);
@@ -16,11 +22,14 @@ QFitsZoomDock::QFitsZoomDock(QWidget* parent)
 	_container = new QWidget(this);
 	_containerLayout = new QGridLayout(_container);
 	
-	_containerLayout->addWidget(_zoomSlider, 0, 0, 1, 1, Qt::AlignTop/* | Qt::AlignHCenter*/);	
+	_containerLayout->addWidget(_zoomSlider, 0, 0, 1, 1/*, Qt::AlignTop | Qt::AlignHCenter*/);	
 	_container->setLayout(_containerLayout);
-	_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//	_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	
-	setWidget(_container);
+ 	setWidget(_container);
+	setWidget(_zoomSlider);
+	
+	setFixedWidth(500);
 }
 
 

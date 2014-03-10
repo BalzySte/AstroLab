@@ -41,6 +41,8 @@ private slots:
 	void subtraction();
 	void multiplication();
 	void division();
+	void createMedianFilter();
+	void findStars();
 	void quit();
 	void about();
     
@@ -73,6 +75,9 @@ private:
 	QAction *normalSizeAct;
 	QAction *fitToWindowAct;
 	*/
+	
+	QAction *findStarsAct;
+	QAction *createMedianFilterAct;
 
 	// Help Menu actions
 	QAction *aboutAct;
@@ -81,6 +86,8 @@ private:
 	QMenu *fileMenu;
 	QMenu *viewMenu;
 	QMenu *operationsMenu;
+	QMenu *filtersMenu;
+	QMenu *analysisMenu;
 	QMenu *helpMenu;
 };
   

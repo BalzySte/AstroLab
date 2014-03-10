@@ -6,6 +6,12 @@
 QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 {
 	setParent(parent);
+	setFeatures(QDockWidget::NoDockWidgetFeatures);
+	
+	QWidget* fakeTitleBar = new QWidget();
+	// Are doth new and old original title bars deleted on exit?
+	setTitleBarWidget (fakeTitleBar);
+	
 	_topSlider = new QStretchSlider(Qt::Vertical, this);
 	_bottomSlider = new QStretchSlider(Qt::Vertical, this);
 		

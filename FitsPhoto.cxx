@@ -342,3 +342,33 @@ pixelT FitsPhoto::getImageMinValue() const
 {	
 	return _imageArray.min();
 }
+
+
+// Filters
+
+
+FitsPhoto FitsPhoto::extractMedianFiltered(int n) const
+{
+	// ATTENTION: With this implementation borders are not processed
+	FitsPhoto medianImage;
+	medianImage.create(_width, _height);	//Image position is not reported but instead set to (0,0)
+	int medianIndex = n*n/2;
+	// Applying N x N Median filter to imageArray to obtain backgroundArray
+	std::vector<pixelT> subArray;
+
+	for (int x = n; x < _width - n; ++x)
+		for (int y = n; y < _height - n; ++y)
+		{
+			for (int subX = -n; subX <= n; ++subX)
+				for (int subY = -n; subY <= n; ++subY)
+				{
+					subArray.push_back(_imageArray[(x + subX) + (y + subY) * _width]);
+				}
+				
+				std::sort(subArray.begin(), subArray.end());
+			medianImage._imageArray[x + (y * _width)] = subArray[medianIndex];	// Median value
+			subArray.clear();
+		}
+		return medianImage;
+		std::cout << "|| PASS ||" << std::endl;
+}

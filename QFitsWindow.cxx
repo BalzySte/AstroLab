@@ -159,7 +159,8 @@ void QFitsWindow::updateZoom(double zoomFactor)
 	scaledImg.setColorCount(256);	
 	scaledImg.setColorTable(colorTable);
 	
-	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
+															// optimised by compiler
 	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 	

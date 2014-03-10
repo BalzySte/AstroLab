@@ -54,12 +54,15 @@ public:
 	void move(int xShift, int yShift);
 	FitsPhoto operator+ (const FitsPhoto& photo) const;
 	FitsPhoto operator- (const FitsPhoto& photo) const;
-	FitsPhoto operator* (double factor) const;	//double or pixelT ???
-	FitsPhoto operator/ (double divisor) const;	//double or pixelT ???
+	FitsPhoto operator* (double factor) const;
+	FitsPhoto operator/ (double divisor) const;
 	FitsPhoto& operator+= (const FitsPhoto& photo);
 	FitsPhoto& operator-= (const FitsPhoto& photo);
 	FitsPhoto& operator*= (double factor);
 	FitsPhoto& operator/= (double divisor);
+	
+	// Filters
+	FitsPhoto extractMedianFiltered(int n) const;	// Median filter, returns a new FitsPhoto object
 	
 	// Image Useful data
 	pixelT getImageMaxValue() const;

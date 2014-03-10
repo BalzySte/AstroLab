@@ -1,8 +1,10 @@
 #include "fitsviewer.h"
 #include "FitsPhoto.h"
 #include "QFitsListWidgetItem.h"
+#include "astroAnalizer.h"
 
 #include <iostream>
+#include <sstream>
 #include <QtGui>
 
 FitsViewer::FitsViewer() : _currentFitsImage(NULL)
@@ -24,6 +26,7 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 	// Adds created widget to the main window
 	setCentralWidget(workspace);
 	
+	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea, stretchDock);
 	addDockWidget(Qt::BottomDockWidgetArea, zoomDock);
 	
@@ -238,8 +241,8 @@ void FitsViewer::division()
 {
 	// Same as FitsViewer::multiplication method.
 	bool ok = 0;
-	double divisor = QInputDialog::getDouble(this, "Multiply by:",
-											tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
+	double divisor = QInputDialog::getDouble(this, "Divide by:",
+											tr("Divisor:"), 1, -2147483647, 2147483647, 3, &ok);
 	if (ok)
 	{
 		if (_currentFitsImage == NULL)
@@ -260,6 +263,51 @@ void FitsViewer::division()
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "DivisionImage");
 	}
 }
+
+
+void FitsViewer::createMedianFilter()
+{	
+	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getWidth(),
+						 const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getHeight());
+	bool ok = 0;
+	int n = QInputDialog::getInt(this, "Insert square matrix dimension (odd integer value)",
+								 tr("Value:"), 1, 1, maxN, 3, &ok);
+	if (ok)
+	{
+		if (_currentFitsImage == NULL)
+			return;
+		
+		if (n % 2 == 0)	// Makes sure dumb user does not divide by 0
+		{
+			QMessageBox msgBox(QMessageBox::Warning, "Invalid Value",
+							   "Odd Integer Required", 0, this);
+			msgBox.addButton(tr("&Continue"), QMessageBox::AcceptRole);
+			//msgBox.exec();
+			return;
+		}
+		
+		std::cout << "|||||||| PASS ||||||||" << std::endl;
+		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractMedianFiltered(n);
+		
+		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+		
+		// Creates and sets Image title
+		std::stringstream newTitle;
+		newTitle << "MedianFiltered_" << n <<'x' << n;
+		newFitsWindow->createFromFitsPhoto(newFitsPhoto, newTitle.str().c_str()); // no std::string temp var?
+	}
+}
+
+
+void FitsViewer::findStars()
+{
+	if (_currentFitsImage == NULL)
+		return;
+	
+	double treshold = 1.4;
+	detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), treshold);
+}
+
 
 void FitsViewer::quit()
 {
@@ -297,6 +345,12 @@ void FitsViewer::createMenus()
 	operationsMenu->addAction(subtractAct);
 	operationsMenu->addAction(multiplyAct);
 	operationsMenu->addAction(divideAct);
+	
+	filtersMenu = new QMenu("Filters", this);
+	filtersMenu->addAction(createMedianFilterAct);
+	
+	analysisMenu = new QMenu("Analysis", this);
+	analysisMenu->addAction(findStarsAct);
 
 	helpMenu = new QMenu("Help", this);
 	helpMenu->addAction(aboutAct);
@@ -304,6 +358,8 @@ void FitsViewer::createMenus()
 	menuBar()->addMenu(fileMenu);
 //	menuBar()->addMenu(viewMenu);
 	menuBar()->addMenu(operationsMenu);
+	menuBar()->addMenu(filtersMenu);
+	menuBar()->addMenu(analysisMenu);
 	menuBar()->addMenu(helpMenu);
 }
 
@@ -330,6 +386,12 @@ void FitsViewer::createActions()
 	
 	divideAct = new QAction("Divide ...", this);
 	connect(divideAct, SIGNAL(triggered()), this, SLOT(division()));
+	
+	createMedianFilterAct = new QAction("Extract Median Filtered ...", this);
+	connect(createMedianFilterAct, SIGNAL(triggered()), this, SLOT(createMedianFilter()));
+	
+	findStarsAct = new QAction("Find Stars ...", this);
+	connect(findStarsAct, SIGNAL(triggered()), this, SLOT(findStars()));
 /*
 	zoomInAct = new QAction("Zoom In (25%)", this);
 	zoomInAct->setShortcut(tr("Ctrl++"));
