@@ -40,6 +40,7 @@ void FitsViewer::setFocusedWindow(QFitsWindow* window)
 {
 	_currentFitsImage = window;
 	stretchDock->update();
+	zoomDock->update();
 }
 
 
@@ -78,15 +79,8 @@ void FitsViewer::open()
 	imageWindowsList.back()->setFocus();
 
 // TODO: Show a proper message in case of error	
-
 //    QMessageBox::information(this, "Image Viewer",
 //						QString("Cannot load %1.").arg(fileName));
-
-// TODO: Implement zoom functionality
-//   scaleFactor = 1.0;
-//   fitToWindowAct->setEnabled(true);
-//   updateActions();
-//   if (!fitToWindowAct->isChecked())
 }
 
 
@@ -139,7 +133,7 @@ void FitsViewer::addition()
 	{
 		std::cout << selectionList->currentItem() << std::endl;
 		// Creates new sum image
-		// TODO: Simply this unreadable messy assignment.
+		// TODO: Simplify this unreadable messy assignment.
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() +
 				const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
 				selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
@@ -300,37 +294,17 @@ void FitsViewer::createMedianFilter()
 
 void FitsViewer::createLowPassFilter()
 {
-	/*
-	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getWidth(),
-							 const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getHeight());
-	bool ok = 0;
-	int n = QInputDialog::getInt(this, "Insert square matrix dimension (odd integer value)",
-								 tr("Value:"), 1, 1, maxN, 3, &ok);
-	if (ok)
-	{
-		
-		if ( % 2 == 0)	// Makes sure dumb user does not divide by 0
-		{
-			QMessageBox msgBox(QMessageBox::Warning, "Invalid Value",
-							   "Odd Integer Required", 0, this);
-			msgBox.addButton(tr("&Continue"), QMessageBox::AcceptRole);
-			//msgBox.exec();
-			return;
-		}
-		*/
-		if (_currentFitsImage == NULL)
-			return;
+	if (_currentFitsImage == NULL)
+		return;
 
-		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractLowPassFilter3x3();
-		
-		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
-		
-		// Creates and sets Image title
-		std::stringstream newTitle;
-		newTitle << "LowPassFiltered_" << 3 <<'x' << 3;
-		newFitsWindow->createFromFitsPhoto(newFitsPhoto, newTitle.str().c_str()); // no std::string temp var?
-//	}
+	FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractLowPassFilter3x3();
 	
+	QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+	
+	// Creates and sets Image title
+	std::stringstream newTitle;
+	newTitle << "LowPassFiltered_" << 3 <<'x' << 3;
+	newFitsWindow->createFromFitsPhoto(newFitsPhoto, newTitle.str().c_str()); // no std::string temp var?
 }
 
 

@@ -4,10 +4,10 @@
 
 #define _PhotoArrayType_ double
 #define stretchDockImagewidth 10
-//#define _StretchSlidersResolution_ 1000
 #define stretchResolution 1000
 
 typedef _PhotoArrayType_ pixelT;
+
 //int stretchResolution = _StretchSlidersResolution_;
 
 #endif // __SETTINGS_FILE__

@@ -8,49 +8,58 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 	setParent(parent);
 	setFeatures(QDockWidget::NoDockWidgetFeatures);
 	
+	// Generates new "fake" titlebar with 0 px thickness
 	QWidget* fakeTitleBar = new QWidget();
-	// Are doth new and old original title bars deleted on exit?
-	setTitleBarWidget (fakeTitleBar);
+	// ATTENTION: Are both new and old original title bars deleted on exit?
+	setTitleBarWidget(fakeTitleBar);
 	
 	_topSlider = new QStretchSlider(Qt::Vertical, this);
 	_bottomSlider = new QStretchSlider(Qt::Vertical, this);
-		
+
+	// Setting top slider features
 	_topSlider->setMinimum(0);
-	_topSlider->setMaximum(stretchResolution);
-	_topSlider->setValue(stretchResolution/2);
+	_topSlider->setMaximum(1000);
+	_topSlider->setValue(500);
 	_topSlider->setMinimumHeight(512*2/3);
 	_topSlider->setMaximumHeight(512*2/3);
 	
+	// Setting bottom slider features
 	_bottomSlider->setMinimum(0);
-	_bottomSlider->setMaximum(stretchResolution);
-	_bottomSlider->setValue(stretchResolution/2);
+	_bottomSlider->setMaximum(1000);
+	_bottomSlider->setValue(500);
 	_bottomSlider->setMinimumHeight(512*2/3);
 	_bottomSlider->setMaximumHeight(512*2/3);
 	
-	
+	// Draws default sliders pixmap
 	createSliderPixmap(_stretchPixmap);
 	
+	// Sliders pixmap is displayed in a QLabel
 	_stretchImageLabel = new QLabel;
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->QLabel::setScaledContents(true);
 	_stretchImageLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	
+	// Creating a separator
 	_separator = new QFrame;
 	_separator->setFrameShape(QFrame::HLine);
 
+	// Creating Stretch labels
 	_maxValueLabel = new QLabel("Max");
 	_minValueLabel = new QLabel("Min");;
 	_maxValueBox = new QLineEdit("-");
 	_minValueBox = new QLineEdit("-");
 	
+	// Setting text labels features
 	_maxValueBox->setReadOnly(true);
 	_maxValueBox->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	_minValueBox->setReadOnly(true);
 	_minValueBox->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	
+	// Creating container widgets and its layout
 	_container = new QWidget(this);
 	_containerLayout = new QGridLayout(_container);
 
+	// All previously created widgets are added to the layout
 	_containerLayout->addWidget(_topSlider, 0, 0, 1, 1, Qt::AlignTop/* | Qt::AlignHCenter*/);
 	_containerLayout->addWidget(_stretchImageLabel, 0, 1);
 	_containerLayout->addWidget(_bottomSlider, 0, 2, 1, 1, Qt::AlignBottom/* | Qt::AlignHCenter*/);
@@ -59,24 +68,31 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 	_containerLayout->addWidget(_maxValueBox, 3, 0, 1, 3);
 	_containerLayout->addWidget(_minValueLabel, 4, 0, 1, 3, Qt::AlignVCenter | Qt::AlignHCenter);
 	_containerLayout->addWidget(_minValueBox, 5, 0, 1, 3);
-		
+	
+	// Layout is set as container's layout
 	_container->setLayout(_containerLayout);
 	_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	
+	// Container is set as dock widget
 	setWidget(_container);
 }
 
 
 void QFitsStretchDock::update()
 {
+	// "Asks" to the main program object current active window
 	QFitsWindow* fitsWindow = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
-	std::cout << "Active Fits windows set properly" << std::endl;
 	
+ 	// If an image is currently selected updates min and max shown values
 	if (fitsWindow != NULL)
 	{
-		_maxValueBox->setText(QString::fromStdString(std::to_string(dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch())));
-		_minValueBox->setText(QString::fromStdString(std::to_string(dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch())));
+		_maxValueBox->setText(QString::fromStdString(std::to_string(
+			dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch())));
+		
+		_minValueBox->setText(QString::fromStdString(std::to_string(
+			dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch())));
 	}
+	// Or just sets text boxes to "-"
 	else
 	{
 		_maxValueBox->setText("-");
@@ -87,26 +103,39 @@ void QFitsStretchDock::update()
 
 void QFitsStretchDock::previewImage()
 {
-	int stretchStart = 341 - (341 * _topSlider->value()/1000);
-	int stretchEnd = 512 - (341 * _bottomSlider->value()/1000);
-//	int stretchStart = (512-10)-(512*_topSlider->value())/stretchResolution;
-//	int stretchEnd = (512+10)-(512*_bottomSlider->value())/stretchResolution;
+	// Heights at which shade of slider image begins and end
+	// so that it follows slider move.
+	int shadeStart = 341 - (341 * _topSlider->value()/1000);
+	int shadeEnd = 512 - (341 * _bottomSlider->value()/1000);
 
-	createSliderPixmap(_stretchPixmap, stretchStart, stretchEnd);
+	// Updating slider image
+	createSliderPixmap(_stretchPixmap, shadeStart, shadeEnd);
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
 
-	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
+	// Gets current selected image pointer
+	QFitsWindow* currentImage = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
+	
+	// If an image is currently focused
+	if (currentImage != NULL)
 	{
-		pixelT currentMax = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMaxStretch();
-		pixelT currentMin = (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow())->getCurrentMinStretch();
+		// Gets from selected image last stretch values
+		pixelT currentMax = currentImage->getCurrentMaxStretch();
+		pixelT currentMin = currentImage->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
-		pixelT maxVariation = (_topSlider->value() - 500) * stretch / stretchResolution;
-		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / stretchResolution;
+		// Calculates stretch variation from current sliders position.
+		// At one time, only a slider can be moved, the other produces
+		// no increment or decrement. Either maxVariation or minVariation
+		// is exclusively 0.
+		// TODO: Increment is linear. Quadratic would suit better
+		pixelT maxVariation = (_topSlider->value() - 500) * stretch / 1000;
+		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / 1000;
 		
-		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->previewStretch(currentMin + minVariation, currentMax + maxVariation);
+		// Updates displayed image calling its preview method
+		currentImage->previewStretch(currentMin + minVariation, currentMax + maxVariation);
 
+		// Min and Max stretch values are updated
 		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
 		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
 	}
@@ -115,44 +144,41 @@ void QFitsStretchDock::previewImage()
 
 void QFitsStretchDock::updateImage()
 {
+	// Default slider image drawn and displayed
 	createSliderPixmap(_stretchPixmap);
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
-
-	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
+	
+	// Gets current selected image pointer
+	QFitsWindow* currentImage = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
+	
+	// If an image is currently focused
+	// Same as 
+	if (currentImage != NULL)
 	{
-		pixelT currentMax = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
-		pixelT currentMin = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
+		// Same considerations as of QFitsStretchDock::previewImage()
+		pixelT currentMax = currentImage->getCurrentMaxStretch();
+		pixelT currentMin = currentImage->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
-		pixelT maxVariation = (_topSlider->value() - 500) * stretch / stretchResolution;
-		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / stretchResolution;
-				
-		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->updateStretch(currentMin + minVariation, currentMax + maxVariation);
+		pixelT maxVariation = (_topSlider->value() - 500) * stretch / 1000;
+		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / 1000;
 		
+		// Updates displayed image calling its update method
+		currentImage->updateStretch(currentMin + minVariation, currentMax + maxVariation);
+		
+		// Min and Max stretch values are updated
 		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
 		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
 	}
-		
+	
+	// Sliders are brought back to their "rest" positions
 	_bottomSlider->setValue(500);
 	_topSlider->setValue(500);
 }
 
-/*
-void QFitsStretchDock::setSliders(pixelT absoluteMin, pixelT min,
-									pixelT absoluteMax, pixelT max)
-{
-	_min = min;
-	_max = max;
-	pixelT absoluteStretch = (absoluteMax-absoluteMin);
-	pixelT topValue = RESOLUTION*(max-absoluteMin)/absoluteStretch;
-	pixelT bottomValue = RESOLUTION*(min-absoluteMin)/absoluteStretch;
-	_topSlider->setValue(static_cast<int>(topValue));
-	_bottomSlider->setValue(static_cast<int>(bottomValue));
-}
-*/
 
-
+// Draws sliders Pixmap
 void createSliderPixmap(QPixmap& pixmap, int shadeStartPos, int shadeEndPos)
 {	
 	int pxWidth = stretchDockImagewidth;
@@ -169,6 +195,7 @@ void createSliderPixmap(QPixmap& pixmap, int shadeStartPos, int shadeEndPos)
 
 	QImage image(imgVector.data(), pxWidth, 512, pxWidth, QImage::Format_Indexed8);
 	
+	// ATTENTION: COLORTABLE SHOULD BE DEFINED AS AN EXTERNAL CONSTANT OBJECT
 	QVector<QRgb> colorTable(256);
 	for(int i = 0; i < 256; ++i)
 		colorTable[i] = qRgb(i,i,i);
@@ -185,26 +212,21 @@ void createSliderPixmap(QPixmap& pixmap, int shadeStartPos, int shadeEndPos)
 QStretchSlider::QStretchSlider(Qt::Orientation orientation, QWidget* parent) :
 											QSlider(orientation, parent)
 {
-//	QWidget* wid = dynamic_cast<QWidget*>(this->parent());
-//	_dockPtr = dynamic_cast<QFitsStretchDock*>(wid->parent());
 	_dockPtr = dynamic_cast<QFitsStretchDock*>(this->parent());
 
-	// Connect signals to slots
-	connect(this, SIGNAL(sliderMoved(int)), this, SLOT(onSliderChange(/*int*/)));
+	// Connects signals to slots
+	connect(this, SIGNAL(sliderMoved(int)), this, SLOT(onSliderChange()));
 	connect(this, SIGNAL(sliderReleased()), this, SLOT(onSliderSet()));
 }
 
 
-void QStretchSlider::onSliderChange(/*int newValue*/)
+void QStretchSlider::onSliderChange()
 {
-	if (_dockPtr != NULL)
-	//if (change == QAbstractSlider::SliderValueChange/* && dock->dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL*/)
-		_dockPtr->previewImage();
+	_dockPtr->previewImage();
 }
 
 
-void QStretchSlider::onSliderSet(/*int newValue*/)
+void QStretchSlider::onSliderSet()
 {
-	if (_dockPtr != NULL)
-		_dockPtr->updateImage();	
+	_dockPtr->updateImage();	
 }

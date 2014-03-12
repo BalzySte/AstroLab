@@ -1,18 +1,16 @@
 //		+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-//		| FitsPhoto                                                     |
-//		+                                                               +
-//		|                                                               |
+//		| 							FitsPhoto                           |
+//		+  AUTHOR:  Stefano Balzan		MAIL:  stefano.balzan@gmail.com	+
+//		|  DATE: Feb 2014				BASED ON:  NASA CCFits Lib 2.4	|
 //		+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 
 // Esay manipulation of 2D Array FITS FILE containing Astronomical Images
-// Class is built on CCfits library and aims to offer a simplified and complete
+// This library is built on CCfits library and aims to offer a simplified and complete
 // layer for manipulating images.
-
-/*
- This library can open fits, create new ones and save them.
- It manages only Primary Data Header Unit part, since it's
- the only one relevant for the project purposes.
- */
+//
+// This library can open fits, create new ones and save them.
+// It manages only Primary Data Header Unit part, since it's
+// the only one relevant for the project purposes.
 
 #ifndef __FitsPhoto__
 #define __FitsPhoto__

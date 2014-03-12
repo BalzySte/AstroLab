@@ -23,16 +23,16 @@ public:
 	void updateImage();
 
 private:
-	QWidget* _container;
-	QGridLayout* _containerLayout;
+	QWidget* _container;	// Main widget containing QGridLayout
+	QGridLayout* _containerLayout;	// Layout containing all Dock widgets
 	QStretchSlider* _topSlider;
 	QStretchSlider* _bottomSlider;
 	
-	// Main stretch tools (bars and gradient image)
+	// Sliders gradient image
 	QPixmap _stretchPixmap;
 	QLabel* _stretchImageLabel;
 	
-	// Stretch tools / values separator
+	// Horizontal separator
 	QFrame* _separator;
 	
 	// Stretch values Widgets (lower dock part)
@@ -43,12 +43,10 @@ private:
 };
 
 
+// Draws slider gradient pixmap. Called upon sliders move.
 void createSliderPixmap(QPixmap& pixmap, int shadeStartPos = 161, int shadeEndPos = 351);
 
 
-// QStretchSlider is a small floating-point version of a QSlider.
-// Only few necessary functions have been redefined to provide the
-// functionality shown in the program.
 class QStretchSlider : public QSlider
 {
 	Q_OBJECT
@@ -58,13 +56,16 @@ public:
 	
 private:
 	QFitsStretchDock* _dockPtr;		// Pointer to Stretch dock (Sliders' parent)
+									// Could be used instead "parent" member
 	
-private slots:	
-	void onSliderChange(/*SliderChange change int newValue*/); 	// virtual protected in inherited class.
-																// Updates displayed image according to
-																// new stretching values.
+private slots:
+	// Called upon slider moving. Calls methods
+	// to provide a quick preview of the image
+	void onSliderChange();
 
-	void onSliderSet(/*int newValue*/);
+	// Called upon slider released. Calls methods
+	// to display final re-stretched image.
+	void onSliderSet();
 };
 
 

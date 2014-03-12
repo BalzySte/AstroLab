@@ -16,6 +16,7 @@ class QFitsZoomDock : public QDockWidget
 	
 public:
 	QFitsZoomDock(QWidget* parent = 0);
+	void update();	// Updates zoom bar position
 	void previewImage();
 	void updateImage();
 	
@@ -23,6 +24,8 @@ private:
 	QWidget* _container;
 	QGridLayout* _containerLayout;
 	QZoomSlider* _zoomSlider;
+	QLabel* _minZoomLabel;
+	QLabel* _maxZoomLabel;
 };
 
 

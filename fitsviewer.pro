@@ -1,6 +1,6 @@
  HEADERS       = fitsviewer.h QFitsStretchDock.h QFitsZoomDock.h QFitsWindow.h
  SOURCES       = fitsviewer.cxx \
-                 main.cxx \
+				 main.cxx \
                  QFitsWindow.cxx \
                  FitsPhoto.cxx \
                  FitsToImage.cxx \
@@ -9,26 +9,22 @@
                  QFitsZoomDock.cxx \
                  astroAnalizer.cxx
                  
-LIBS += -L"/usr/include/CCfits" -lCCfits -lcfitsio
-INCLUDEPATH += -I"/usr/include/CCfits"
-                 
+QMAKE_CXXFLAGS += -std=c++11
 
- # install
- target.path = $$[QT_INSTALL_EXAMPLES]/widgets/imageviewer/
- sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS imageviewer.pro
- sources.path = $$[QT_INSTALL_EXAMPLES]/widgets/imageviewer
- INSTALLS += target sources
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_LFLAGS_RELEASE -= -O1
+QMAKE_LFLAGS_RELEASE += -O3
 
- symbian: include($$QT_SOURCE_TREE/examples/symbianpkgrules.pri)
+QMAKE_CXXFLAGS_DEBUG += -pg
+QMAKE_LFLAGS_DEBUG += -pg
+              
+LIBS += -lCCfits -lcfitsio
+INCLUDEPATH += "/usr/include/CCfits"
+				
 
- #Symbian has built-in component named imageviewer so we use different target
- symbian: TARGET = imageviewerexample
-
- wince*: {
-    DEPLOYMENT_PLUGIN += qjpeg qmng qgif
- }
- maemo5: include($$QT_SOURCE_TREE/examples/maemo5pkgrules.pri)
-
- symbian: warning(This example might not fully work on Symbian platform)
- maemo5: warning(This example might not fully work on Maemo platform)
- simulator: warning(This example might not fully work on Simulator platform)
+# install
+target.path = ./install/
+sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS imageviewer.pro
+sources.path = ./install/sources/
+INSTALLS += target sources

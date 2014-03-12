@@ -180,6 +180,12 @@ pixelT QFitsWindow::getCurrentMinStretch()
 }
 
 
+double QFitsWindow::getCurrentZoom()
+{
+	return _zoomFactor;
+}
+
+
 // ATTENTION: Function "steals" FitsPhoto parameter through std::move
 void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 {
@@ -246,7 +252,9 @@ QImage& QFitsWindow::getQImage(pixelT bottom, pixelT top)
 void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 {
 	// TODO : here ask the user about closing the project without saving
-	subWindowsList.remove(this); //remove this QFitsWindow instance from windows list.
+	
+	// Removes this QFitsWindow instance from windows list.
+	subWindowsList.remove(this);
 	if (subWindowsList.size() != 0)
 		subWindowsList.back()->setFocus();
 	else
@@ -258,9 +266,8 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 	closeEvent->accept();
 }
 
-void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
+void QFitsWindow::focusInEvent()
 {
-	std::cout << "Focused" << std::endl;
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 	tmpMainWin->setFocusedWindow(this);
@@ -321,7 +328,7 @@ QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 }
 
 
-void QFitsScrollArea::focusInEvent(QFocusEvent * focusInEvent)
+void QFitsScrollArea::focusInEvent()
 {
 	QObject* tmpMdiArea = (parent()->parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());

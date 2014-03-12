@@ -12,7 +12,7 @@ struct star
 public:
 	star();
 	star(int xCoord,int yCoord, pixelT intensity);
-	bool operator< (star otherStar) const;
+	bool operator< (star otherStar) const;	// Compares intensities
 	int x;
 	int y;
 	pixelT intensity;

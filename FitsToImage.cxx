@@ -13,9 +13,6 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto&
 // from 0 to 255. 0 is Black and 255 is white.
 
 	int pixelNum = fitImage.getPixelNum();
-
-	pixelT imageMin = fitImage.getImageMinValue();
-	pixelT imageMax = fitImage.getImageMaxValue();
 	
 	pixelT stretch = std::abs(top - bottom);	
 	
@@ -40,7 +37,8 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto&
 				(255*(pixelValue - bottom) / stretch));
 		}
 		
-	else if (top < bottom)		//Colors are reversed (max = black, min = white);
+	//Colors are reversed (max = black, min = white);
+	else if (top < bottom)
 		for (int px = 0; px < pixelNum; ++px)
 		{
 			pixelValue = fitImage.getImageArray()[px];
@@ -58,18 +56,18 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto&
 			grayImage[px] = 255 - static_cast<uchar> (
 				(255*(pixelValue - top) / (stretch)));
 		}
-		
+	
+	// If top == bottom returns an empty image
 	else
 		for (int px = 0; px < pixelNum; ++px)
 			grayImage[px] = 0.;
 }
 
 
+// Overloaded version with default min - max stretch
 void FitsTo8BitScale(std::vector<uchar>& grayImage,
 					 FitsPhoto& fitImage, bool reversed)
-{
-	// Overloaded version with default min - max stretch
-	
+{	
 	int pixelNum = fitImage.getPixelNum();
 		
 	pixelT imageMin = fitImage.getImageMinValue();

@@ -86,9 +86,8 @@ private:
 private slots:	
 	// Slots	
 	void closeEvent(QCloseEvent* closeEvent);
-	void focusInEvent(QFocusEvent * focusInEvent);	
+	void focusInEvent();	
 //	void focusOutEvent(QFocusEvent * focusOutEvent);
-	
 };
 
 
@@ -122,7 +121,7 @@ private:
 	QFitsWindow* _fitsWindowParent;
 	
 private slots:
-	void focusInEvent(QFocusEvent * focusInEvent);	
+	void focusInEvent();	
 };
 
 #endif // __QFitsWindow_h__
