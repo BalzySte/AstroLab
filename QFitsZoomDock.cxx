@@ -1,7 +1,8 @@
 #include "QFitsZoomDock.h"
-#include <iostream>
-#include <string>
 
+#include "QFitsWindow.h"
+#include "fitsviewer.h"
+#include "settings.h"
 
 
 QFitsZoomDock::QFitsZoomDock(QWidget* parent)

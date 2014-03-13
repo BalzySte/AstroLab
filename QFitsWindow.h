@@ -3,11 +3,9 @@
 #define __QFitsWindow_h__
 
 #include <QtGui>
-
 #include "FitsPhoto.h"
-#include "QFitsStretchDock.h"
-#include "fitsviewer.h"
 #include "astroAnalizer.h"
+
 
 //#include "common.h"
 
@@ -18,6 +16,7 @@
 
 class QFitsLabel;
 class QFitsScrollArea;
+class QFitsListWidgetItem;
 
 class QFitsWindow : public QMdiSubWindow
 {
@@ -63,7 +62,7 @@ private:
 	QString _imageTitle;
 	
 	// QListWidgetItem object, used to generate opened images list i.e. when adding.
-	QListWidgetItem* _listItem;
+	QFitsListWidgetItem* _listItem;
 	
 	// Variables for keeping the stretch set through the stretch box's sliders
 	pixelT _currentMinStretch, _currentMaxStretch;
@@ -86,8 +85,7 @@ private:
 private slots:	
 	// Slots	
 	void closeEvent(QCloseEvent* closeEvent);
-	void focusInEvent();	
-//	void focusOutEvent(QFocusEvent * focusOutEvent);
+	void focusInEvent(QFocusEvent* focusInEvent);	
 };
 
 
@@ -121,7 +119,7 @@ private:
 	QFitsWindow* _fitsWindowParent;
 	
 private slots:
-	void focusInEvent();	
+	void focusInEvent(QFocusEvent* focusInEvent);	
 };
 
 #endif // __QFitsWindow_h__

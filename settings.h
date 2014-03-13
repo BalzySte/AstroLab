@@ -6,6 +6,9 @@
 #define stretchDockImagewidth 10
 #define stretchResolution 1000
 
+// Unsigned character type
+typedef unsigned char uchar;
+
 typedef _PhotoArrayType_ pixelT;
 
 //int stretchResolution = _StretchSlidersResolution_;

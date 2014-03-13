@@ -3,10 +3,11 @@
 
 #include "FitsPhoto.h"
 #include "settings.h"
-
 #include <vector>
 
+
 typedef unsigned char uchar;
+
 void FitsTo8BitScale(std::vector<uchar>& grayImage,
 				FitsPhoto& fitImage, pixelT bottom, pixelT top);
 

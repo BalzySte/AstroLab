@@ -1,7 +1,5 @@
 #include "FitsToImage.h"
-#include <cmath>
 
-#include <iostream>
 
 void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto& 
 					fitImage, pixelT bottom, pixelT top)
@@ -72,9 +70,7 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage,
 		
 	pixelT imageMin = fitImage.getImageMinValue();
 	pixelT imageMax = fitImage.getImageMaxValue();
-	
-	std::cout << imageMin << "  " << imageMax << std::endl;
-	
+		
 	pixelT stretch = (imageMax - imageMin);
 	
 	if (reversed == false)

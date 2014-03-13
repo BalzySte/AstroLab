@@ -1,9 +1,9 @@
 #include "FitsPhoto.h"
+
 #include <CCfits>
 #include <algorithm>
-
 #include <sstream>
-#include <stdlib.h>
+
 
 // Default Constructor, sets image position to default value (0,0)
 // Unless performing particular operations, such as aligning images

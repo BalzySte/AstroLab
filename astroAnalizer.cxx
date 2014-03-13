@@ -1,10 +1,7 @@
-// Astronomical Images Manipulation and data reduction
-
 #include "astroAnalizer.h"
-#include "settings.h"
 
+#include "settings.h"
 #include <sstream>
-#include <valarray>
 #include <algorithm>
 
 								
@@ -13,22 +10,12 @@ std::vector<star> detectStars(const FitsPhoto& astroImage, double treshold, int 
 {
 	int width = astroImage.getWidth();
 	int height = astroImage.getHeight();
-	int pixelNumber = height * width;
-	
-	std::valarray<pixelT> imageArray(0., pixelNumber); //Fill constructor. Efficiency?
-	
-	std::cout << "parameters read, pxNum " << pixelNumber << ' ' << width << 'x' << height << std::endl;
-	std::cout << "Valarray len " << imageArray.size() << std::endl;
-	
-	// Applying Low-pass 3x3 filter to imageArray
+			
+	// Applying Low-pass 3x3 filter to astroImage
 	FitsPhoto lowPassPhoto = astroImage.extractLowPassFilter3x3();
-		
-	std::cout << "3x3 filter Applied" << std::endl;
-	
-	// Applying Median filter to imageArray to obtain backgroundArray (default is 9x9)
+			
+	// Applying Median filter to astroImage to obtain backgroundArray (default is 9x9)
 	FitsPhoto backgroundFilteredPhoto = lowPassPhoto.extractMedianFiltered(medianMatrixSize);
-
-	std::cout << "Background median filtered image created" << std::endl;
 	
 	// Final image
 	FitsPhoto finalPhoto = lowPassPhoto - backgroundFilteredPhoto;
@@ -89,7 +76,6 @@ std::vector<star> detectStars(const FitsPhoto& astroImage, double treshold, int 
 	std::sort(stars.begin(), stars.end());
 	
 	pixelT brightestStar = (stars.end()-1)->intensity;
-	std::cout << brightestStar << std::endl;
 	for (std::vector<star>::iterator it = stars.end()-1; it != stars.begin()-1; --it)
 		if ((it->intensity / brightestStar) < treshold)
 		{
@@ -97,10 +83,6 @@ std::vector<star> detectStars(const FitsPhoto& astroImage, double treshold, int 
 			break;
 		}
 		
-	for (std::vector<star>::const_iterator it = stars.cbegin(); it != stars.cend(); ++it)
-		std::cout << it->print() << std::endl;
-	std::cout << "DONE, with " << stars.size() << " Star(s)" << std::endl;
-
 	return stars;
 }
 

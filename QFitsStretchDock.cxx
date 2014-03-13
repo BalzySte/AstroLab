@@ -1,6 +1,11 @@
 #include "QFitsStretchDock.h"
-#include <iostream>
-#include <string>
+
+#include "QFitsWindow.h"
+#include "settings.h"
+#include "fitsviewer.h"
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
 
 
 QFitsStretchDock::QFitsStretchDock(QWidget* parent)
@@ -10,6 +15,7 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 	
 	// Generates new "fake" titlebar with 0 px thickness
 	QWidget* fakeTitleBar = new QWidget();
+	
 	// ATTENTION: Are both new and old original title bars deleted on exit?
 	setTitleBarWidget(fakeTitleBar);
 	
@@ -58,6 +64,9 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 	// Creating container widgets and its layout
 	_container = new QWidget(this);
 	_containerLayout = new QGridLayout(_container);
+	
+	// Set left and right container's margins (appearance purposes)
+	_containerLayout->setContentsMargins(0, 8, 0, 8);
 
 	// All previously created widgets are added to the layout
 	_containerLayout->addWidget(_topSlider, 0, 0, 1, 1, Qt::AlignTop/* | Qt::AlignHCenter*/);
@@ -71,10 +80,13 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 	
 	// Layout is set as container's layout
 	_container->setLayout(_containerLayout);
-	_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	
 	// Container is set as dock widget
 	setWidget(_container);
+	
+	// DockSpace width is set to 500 pixels
+	setFixedWidth(85);
 }
 
 
@@ -86,12 +98,35 @@ void QFitsStretchDock::update()
  	// If an image is currently selected updates min and max shown values
 	if (fitsWindow != NULL)
 	{
-		_maxValueBox->setText(QString::fromStdString(std::to_string(
-			dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch())));
+		pixelT maxVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
+		pixelT minVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
 		
-		_minValueBox->setText(QString::fromStdString(std::to_string(
-			dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch())));
-	}
+		std::stringstream maxStr;
+		std::stringstream minStr;
+		
+		// If max and min are in a range suitable for fixed representation
+		if (fabs(maxVal) < pow(10., 7) && fabs(maxVal) > pow(10., -3)
+			&& fabs(minVal) < pow(10., 7) && fabs(minVal) > pow(10., -3))
+		{
+			// Calculates maximum number of decimals
+			int prec = static_cast<int>(std::min(std::min(3., 1000./fabs(minVal)), 1000./fabs(maxVal)));
+			
+			// Formats values strings
+			maxStr << std::setprecision(prec) << std::fixed << maxVal;
+			minStr << std::setprecision(prec) << std::fixed << minVal;
+		}
+		else
+		// otherwise
+		{
+			//Numbers are shown using scientific notation
+			maxStr << std::setprecision(1) << std::scientific << maxVal;
+			minStr << std::setprecision(1) << std::scientific << minVal;
+		}
+		
+		_maxValueBox->setText(QString::fromStdString(maxStr.str()));
+		_minValueBox->setText(QString::fromStdString(minStr.str()));
+			
+		}
 	// Or just sets text boxes to "-"
 	else
 	{
@@ -136,8 +171,33 @@ void QFitsStretchDock::previewImage()
 		currentImage->previewStretch(currentMin + minVariation, currentMax + maxVariation);
 
 		// Min and Max stretch values are updated
-		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
-		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
+		pixelT maxVal = currentMax + maxVariation;
+		pixelT minVal = currentMin + minVariation;
+		
+		std::stringstream maxStr;
+		std::stringstream minStr;
+		
+		// If max and min are in a range suitable for fixed representation
+		if (fabs(maxVal) < pow(10., 7) && fabs(maxVal) > pow(10., -3)
+			&& fabs(minVal) < pow(10., 7) && fabs(minVal) > pow(10., -3))
+		{
+			// Calculates maximum number of decimals
+			int prec = static_cast<int>(std::min(std::min(3., 1000./fabs(minVal)), 1000./fabs(maxVal)));
+			
+			// Formats values strings
+			maxStr << std::setprecision(prec) << std::fixed << maxVal;
+			minStr << std::setprecision(prec) << std::fixed << minVal;
+		}
+		else
+			// otherwise
+		{
+			//Numbers are shown using scientific notation
+			maxStr << std::setprecision(1) << std::scientific << maxVal;
+			minStr << std::setprecision(1) << std::scientific << minVal;
+		}
+		
+		_maxValueBox->setText(QString::fromStdString(maxStr.str()));
+		_minValueBox->setText(QString::fromStdString(minStr.str()));
 	}
 }
 
@@ -168,8 +228,34 @@ void QFitsStretchDock::updateImage()
 		currentImage->updateStretch(currentMin + minVariation, currentMax + maxVariation);
 		
 		// Min and Max stretch values are updated
-		_maxValueBox->setText(QString::fromStdString(std::to_string(currentMax + maxVariation)));
-		_minValueBox->setText(QString::fromStdString(std::to_string(currentMin + minVariation)));
+		pixelT maxVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
+		pixelT minVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
+		
+		std::stringstream maxStr;
+		std::stringstream minStr;
+		
+		// If max and min are in a range suitable for fixed representation
+		if (fabs(maxVal) < pow(10., 7) && fabs(maxVal) > pow(10., -3)
+			&& fabs(minVal) < pow(10., 7) && fabs(minVal) > pow(10., -3))
+		{
+			// Calculates maximum number of decimals
+			int prec = static_cast<int>(std::min(std::min(3., 1000./fabs(minVal)), 1000./fabs(maxVal)));
+			
+			// Formats values strings
+			maxStr << std::setprecision(prec) << std::fixed << maxVal;
+			minStr << std::setprecision(prec) << std::fixed << minVal;
+		}
+		else
+		// otherwise
+		{
+			//Numbers are shown using scientific notation
+			maxStr << std::setprecision(1) << std::scientific << maxVal;
+			minStr << std::setprecision(1) << std::scientific << minVal;
+		}
+		
+		_maxValueBox->setText(QString::fromStdString(maxStr.str()));
+		_minValueBox->setText(QString::fromStdString(minStr.str()));
+		
 	}
 	
 	// Sliders are brought back to their "rest" positions

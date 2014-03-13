@@ -1,11 +1,11 @@
 #include "fitsviewer.h"
+
 #include "FitsPhoto.h"
 #include "QFitsListWidgetItem.h"
 #include "astroAnalizer.h"
-
-#include <iostream>
+#include <vector>
 #include <sstream>
-#include <QtGui>
+
 
 FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 {
@@ -26,12 +26,16 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 	// Adds created widget to the main window
 	setCentralWidget(workspace);
 	
+	// Sets right dock area ownership of bottom right corner
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+	
+	// Adds docks
 	addDockWidget(Qt::RightDockWidgetArea, stretchDock);
 	addDockWidget(Qt::BottomDockWidgetArea, zoomDock);
 	
 	setWindowTitle("Fits Viewer");
 	
+	// Sets main window size
 	resize(800, 600);
 }
 
@@ -39,6 +43,8 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 void FitsViewer::setFocusedWindow(QFitsWindow* window)
 {
 	_currentFitsImage = window;
+	
+	// Updates docks
 	stretchDock->update();
 	zoomDock->update();
 }
@@ -49,19 +55,12 @@ QFitsWindow* FitsViewer::getFocusedWindow() const
 	return _currentFitsImage;
 }
 
-/*
-void FitsViewer::updateStretchDock()
-{
-	if (stretchDock != NULL)
-		stretchDock->update();
-}
-*/
 
 void FitsViewer::open()
 {
-	// Prompt the user to select file(s) to open
+	// Prompts the user to select file(s) to open
 	QStringList openFileNames = QFileDialog::getOpenFileNames(this,
-                                     "Open Images", QDir::currentPath());
+		"Open Images", QDir::currentPath(), "Fits Images (*.fit *.fits)");
 	
 	// If user selected at least 1 file opens it creating a FitsWindow.
 	if (!openFileNames.isEmpty())
@@ -71,14 +70,15 @@ void FitsViewer::open()
 		{
 			QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 			newFitsWindow->open(openFileNames[count]);
-		//	workspace->addSubWindow(newFitsWindow);
 			newFitsWindow->show();
 		}
 	}
+	else
+		return;
 	
 	imageWindowsList.back()->setFocus();
 
-// TODO: Show a proper message in case of error	
+// TODO: Show a proper message in case of error
 //    QMessageBox::information(this, "Image Viewer",
 //						QString("Cannot load %1.").arg(fileName));
 }
@@ -95,7 +95,7 @@ void FitsViewer::addition()
 	// TODO: check first whether there are only 2 images opened -> sumImg = img1+img2.
 	QListWidget* selectionList = new QListWidget;
 	
-	// Check wheter an image is focused:
+	// Checks whether an image is focused:
 	if (_currentFitsImage == NULL)
 		return;
 	
@@ -103,7 +103,7 @@ void FitsViewer::addition()
 	{
 		QFitsListWidgetItem* _imageEntry = new QFitsListWidgetItem((*it)->getImageTitle(), *it);
 											// Becoming selectionList's children
-											// they are destroied aas the function
+											// they are destroyed as the function
 											// returns together with their father
 
 		selectionList->addItem((_imageEntry));
@@ -112,10 +112,11 @@ void FitsViewer::addition()
 	// Selection list was populated, now creating dialog to prompt the user
 	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
 
-	// Creates a layout for QDialog
+	// Creates a vertical box layout for QDialog
 	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
 	dialog_layout->addWidget(selectionList);
 	
+	// Creates button box with 2 buttons
 	QDialogButtonBox *buttonBox = new QDialogButtonBox();
 	buttonBox->addButton("Continue", QDialogButtonBox::AcceptRole);
 	buttonBox->addButton("Cancel", QDialogButtonBox::RejectRole);
@@ -131,7 +132,6 @@ void FitsViewer::addition()
 
 	if (result == QDialog::Accepted)
 	{
-		std::cout << selectionList->currentItem() << std::endl;
 		// Creates new sum image
 		// TODO: Simplify this unreadable messy assignment.
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() +
@@ -142,11 +142,9 @@ void FitsViewer::addition()
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "SumImage");
 	}
-	else
-	{
-		// Do nothing
-	}
+
 	delete imgDialog;	// Delete image dialog object from heap
+						// together with its children
 }
 
 
@@ -155,7 +153,7 @@ void FitsViewer::subtraction()
 	// TODO: check first whether there are only 2 images opened -> sumImg = img1+img2.
 	QListWidget* selectionList = new QListWidget;
 	
-	// Check wheter an image is focused:
+	// Check whether an image is focused:
 	if (_currentFitsImage == NULL)
 		return;
 	
@@ -172,10 +170,11 @@ void FitsViewer::subtraction()
 	// Selection list was populated, now creating dialog to prompt the user
 	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
 	
-	// Creates a layout for QDialog
+	// Creates a vertical box layout for QDialog
 	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
 	dialog_layout->addWidget(selectionList);
 	
+	// Creates button box with 2 buttons
 	QDialogButtonBox *buttonBox = new QDialogButtonBox();
 	buttonBox->addButton("Continue", QDialogButtonBox::AcceptRole);
 	buttonBox->addButton("Cancel", QDialogButtonBox::RejectRole);
@@ -191,7 +190,6 @@ void FitsViewer::subtraction()
 	
 	if (result == QDialog::Accepted)
 	{
-		std::cout << selectionList->currentItem() << std::endl;
 		// Creates new difference image
 		// TODO: Simply this unreadable messy assignment.
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() - const_cast<const QFitsWindow*>(dynamic_cast<
@@ -201,16 +199,17 @@ void FitsViewer::subtraction()
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "SubtractImage");
 	}
-	else
-	{
-		// Do nothing
-	}
+
 	delete imgDialog;	// Delete image dialog object from heap
 }
 
 
 void FitsViewer::multiplication()
 {
+	// Checks whether an image is focused
+	if (_currentFitsImage == NULL)
+		return;
+	
 	// Asking user factor value. Variable ok is used to remember user choice.
 	// If user confirmed it is set to TRUE, otherwise to FALSE. 
 	bool ok;
@@ -218,9 +217,6 @@ void FitsViewer::multiplication()
 									   tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
 	if (ok)		//Checks if user confirmed operation
 	{
-		if (_currentFitsImage == NULL)
-			return;
-		
 		// Creates multiplied new image
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() * factor;
 		
@@ -233,15 +229,16 @@ void FitsViewer::multiplication()
 
 void FitsViewer::division()
 {
+	// Checks whether an image is focused
+	if (_currentFitsImage == NULL)
+		return;
+	
 	// Same as FitsViewer::multiplication method.
 	bool ok = 0;
 	double divisor = QInputDialog::getDouble(this, "Divide by:",
 											tr("Divisor:"), 1, -2147483647, 2147483647, 3, &ok);
 	if (ok)
 	{
-		if (_currentFitsImage == NULL)
-			return;
-
 		if (divisor == 0.)	// Makes sure dumb user does not divide by 0
 		{
 			QMessageBox msgBox(QMessageBox::Warning, "Division by 0",
@@ -261,6 +258,11 @@ void FitsViewer::division()
 
 void FitsViewer::createMedianFilter()
 {	
+	// Checks whether an image is focused
+	if (_currentFitsImage == NULL)
+		return;
+	
+	// Gets image width and height. Minimum between them is definitely the maximum median matrix size
 	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getWidth(),
 						 const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getHeight());
 	bool ok = 0;
@@ -271,7 +273,7 @@ void FitsViewer::createMedianFilter()
 		if (_currentFitsImage == NULL)
 			return;
 		
-		if (n % 2 == 0)	// Makes sure dumb user does not divide by 0
+		if (n % 2 == 0)	// Makes sure number is even
 		{
 			QMessageBox msgBox(QMessageBox::Warning, "Invalid Value",
 							   "Odd Integer Required", 0, this);
@@ -280,8 +282,10 @@ void FitsViewer::createMedianFilter()
 			return;
 		}
 		
+		// Generates filtered photo
 		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractMedianFiltered(n);
-		
+
+		// Creates new image window
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		
 		// Creates and sets Image title
@@ -294,11 +298,14 @@ void FitsViewer::createMedianFilter()
 
 void FitsViewer::createLowPassFilter()
 {
+	// Checks whether an image is focused
 	if (_currentFitsImage == NULL)
 		return;
 
+	// Generates filtered photo
 	FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractLowPassFilter3x3();
 	
+	// Creates new image window
 	QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 	
 	// Creates and sets Image title
@@ -310,16 +317,18 @@ void FitsViewer::createLowPassFilter()
 
 void FitsViewer::findStars()
 {
+	if (_currentFitsImage == NULL)
+		return;
+	
 	bool ok;
 	double treshold = QInputDialog::getDouble(this, "Multiply by:",
-											tr("Factor:"), 0.4, 0.01, 1., 3, &ok);
+											tr("Factor:"), 0.4, 0.001, 1., 3, &ok);
 	if (ok)		//Checks if user confirmed operation
-	{	
-		if (_currentFitsImage == NULL)
-			return;
-		
+	{			
+		// Get star vector returned by detectStars function
 		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), treshold);
 		
+		// Calls circleStars QFitsWindow's method to circle them
 		for (std::vector<star>::iterator it = starVector.begin(); it != starVector.end(); ++it)
 			_currentFitsImage->circleStars(starVector, 10);
 	}		

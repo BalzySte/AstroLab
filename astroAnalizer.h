@@ -1,11 +1,13 @@
 #ifndef __astroAnalizer_h__
 #define __astroAnalizer_h__
 
-
-#include <iostream>
 #include <string>
 #include <vector>
 #include "FitsPhoto.h"
+#include "settings.h"
+
+
+// Astronomical Images Manipulation and data reduction
 
 struct star
 {

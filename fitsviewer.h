@@ -1,21 +1,12 @@
 #ifndef __fitsviewer_h__
 #define __fitsviewer_h__
 
-#include <vector>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 
 #include "QFitsWindow.h"
 #include "QFitsStretchDock.h"
 #include "QFitsZoomDock.h"
-#include "common.h"
-
-
-class QAction;
-class QLabel;
-class QMenu;
-class QScrollArea;
-class QScrollBar;
 
 
 class FitsViewer : public QMainWindow

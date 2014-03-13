@@ -1,4 +1,4 @@
- HEADERS       = fitsviewer.h QFitsStretchDock.h QFitsZoomDock.h QFitsWindow.h
+ HEADERS       = fitsviewer.h QFitsWindow.h QFitsStretchDock.h QFitsZoomDock.h QFitsListWidgetItem.h
  SOURCES       = fitsviewer.cxx \
 				 main.cxx \
                  QFitsWindow.cxx \

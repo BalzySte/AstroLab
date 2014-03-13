@@ -2,12 +2,11 @@
 #define __QFitsListWidgetItem_h__
 
 
-#include <QtGui>
+#include <QListWidgetItem>
 #include "QFitsWindow.h"
-#include "settings.h"
 
-#include "common.h"
 
+class QFitsWindow;
 
 // QFitsListWidgetItem class is a simple QListWidgetItem
 // which contains in addition a pointer to a QFitsWindow

@@ -2,13 +2,7 @@
 #define __QFitsStretchDock_h__
 
 #include <QtGui>
-#include "QFitsWindow.h"
-#include "settings.h"
-#include "fitsviewer.h"
 
-#include "common.h"
-
-#define RESOLUTION 1000
 
 class QStretchSlider;	//declaration
 

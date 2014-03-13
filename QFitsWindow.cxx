@@ -1,27 +1,30 @@
-// not implemented
-
 #include "QFitsWindow.h"
-#include "FitsPhoto.h"
+
 #include "FitsToImage.h"
 #include "fitsviewer.h"
 
-#include <iostream>
 
 QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
-					subWindowsList(winList), QMdiSubWindow(parent), _zoomFactor(1.)
+				QMdiSubWindow(parent), subWindowsList(winList), _zoomFactor(1.)
 {
+	// Instance must be deleted on close action
 	setAttribute(Qt::WA_DeleteOnClose);
+	
+	// Created object is added to image windows list
 	subWindowsList.push_back(this);
 	
+	// Creates image label for showing image
 	_imageLabel = new QFitsLabel(this);
 	_imageLabel->setBackgroundRole(QPalette::Base);
 	_imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
- 	_imageLabel->setScaledContents(true);		// Would stretch the image and it's not desirable
+ 	_imageLabel->setScaledContents(true);	// Adapts to image size
 	
+	// Adds a scroll area containing the label
 	_scrollArea = new QFitsScrollArea(this);
 	_scrollArea->setBackgroundRole(QPalette::Dark);
 	_scrollArea->setWidget(_imageLabel);
 	
+	// Adds scroll area to the window
 	setWidget(_scrollArea);
 }
 
@@ -38,12 +41,17 @@ void QFitsWindow::open(QString filename)
 	_currentMinStretch = _fitsPhoto.getImageMinValue();
 	_currentMaxStretch = _fitsPhoto.getImageMaxValue();
 	
+	// Sets 8bit shades vector size according to opened image
 	_8bitImageArray.resize(_fitsPhoto.getPixelNum());
+	
+	// Populates 8 bit shades vector with max - min stretch
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto);
 	
+	// Generates default full scale image
 	_image = QImage(_8bitImageArray.data(), _fitsPhoto.getWidth(), _fitsPhoto.getHeight(),
 				 _fitsPhoto.getWidth(), QImage::Format_Indexed8);
 	
+	// Generates colortable ATTENTION: should be created once for entire program
 	QVector<QRgb> colorTable(256);
 	for(int i = 0; i < 256; ++i)
 		colorTable[i] = qRgb(i,i,i);
@@ -51,8 +59,10 @@ void QFitsWindow::open(QString filename)
 	_image.setColorCount(256);	
 	_image.setColorTable(colorTable);
 	
+	// Generates QPixmap from image
 	QPixmap imagePixmap = QPixmap::fromImage(_image);
 	
+	// Apply QPixmap to label and adjust its size
 	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 		
@@ -64,10 +74,14 @@ void QFitsWindow::open(QString filename)
 
 void QFitsWindow::previewStretch(pixelT min, pixelT max)
 {
+	// See QFitsWindow::open() for detailed description
+	// Populates 8 bit shades vector with restretched image
 	FitsTo8BitScale(_8bitImageArray, _fitsPhoto, min, max);
+	
 	int _width = _image.width();
 	int _height = _image.height();
 	
+	// Generates scaled image according to zoom
 	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
 									 static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::FastTransformation);
 	
@@ -89,6 +103,8 @@ void QFitsWindow::previewStretch(pixelT min, pixelT max)
 
 void QFitsWindow::updateStretch(pixelT min, pixelT max)
 {
+	// See QFitsWindow::open() for detailed description
+	
 	_currentMinStretch = min;
 	_currentMaxStretch = max;
 	
@@ -120,7 +136,8 @@ void QFitsWindow::updateStretch(pixelT min, pixelT max)
 
 
 void QFitsWindow::previewZoom(double zoomFactor)
-{		
+{
+	// See QFitsWindow::open() for detailed description
 	int _width = _image.width();
 	int _height = _image.height();
 	
@@ -144,6 +161,7 @@ void QFitsWindow::previewZoom(double zoomFactor)
 
 void QFitsWindow::updateZoom(double zoomFactor)
 {
+	// See QFitsWindow::open() for detailed description
 	_zoomFactor = zoomFactor;
 	
 	int _width = _image.width();
@@ -189,6 +207,7 @@ double QFitsWindow::getCurrentZoom()
 // ATTENTION: Function "steals" FitsPhoto parameter through std::move
 void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 {
+	// See QFitsWindow::open() for detailed description
 	// TODO: Should rename images with same name.
 	_imageTitle = imageName;
 	
@@ -257,6 +276,8 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 	subWindowsList.remove(this);
 	if (subWindowsList.size() != 0)
 		subWindowsList.back()->setFocus();
+	
+	// If image was the only one left
 	else
 	{
 		QObject* tmpMdiArea = (parent())->parent();
@@ -266,8 +287,11 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 	closeEvent->accept();
 }
 
-void QFitsWindow::focusInEvent()
+
+void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 {
+	// Although not used, focusInEvent parameter is necessary for
+	// signal - slot connection
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 	tmpMainWin->setFocusedWindow(this);
@@ -276,6 +300,11 @@ void QFitsWindow::focusInEvent()
 
 void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 {
+// Draws blue circles around stars contained in vector.
+// Circles are temporary and drawn directly on the image pixmap.
+// They disappear as the user changes either stretch or zoom.
+	
+	// See QFitsWindow::open() for detailed description on how image is drawn
 	int _width = _image.width();
 	int _height = _image.height();
 	
@@ -291,20 +320,25 @@ void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 	
 	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
 															// optimised by compiler
+	// QPainter object is used to draw
 	QPainter painter(&imagePixmap);
+	// Setting drawing tool (blue pen)
 	painter.setPen(Qt::blue);
 	
+	// An arc is drawn. 0 and 5760 values draw a full circle
 	int startAngle = 0;
 	int spanAngle = 5760;
 	
+	// For each element in vector draws the circle
 	for (std::vector<star>::iterator it = vector.begin(); it != vector.end(); ++it)
 	{
 		QRectF rectangle((it->x-radius)*_zoomFactor, (it->y-radius)*_zoomFactor, (2*radius)*_zoomFactor, (2*radius)*_zoomFactor);	
 		painter.drawArc(rectangle, startAngle, spanAngle);
 	}
 	
+	// Finished to draw
 	painter.end();
-		
+	
 	_imageLabel->setPixmap(imagePixmap);
 	_imageLabel->adjustSize();
 	
@@ -317,19 +351,21 @@ void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
 {
 	_fitsWindowParent = parent;
-	//connect(this, SIGNAL(focusInEvent(QFocusEvent)), _fitsWindowParent, SLOT(focusInEvent(QFocusEvent)));
 }
 
 
-// --- QFitsScrollArea ---
+// ******* QFitsScrollArea ******* //
+
 QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 {
 	_fitsWindowParent = fitsWinPtr;		//Useless, should use parent.
 }
 
 
-void QFitsScrollArea::focusInEvent()
+void QFitsScrollArea::focusInEvent(QFocusEvent* focusInEvent)
 {
+	// Although not used, focusInEvent parameter is necessary for
+	// signal - slot connection
 	QObject* tmpMdiArea = (parent()->parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
 

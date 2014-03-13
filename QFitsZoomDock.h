@@ -2,10 +2,6 @@
 #define __QFitsZoomDock_h__
 
 #include <QtGui>
-#include "QFitsWindow.h"
-#include "fitsviewer.h"
-#include "settings.h"
-#include "common.h"
 
 
 class QZoomSlider;	// Declaration
