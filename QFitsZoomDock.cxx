@@ -42,7 +42,7 @@ QFitsZoomDock::QFitsZoomDock(QWidget* parent)
 	// Layout is set as container's layout	
 	_container->setLayout(_containerLayout);
 	
-	// Container is set that it can expand and occupy entire dock space
+	// Container is set in a way that it can expand and occupy entire dock space
 	_container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	
 	// Container is set as dock widget

@@ -58,11 +58,11 @@ QFitsWindow* FitsViewer::getFocusedWindow() const
 
 void FitsViewer::open()
 {
-	// Prompts the user to select file(s) to open
+	// Prompts user to select file(s) to open
 	QStringList openFileNames = QFileDialog::getOpenFileNames(this,
 		"Open Images", QDir::currentPath(), "Fits Images (*.fit *.fits)");
 	
-	// If user selected at least 1 file opens it creating a FitsWindow.
+	// If user selects at least 1 file, opens it creating a FitsWindow.
 	if (!openFileNames.isEmpty())
 	{
 		//Creates images
@@ -161,7 +161,7 @@ void FitsViewer::subtraction()
 	{
 		QFitsListWidgetItem* _imageEntry = new QFitsListWidgetItem((*it)->getImageTitle(), *it);
 		// Becoming selectionList's children
-		// they are destroied aas the function
+		// they are destroyed as the function
 		// returns together with their father
 		
 		selectionList->addItem((_imageEntry));
@@ -211,11 +211,11 @@ void FitsViewer::multiplication()
 		return;
 	
 	// Asking user factor value. Variable ok is used to remember user choice.
-	// If user confirmed it is set to TRUE, otherwise to FALSE. 
+	// If user confirms, it is set to TRUE, otherwise to FALSE. 
 	bool ok;
 	double factor = QInputDialog::getDouble(this, "Multiply by:",
 									   tr("Factor:"), 1, -2147483647, 2147483647, 3, &ok);
-	if (ok)		//Checks if user confirmed operation
+	if (ok)		//Checks if user confirms operation
 	{
 		// Creates multiplied new image
 		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() * factor;
@@ -321,12 +321,12 @@ void FitsViewer::findStars()
 		return;
 	
 	bool ok;
-	double treshold = QInputDialog::getDouble(this, "Multiply by:",
+	double threshold = QInputDialog::getDouble(this, "Multiply by:",
 											tr("Factor:"), 0.4, 0.001, 1., 3, &ok);
-	if (ok)		//Checks if user confirmed operation
+	if (ok)		//Checks if user confirms operation
 	{			
-		// Get star vector returned by detectStars function
-		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), treshold);
+		// Gets star vector returned by detectStars function
+		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), threshold);
 		
 		// Calls circleStars QFitsWindow's method to circle them
 		for (std::vector<star>::iterator it = starVector.begin(); it != starVector.end(); ++it)

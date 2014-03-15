@@ -95,7 +95,7 @@ void QFitsStretchDock::update()
 	// "Asks" to the main program object current active window
 	QFitsWindow* fitsWindow = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
 	
- 	// If an image is currently selected updates min and max shown values
+ 	// If an image is currently selected, updates min and max shown values
 	if (fitsWindow != NULL)
 	{
 		pixelT maxVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
@@ -138,12 +138,12 @@ void QFitsStretchDock::update()
 
 void QFitsStretchDock::previewImage()
 {
-	// Heights at which shade of slider image begins and end
-	// so that it follows slider move.
+	// Heights at which shade of slider image begins and ends
+	// so that it follows the sliding.
 	int shadeStart = 341 - (341 * _topSlider->value()/1000);
 	int shadeEnd = 512 - (341 * _bottomSlider->value()/1000);
 
-	// Updating slider image
+	// Updating slider image 
 	createSliderPixmap(_stretchPixmap, shadeStart, shadeEnd);
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
@@ -159,7 +159,7 @@ void QFitsStretchDock::previewImage()
 		pixelT currentMin = currentImage->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
-		// Calculates stretch variation from current sliders position.
+		// Calculates stretch variation from current slider positions.
 		// At one time, only a slider can be moved, the other produces
 		// no increment or decrement. Either maxVariation or minVariation
 		// is exclusively 0.

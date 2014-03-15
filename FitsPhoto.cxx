@@ -7,7 +7,7 @@
 
 // Default Constructor, sets image position to default value (0,0)
 // Unless performing particular operations, such as aligning images
-// and the adding them up, position is not relevant and must be set
+// and adding them up, position is not relevant and must be set
 // to (0,0).
 FitsPhoto::FitsPhoto() : _x(0), _y(0)
 {
@@ -54,7 +54,7 @@ void FitsPhoto::create(int width, int height, int xPos, int yPos)
 	_height = height;
 	_pixelNumber = width*height;
 	_imageArray.resize(_pixelNumber);	// Added pixel values are initialised to pixelT()
-										// therefore to float() or double() which is 0.0
+										// then to float() or double() which is 0.
 	_x = xPos;
 	_y = yPos;
 }
@@ -137,7 +137,7 @@ bool FitsPhoto::isValid() const
 
 
 // (X,Y) Coordinates access methods
-// ATTENTION: No control on bounds. It's for performance, not laziness
+// ATTENTION: No control on bounds. It's because of performance, not laziness
 pixelT& FitsPhoto::operator() (int x, int y)
 {
 	return _imageArray[x + (_width * y)];

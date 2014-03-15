@@ -4,11 +4,12 @@
 void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto& 
 					fitImage, pixelT bottom, pixelT top)
 {
-// 24 bit RGB colors can describe 16.777.216 different shades.
-// Gray is obtained if R, G, and B channels have an equal intensity
-// Different gray shades are obtained varying the intensity.
-// Gray tonalities can therefore be described through an 8 bit number
-// from 0 to 255. 0 is Black and 255 is white.
+// 24 bit RGB colours can describe 16.777.216 different colours.
+// R, G, B are 8 bit unsigned numbers between 0 and 255.
+// Gray is obtained if R, G, and B channels have equal intensity.
+// Different shades of gray are obtained by varying the intensity.
+// Aforementioned shades can therefore be described by an 8 bit number
+// included between 0 and 255. 0 is Black and 255 is White.
 
 	int pixelNum = fitImage.getPixelNum();
 	

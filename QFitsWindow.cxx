@@ -301,7 +301,7 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
 void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 {
 // Draws blue circles around stars contained in vector.
-// Circles are temporary and drawn directly on the image pixmap.
+// Circles are temporary drawn directly on the image pixmap.
 // They disappear as the user changes either stretch or zoom.
 	
 	// See QFitsWindow::open() for detailed description on how image is drawn

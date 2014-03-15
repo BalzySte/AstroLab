@@ -1,5 +1,5 @@
- HEADERS       = fitsviewer.h QFitsWindow.h QFitsStretchDock.h QFitsZoomDock.h QFitsListWidgetItem.h
- SOURCES       = fitsviewer.cxx \
+HEADERS       = fitsviewer.h QFitsWindow.h QFitsStretchDock.h QFitsZoomDock.h QFitsListWidgetItem.h
+SOURCES       = fitsviewer.cxx \
 				 main.cxx \
                  QFitsWindow.cxx \
                  FitsPhoto.cxx \

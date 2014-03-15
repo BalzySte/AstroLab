@@ -48,11 +48,11 @@ public:
 	pixelT getCurrentMinStretch();
 	double getCurrentZoom();
 	
-	// Directly drawing on image
+	// Circles stars on image direcly.
 	void circleStars(std::vector<star>& vector, int radius);
-																	// Used to temporarily point out something
-																	// on an image. Drawn circle will disappear
-																	// upon QLabel redrawing.
+		// Used to temporarily point out stars
+		// on an image. Drawn circles will disappear
+		// upon QLabel redrawing.
 	
 private:	
 	// Reference to opened Fits Windows list container
@@ -64,10 +64,10 @@ private:
 	// QListWidgetItem object, used to generate opened images list i.e. when adding.
 	QFitsListWidgetItem* _listItem;
 	
-	// Variables for keeping the stretch set through the stretch box's sliders
+	// Variables for keeping the stretch set through the sliders of the stretch box
 	pixelT _currentMinStretch, _currentMaxStretch;
 	
-	// Qt Widget drawn inside fits window
+	// Inside-drawn Qt Widget fits window
 	QFitsLabel* _imageLabel;
 	QFitsScrollArea* _scrollArea;
 	

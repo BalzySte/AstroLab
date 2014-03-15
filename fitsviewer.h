@@ -16,10 +16,10 @@ class FitsViewer : public QMainWindow
 public:
 	FitsViewer();
 	
-	// Set currently selected image window
+	// Sets currently selected image window
 	void setFocusedWindow(QFitsWindow* window);
 	
-	// Get currently selected image window
+	// Gets currently selected image window
 	QFitsWindow* getFocusedWindow() const;
 	
 	// Updates stretch dock when focus changes
