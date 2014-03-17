@@ -16,8 +16,14 @@ struct star
 public:
 	star();
 	star(int xCoord,int yCoord, pixelT intensity);
+	
+	// Printing functions (produce strings)
 	std::string print() const;
 	std::string printDetailed() const;
+	std::string printCoordinates() const;
+	std::string printRelativeCentroids() const;
+	std::string printFWHM() const;
+	std::string printIntensity() const;
 	
 	bool operator< (star otherStar) const;	// Compares intensities
 	
@@ -34,6 +40,6 @@ public:
 
 
 std::vector<star> detectStars(const FitsPhoto& astroImage, double threshold, int medianMatrixSize = 9);
-void extractStarProfiles (const FitsPhoto& astroImage, const FitsPhoto& background, std::vector<star>& starVector);
+std::vector<star> extractStarProfiles(const FitsPhoto& astroImage, double threshold, int medianMatrixSize = 9);
 
 #endif //__astroAnalizer_h__

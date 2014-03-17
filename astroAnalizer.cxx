@@ -2,6 +2,7 @@
 
 #include "settings.h"
 #include <sstream>
+#include <iomanip>
 #include <algorithm>
 
 								
@@ -22,8 +23,8 @@ std::vector<star> detectStars(const FitsPhoto& astroImage, double threshold, int
 	
 	std::vector<star> stars;
 	
-	for (int x = medianMatrixSize; x < width - medianMatrixSize; ++x)
-		for (int y = medianMatrixSize; y < height - medianMatrixSize; ++y)
+	for (int x = (medianMatrixSize/2) + 2 ; x < width - (medianMatrixSize/2) - 2; ++x)
+		for (int y = (medianMatrixSize/2) + 2; y < height - (medianMatrixSize/2) - 2; ++y)
 		{
 			pixelT pixelValue = finalPhoto(x, y);
 			
@@ -47,13 +48,13 @@ std::vector<star> detectStars(const FitsPhoto& astroImage, double threshold, int
 			for (int px = -2; px <= 2; ++px)
 				if (px != 0)
 					if (pixelValue <= finalPhoto(x + px, y - px))
-						noStar = true;;
+						noStar = true;
 				
 			// Checks -- dir
 			for (int subX = -2; subX <= 2; ++subX)
 				if (subX != 0)
 					if (pixelValue <= finalPhoto(x + subX, y))
-						noStar = true;;
+						noStar = true;
 					
 			// Checks | dir
 			for (int subY = -2; subY <= 2; ++subY)
@@ -119,6 +120,51 @@ std::string star::printDetailed() const
 }
 
 
+std::string star::printCoordinates() const
+{
+	std::stringstream stream;
+	stream << '(' << x << ", " << y << ')';
+	return stream.str();
+}
+
+
+std::string star::printRelativeCentroids() const
+{
+	std::stringstream stream;
+	stream << '(' << xCentroid << ", " << yCentroid << ')';
+	return stream.str();
+}
+
+
+std::string star::printFWHM() const
+{
+	std::stringstream stream;
+	stream << '(' << xFWHM << ", " << yFWHM << ')';
+	return stream.str();
+}
+
+
+std::string star::printIntensity() const
+{
+	std::stringstream value;
+	// Checks if exponential notation is required
+	if (fabs(intensity) < pow(10., 7) && fabs(intensity) > pow(10., -3)
+		&& fabs(intensity) < pow(10., 7) && fabs(intensity) > pow(10., -3))
+	{
+		// Formats values strings
+		int prec = static_cast<int>(std::min(3., 1000./fabs(intensity)));
+		value << std::setprecision(prec) << std::fixed << intensity;
+	}
+	else
+		// otherwise
+	{
+		//Numbers are shown using scientific notation
+		value << std::setprecision(2) << std::scientific << intensity;
+	}
+	
+	return value.str();
+}
+
 
 bool star::operator< (star otherStar) const
 {
@@ -128,107 +174,178 @@ bool star::operator< (star otherStar) const
 }
 
 
-void extractStarProfiles (const FitsPhoto& astroImage, const FitsPhoto& background, std::vector<star>& starVector)
+std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double threshold, int medianMatrixSize)
 {
+	std::vector<star> starVector = detectStars(origAstroImage, threshold, medianMatrixSize);
+	std::vector<star> processedStarVector;
+	
+	// Applying Low-pass 3x3 filter to astroImage
+	FitsPhoto lowPassPhoto = origAstroImage.extractLowPassFilter3x3();
+	
+	// Applying Median filter to astroImage to obtain backgroundArray (default is 9x9)
+	FitsPhoto backgroundFilteredPhoto = lowPassPhoto.extractMedianFiltered(medianMatrixSize);
+	
+	// Final image
+	FitsPhoto astroImage = lowPassPhoto - backgroundFilteredPhoto;
+
+	int width = astroImage.getWidth();
+	int height = astroImage.getHeight();
+	
+	int maxStarRadius = 10;
+	
 	// For each star in vector:
 	for (std::vector<star>::iterator it = starVector.begin(); it != starVector.end(); ++it)
-	{
-		// Starts from central maximum pixel
-		int xPixelDispl = 0;	// Displacement from centre, X direction
-		int yPixelDispl = 0;	// Displacement from centre, Y direction
-		
+	{		
 		int xCentre = it->x;
 		int yCentre = it->y;
-		
 		pixelT centreIntensity = it->intensity;
 		
-		pixelT xTotalCount = 0;
-		pixelT yTotalCount = 0;
+		bool validStar = true;
 		
-		double xAccurateCentre = 0.;
-		double yAccurateCentre = 0.;
+		double xAccurateCentre = 0;
+		double yAccurateCentre = 0;
+		double xSquareSum = 0;
+		double ySquareSum = 0;
 		
-		pixelT xSquareCount = 0.;
-		pixelT ySquareCount = 0.;
+	// X axis
 		
-		// Calculates mean and mean squares along two axes
-		// X and Y coordinates means will be the coordinates of the centroid
-		// FWHM along 2 axes will be extracted from  VAR(X) = E(X)^2 - E(X^2).
+		pixelT xTotalCount = centreIntensity;
+		int xDisplacement = -1;	// Displacement from centre, X direction		
 		
-		// X axis, left direction (central pixel included)
-		while (true)
+		// left direction
+		while (validStar)
 		{
-			pixelT xPixelCount = astroImage(xCentre + xPixelDispl, yCentre);
-			pixelT backgroundIntensity = background(xCentre + xPixelDispl, yCentre);
-			xAccurateCentre += xPixelCount * xPixelDispl;
-			xTotalCount += xPixelCount;
-			xSquareCount += pow(xPixelCount, 2);
+			int xCoord = xCentre + xDisplacement;
 			
-			if ((xPixelCount/backgroundIntensity) < 2. || xPixelCount < centreIntensity/100.)
+			// Checks whether star is good
+			if (xCoord < medianMatrixSize/2 + maxStarRadius)
+			{
+				validStar = false;
+				break;
+			}
+			
+			// Scan radius = 10
+			if  (xDisplacement < -maxStarRadius)
 				break;
 			
-			--xPixelDispl;
-		//find centroid and FWHM on x/y
+			pixelT pixelValue = astroImage(xCoord, yCentre);
+			if (pixelValue < 0.)
+				pixelValue = 0.;
+
+			xAccurateCentre += pixelValue * xDisplacement;
+			xSquareSum += pixelValue * pow(xDisplacement, 2);
+			xTotalCount += pixelValue;
+			
+			--xDisplacement;
 		}
 		
-		// X axis, right direction (central pixel excluded)
-		xPixelDispl = 1;
-		while (true)
+		// right direction
+		xDisplacement = 1;
+		
+		while (validStar)
 		{
-			pixelT xPixelCount = astroImage(xCentre + xPixelDispl, yCentre);
-			pixelT backgroundIntensity = background(xCentre + xPixelDispl, yCentre);
-			xAccurateCentre += xPixelCount * xPixelDispl;
-			xTotalCount += xPixelCount;
-			xSquareCount += pow(xPixelCount, 2);
+			int xCoord = xCentre + xDisplacement;
 			
-			if ((xPixelCount/backgroundIntensity) < 2. || xPixelCount < centreIntensity/100.)
+			// Checks whether star is good
+			if (xCoord > width - medianMatrixSize/2 - maxStarRadius)
+			{
+				validStar = false;
+				break;
+			}
+			
+			// Scan radius = maxStarRadius
+			if  (xDisplacement > maxStarRadius)
 				break;
 			
-			++xPixelDispl;
+			pixelT pixelValue = astroImage(xCoord, yCentre);
+			if (pixelValue < 0.)
+				pixelValue = 0.;
+			
+			xAccurateCentre += pixelValue * xDisplacement;
+			xSquareSum += pixelValue * pow(xDisplacement, 2);
+			xTotalCount += pixelValue;
+			
+			++xDisplacement;
 		}
 		
-		
-		// X final accurate coordinate.
+		// Y final accurate coordinate.
 		xAccurateCentre /= xTotalCount;
-		it->xFWHM = pow(xAccurateCentre, 2) - xSquareCount/xTotalCount;
+		it->xCentroid = xAccurateCentre;
+		it->xFWHM = 2.355 * pow(xSquareSum/xTotalCount - pow(xAccurateCentre, 2), 0.5);
+	
+	// END X axis
 		
-		// Y axis, up direction (central pixel included)
-		while (true)
+	// Y axis
+		
+		pixelT yTotalCount = centreIntensity;
+		int yDisplacement = -1;	// Displacement from centre, Y direction
+		
+		// left direction
+		while (validStar)
 		{
-			pixelT yPixelCount = astroImage(xCentre, yCentre + yPixelDispl);
-			pixelT backgroundIntensity = background(xCentre, yCentre + yPixelDispl);
-			yAccurateCentre += yPixelCount * yPixelDispl;
-			yTotalCount += yPixelCount;
-			ySquareCount += pow(yPixelCount, 2);
+			int yCoord = yCentre + yDisplacement;
 			
-			if ((yPixelCount/backgroundIntensity) < 2. || yPixelCount < centreIntensity/100.)
+			// Checks whether star is good
+			if (yCoord < medianMatrixSize/2 + maxStarRadius)
+			{
+				validStar = false;
+				break;
+			}
+			
+			// Scan radius = 10
+			if  (yDisplacement < -maxStarRadius)
 				break;
 			
-			--yPixelDispl;
-			//find centroid and FWHM on x/y
+			pixelT pixelValue = astroImage(xCentre, yCoord);
+			if (pixelValue < 0.)
+				pixelValue = 0.;
+			
+			yAccurateCentre += pixelValue * yDisplacement;
+			ySquareSum += pixelValue * pow(yDisplacement, 2);
+			yTotalCount += pixelValue;
+			
+			--yDisplacement;
 		}
 		
-		// Y axis, down direction (central pixel excluded)
-		yPixelDispl = 1;
-		while (true)
+ 		// Right direction
+		yDisplacement = 1;
+		
+		while (validStar)
 		{
-			pixelT yPixelCount = astroImage(yCentre, yCentre + yPixelDispl);
-			pixelT backgroundIntensity = background(yCentre, yCentre + yPixelDispl);
-			yAccurateCentre += yPixelCount * yPixelDispl;
-			yTotalCount += yPixelCount;
-			ySquareCount += pow(yPixelCount, 2);
+			int yCoord = yCentre + yDisplacement;
 			
-			if ((yPixelCount/backgroundIntensity) < 2. || yPixelCount < centreIntensity/100.)
+			// Checks whether star is good
+			if (yCoord > height - medianMatrixSize/2 - maxStarRadius)
+			{
+				validStar = false;
+				break;
+			}
+			
+			// Scan radius = 10
+			if  (yDisplacement > maxStarRadius)
 				break;
 			
-			++yPixelDispl;
+			pixelT pixelValue = astroImage(xCentre, yCoord);
+			if (pixelValue < 0.)
+				pixelValue = 0.;
+			
+			yAccurateCentre += pixelValue * yDisplacement;
+			ySquareSum += pixelValue * pow(yDisplacement, 2);
+			yTotalCount += pixelValue;
+			
+			++yDisplacement;
 		}
 		
 		// Y final accurate coordinate.
 		yAccurateCentre /= yTotalCount;
-		it->xFWHM = pow(yAccurateCentre, 2) - ySquareCount/yTotalCount;
-		
-		it->xCentroid = xAccurateCentre;
 		it->yCentroid = yAccurateCentre;
+		it->yFWHM = 2.355 * pow(ySquareSum/yTotalCount - pow(yAccurateCentre, 2), 0.5);
+		
+	// END Y axis
+		
+ 		if (validStar)
+ 			processedStarVector.push_back(*it);
 	}
+	
+	return processedStarVector;
 }

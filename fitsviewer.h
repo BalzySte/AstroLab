@@ -35,6 +35,7 @@ private slots:
 	void createMedianFilter();
 	void createLowPassFilter();
 	void findStars();
+	void analyseStar();
 	void quit();
 	void about();
     
@@ -71,6 +72,7 @@ private:
 	QAction *findStarsAct;
 	QAction *createMedianFilterAct;
 	QAction *createLowPassFilterAct;
+	QAction *starAnalysisAct;
 
 	// Help Menu actions
 	QAction *aboutAct;

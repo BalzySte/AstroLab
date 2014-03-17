@@ -50,6 +50,7 @@ public:
 	
 	// Circles stars on image direcly.
 	void circleStars(std::vector<star>& vector, int radius);
+	void circleNumberStars(std::vector<star>& vector, int radius);
 		// Used to temporarily point out stars
 		// on an image. Drawn circles will disappear
 		// upon QLabel redrawing.

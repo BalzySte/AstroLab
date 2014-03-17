@@ -1,4 +1,4 @@
-HEADERS       = fitsviewer.h QFitsWindow.h QFitsStretchDock.h QFitsZoomDock.h QFitsListWidgetItem.h
+HEADERS       = fitsviewer.h QFitsWindow.h QFitsStretchDock.h QFitsZoomDock.h QFitsListWidgetItem.h QTextInfoWindow.h
 SOURCES       = fitsviewer.cxx \
 				 main.cxx \
                  QFitsWindow.cxx \
@@ -7,7 +7,8 @@ SOURCES       = fitsviewer.cxx \
                  QFitsStretchDock.cxx \
                  QFitsListWidgetItem.cxx \
                  QFitsZoomDock.cxx \
-                 astroAnalizer.cxx
+                 astroAnalizer.cxx \
+                 QTextInfoWindow.cxx
                  
 QMAKE_CXXFLAGS += -std=c++11
 

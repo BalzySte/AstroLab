@@ -3,8 +3,10 @@
 #include "FitsPhoto.h"
 #include "QFitsListWidgetItem.h"
 #include "astroAnalizer.h"
+#include "QTextInfoWindow.h"
 #include <vector>
 #include <sstream>
+#include <iomanip>
 
 
 FitsViewer::FitsViewer() : _currentFitsImage(NULL)
@@ -329,8 +331,42 @@ void FitsViewer::findStars()
 		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), threshold);
 		
 		// Calls circleStars QFitsWindow's method to circle them
+		_currentFitsImage->circleStars(starVector, 10);
+	}		
+}
+
+
+void FitsViewer::analyseStar()
+{
+	if (_currentFitsImage == NULL)
+		return;
+	
+	bool ok;
+	double threshold = QInputDialog::getDouble(this, "Multiply by:",
+											   tr("Factor:"), 0.4, 0.001, 1., 3, &ok);
+	if (ok)		//Checks if user confirms operation
+	{			
+		// Gets star vector returned by detectStars function
+		std::vector<star> starVector = extractStarProfiles(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), threshold);
+		
+		// Calls circleNumberStars QFitsWindow's method to circle them and assing a number
+		_currentFitsImage->circleNumberStars(starVector, 10);
+		
+		// Creates Information String
+		std::stringstream infoStream;
+		infoStream << "   NO   |   COORDINATES   |   INTENSITY   |   CENTROID DISPLACEMENT   |   FWHM (X, Y)" << std::endl;
+		int count = 0;
+
 		for (std::vector<star>::iterator it = starVector.begin(); it != starVector.end(); ++it)
-			_currentFitsImage->circleStars(starVector, 10);
+			infoStream << std::right << std::setw(8) << ++count
+						<< std::right << std::setw(18) << it->printCoordinates()
+						<< std::right << std::setw(16) << it->printIntensity()
+						<< std::right << std::setw(30) << it->printRelativeCentroids()
+						<< std::right << std::setw(30) << it->printFWHM()
+						<< std::endl;
+
+		QTextInfoWindow* infoWindow = new QTextInfoWindow("Star Profiles");
+ 		infoWindow->setText(infoStream.str());
 	}		
 }
 
@@ -378,7 +414,8 @@ void FitsViewer::createMenus()
 	
 	analysisMenu = new QMenu("Analysis", this);
 	analysisMenu->addAction(findStarsAct);
-
+	analysisMenu->addAction(starAnalysisAct);
+	
 	helpMenu = new QMenu("Help", this);
 	helpMenu->addAction(aboutAct);
 
@@ -422,6 +459,10 @@ void FitsViewer::createActions()
 	
 	findStarsAct = new QAction("Find Stars ...", this);
 	connect(findStarsAct, SIGNAL(triggered()), this, SLOT(findStars()));
+	
+	starAnalysisAct = new QAction("Star Analysis ...", this);
+	connect(starAnalysisAct, SIGNAL(triggered()), this, SLOT(analyseStar()));
+	
 /*
 	zoomInAct = new QAction("Zoom In (25%)", this);
 	zoomInAct->setShortcut(tr("Ctrl++"));

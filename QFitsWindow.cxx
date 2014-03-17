@@ -346,6 +346,56 @@ void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 }
 
 
+void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
+{
+	// Works as previous functions but draws also a small number
+	// near the top right corner of the circle to identify the star
+	
+	// See QFitsWindow::open() for detailed description on how image is drawn
+	int _width = _image.width();
+	int _height = _image.height();
+	
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+									 static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
+	// optimised by compiler
+	// QPainter object is used to draw
+	QPainter painter(&imagePixmap);
+	// Setting drawing tool (blue pen)
+	painter.setPen(Qt::blue);
+	painter.setFont(QFont("Arial"));
+	
+	// An arc is drawn. 0 and 5760 values draw a full circle
+	int startAngle = 0;
+	int spanAngle = 5760;
+	
+	// For each element in vector draws the circle
+	int count = 0;
+	for (std::vector<star>::iterator it = vector.begin(); it != vector.end(); ++it)
+	{
+		QRectF rectangle((it->x-radius)*_zoomFactor, (it->y-radius)*_zoomFactor, (2*radius)*_zoomFactor, (2*radius)*_zoomFactor);	
+		painter.drawArc(rectangle, startAngle, spanAngle);
+		painter.drawText(QPoint((it->x+radius)*_zoomFactor, (it->y+radius)*_zoomFactor), std::to_string(++count).c_str());
+	}
+	
+	// Finished to draw
+	painter.end();
+	
+	_imageLabel->setPixmap(imagePixmap);
+	_imageLabel->adjustSize();
+	
+	show();	
+}
+
+
 // --- QFitsLabel ---
 
 QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
