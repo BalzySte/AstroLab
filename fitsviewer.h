@@ -27,7 +27,7 @@ public:
   
 private slots:
 	void open();
-	void save();
+	void exportImage();
 	void addition();
 	void subtraction();
 	void multiplication();
@@ -54,6 +54,7 @@ private:
 	
 	// File menu actions
 	QAction *openAct;
+	QAction *exportImageAct;
 	QAction *exitAct;
 
 	// Operations menu actions

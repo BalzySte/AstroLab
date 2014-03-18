@@ -26,6 +26,8 @@ public:
 	QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent = 0);
 	void open(QString filename);
 	void createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName = "New Image");
+	void exportPixmapToFile(QString filename);
+	
 	
 	// Previews and updates image stretch 
 	void previewStretch(pixelT min, pixelT max);

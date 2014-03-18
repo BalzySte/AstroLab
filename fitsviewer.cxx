@@ -86,9 +86,35 @@ void FitsViewer::open()
 }
 
 
-void FitsViewer::save()
-{ 
-  
+void FitsViewer::exportImage()
+{
+	if (_currentFitsImage != NULL)
+	{
+		/*
+		QString filename;
+		QFileDialog fileDialog (this, "Export Image",
+			QDir::currentPath(), "Image File (*.png)");
+		
+		fileDialog.setFileMode(QFileDialog::AnyFile);
+		fileDialog.setDefaultSuffix("png");
+		fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+		fileDialog.setFilter(QDir::Files);
+
+		if (fileDialog.exec())
+		{
+			filename = fileDialog.selectedFiles().first();
+			std::cout << filename.toStdString() << std::endl;
+			_currentFitsImage->exportPixmapToFile(filename);
+			
+		}
+		*/
+		QString filter("Image File (*.png)");
+		QString filename = QFileDialog::getSaveFileName(this, "Export to file",
+		QDir::currentPath(), filter, &filter);
+		if (filename != QString())
+			_currentFitsImage->exportPixmapToFile(filename);
+			
+	}
 }
 
 
@@ -392,6 +418,7 @@ void FitsViewer::createMenus()
 { 
 	fileMenu = new QMenu("File", this);
 	fileMenu->addAction(openAct);
+	fileMenu->addAction(exportImageAct);
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 /*
@@ -434,6 +461,9 @@ void FitsViewer::createActions()
 	openAct = new QAction("Open...", this);
 //	openAct->setShortcut(tr("Ctrl+O"));
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+	
+	exportImageAct = new QAction("Export Image ...", this);
+	connect (exportImageAct, SIGNAL(triggered()), this, SLOT(exportImage()));
 	
 	exitAct = new QAction("Exit", this);
 //	exitAct->setShortcut(tr("Ctrl+Q"));

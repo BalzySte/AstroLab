@@ -176,21 +176,85 @@ bool star::operator< (star otherStar) const
 
 std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double threshold, int medianMatrixSize)
 {
-	std::vector<star> starVector = detectStars(origAstroImage, threshold, medianMatrixSize);
-	std::vector<star> processedStarVector;
+	int width = origAstroImage.getWidth();
+	int height = origAstroImage.getHeight();
 	
-	// Applying Low-pass 3x3 filter to astroImage
+	// Applying Low-pass 3x3 filter to origAstroImage
 	FitsPhoto lowPassPhoto = origAstroImage.extractLowPassFilter3x3();
 	
 	// Applying Median filter to astroImage to obtain backgroundArray (default is 9x9)
 	FitsPhoto backgroundFilteredPhoto = lowPassPhoto.extractMedianFiltered(medianMatrixSize);
 	
 	// Final image
-	FitsPhoto astroImage = lowPassPhoto - backgroundFilteredPhoto;
-
-	int width = astroImage.getWidth();
-	int height = astroImage.getHeight();
+	FitsPhoto finalPhoto = lowPassPhoto - backgroundFilteredPhoto;
 	
+	std::vector<star> starVector;
+	
+	for (int x = (medianMatrixSize/2) + 2 ; x < width - (medianMatrixSize/2) - 2; ++x)
+		for (int y = (medianMatrixSize/2) + 2; y < height - (medianMatrixSize/2) - 2; ++y)
+		{
+			pixelT pixelValue = finalPhoto(x, y);
+			
+			// Should remove all negative intensity stars, since their "maximum" has
+			// an intensity lower than the average background.
+			if (pixelValue <= 0)
+				continue;
+			
+			// Moves along 8 directions from central pixel and check if other pixels
+			// are lower than central.
+			
+			bool noStar = false;
+			
+			// Checks \ dir
+			for (int px = -2; px <= 2; ++px)
+				if (px != 0)
+					if (pixelValue <= finalPhoto(x + px, y + px))
+						noStar = true;
+			
+			// Checks / dir		
+			for (int px = -2; px <= 2; ++px)
+				if (px != 0)
+					if (pixelValue <= finalPhoto(x + px, y - px))
+						noStar = true;
+					
+					// Checks -- dir
+			for (int subX = -2; subX <= 2; ++subX)
+				if (subX != 0)
+					if (pixelValue <= finalPhoto(x + subX, y))
+						noStar = true;
+					
+			// Checks | dir
+			for (int subY = -2; subY <= 2; ++subY)
+				if (subY != 0)
+					if (pixelValue <= finalPhoto(x, y + subY))
+						noStar = true;
+					
+			if (noStar == true)
+						continue;
+									
+			// If cycle reaches this point, examined pixel must
+			// be the centre of a star, therefore is added to list
+			star starPos(x, y, pixelValue);
+			starVector.push_back(starPos);			// Should probably use emplace?
+												// to construct directly in vector
+												// instead of copying?
+		}
+		
+		// Sorts stars according to intensity
+		std::sort(starVector.begin(), starVector.end());
+		
+		// Throws away all starVector less bright according to threshold
+		pixelT brightestStar = (starVector.end()-1)->intensity;
+		for (std::vector<star>::iterator it = starVector.end()-1; it != starVector.begin()-1; --it)
+			if ((it->intensity / brightestStar) < threshold)
+			{
+				starVector.erase(starVector.begin(), it);
+				break;
+			}
+			
+	// Begins star analysis
+	std::vector<star> processedStarVector;
+			
 	int maxStarRadius = 10;
 	
 	// For each star in vector:
@@ -228,7 +292,7 @@ std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double th
 			if  (xDisplacement < -maxStarRadius)
 				break;
 			
-			pixelT pixelValue = astroImage(xCoord, yCentre);
+			pixelT pixelValue = finalPhoto(xCoord, yCentre);
 			if (pixelValue < 0.)
 				pixelValue = 0.;
 
@@ -257,7 +321,7 @@ std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double th
 			if  (xDisplacement > maxStarRadius)
 				break;
 			
-			pixelT pixelValue = astroImage(xCoord, yCentre);
+			pixelT pixelValue = finalPhoto(xCoord, yCentre);
 			if (pixelValue < 0.)
 				pixelValue = 0.;
 			
@@ -296,7 +360,7 @@ std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double th
 			if  (yDisplacement < -maxStarRadius)
 				break;
 			
-			pixelT pixelValue = astroImage(xCentre, yCoord);
+			pixelT pixelValue = finalPhoto(xCentre, yCoord);
 			if (pixelValue < 0.)
 				pixelValue = 0.;
 			
@@ -325,7 +389,7 @@ std::vector<star> extractStarProfiles(const FitsPhoto& origAstroImage, double th
 			if  (yDisplacement > maxStarRadius)
 				break;
 			
-			pixelT pixelValue = astroImage(xCentre, yCoord);
+			pixelT pixelValue = finalPhoto(xCentre, yCoord);
 			if (pixelValue < 0.)
 				pixelValue = 0.;
 			

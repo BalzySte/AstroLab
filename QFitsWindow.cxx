@@ -69,6 +69,12 @@ void QFitsWindow::open(QString filename)
 	setWindowTitle(_imageTitle);
 	resize(300, 250);
 	show();
+}	void _exportPixmapToFile(QString filename);
+
+
+void QFitsWindow::exportPixmapToFile(QString filename)
+{
+	_imageLabel->pixmap()->toImage().convertToFormat(QImage::Format_ARGB32).save(filename);
 }
 
 
