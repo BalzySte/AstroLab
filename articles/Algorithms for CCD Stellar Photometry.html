@@ -1,0 +1,1668 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!--Converted with LaTeX2HTML 99.1 release (March 30, 1999)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<html><head>
+<title>Algorithms for CCD Stellar Photometry</title>
+<meta name="description" content="Algorithms for CCD Stellar Photometry">
+<meta name="keywords" content="mighellkj">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="Generator" content="LaTeX2HTML v99.1 release">
+<meta http-equiv="Content-Style-Type" content="text/css">
+
+<link rel="STYLESHEET" href="Algorithms%20for%20CCD%20Stellar%20Photometry_files/mighellkj.css">
+
+</head>
+
+<body bgcolor="#FFFFFF">
+<font size="-1"><strong>Next:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/grechnevvv2">Joint Processing of Radio Data Produced by the SSRT Together With Data of Other Spectral Ranges</a> <br>
+<strong>Up:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/Analysis.html">Data Analysis and Processing Techniques</a> <br>
+<strong>Previous:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/puetterrc">The Pixon Method of Image Reconstruction</a> <br>
+<strong>
+<a href="http://www.adass.org/adass/proceedings/adass98/toc.html">Table of Contents</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/index_subj.html">Subject Index</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/index_auth.html">Author Index</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/Search.html">Search</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/reprints/mighellkj.ps.gz">PS reprint</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/reprints/mighellkj.pdf">PDF reprint</a>
+</strong></font><hr><font size="-1"><b>
+Mighell, K. J. 1999, in ASP Conf. Ser., Vol. 172, Astronomical Data 
+Analysis Software and Systems VIII, eds. D. M. Mehringer, R. L. Plante, 
+&amp; D. A. Roberts (San Francisco: ASP), 317
+</b></font><hr>
+
+<!--End of Navigation Panel-->
+
+<p>
+
+</p><p>
+
+</p><p>
+
+</p><p>
+
+</p><p>
+
+</p><p>
+
+</p><p>
+ 
+</p><h1 align="LEFT">Algorithms for CCD Stellar Photometry</h1>
+<strong>Kenneth J. Mighell</strong>
+<br>
+Kitt Peak National Observatory,
+       National Optical Astronomy Observatories,
+       P.O. Box 26732,
+       Tucson, AZ&nbsp;&nbsp;85726-67332<p></p>
+
+<p>
+
+</p><h3>Abstract:</h3>
+<div class="ABSTRACT">          Basic algorithms for the production of stellar photometry from CCD 
+observations are described and reviewed.  
+Simple algorithms for 
+detecting stars,
+finding their positions, 
+and estimating the nearby sky background
+will be presented along with 
+references to the extensive literature devoted to these topics.
+The basic techniques of aperture and PSF-fitting CCD stellar photometry
+are discussed in detail.
+Recent advances in PSF-fitting CCD stellar photometry 
+are described and used to show how
+accurate <span class="MATH"><i>V</i></span>-band stellar photometry with the 
+<i class="slanted"> Next Generation Space Telescope</i>
+could be accomplished with a 8-m primary mirror that is diffraction
+limited at near-infrared wavelengths.
+</div>
+<p>
+
+</p><p>
+
+</p><h3><a name="SECTION00010000000000000000">
+<span class="arabic">1</span>. Introduction to CCD Stellar Photometry</a>
+</h3>
+
+<p>
+The problem of doing accurate stellar photometry with
+calibrated charge-coupled device (CCD) data amounts
+to that of condensing 
+the intensity values of hundreds, thousands, or even
+millions of picture elements (pixels) into a list 
+containing the magnitude and position of each
+star on the CCD image.
+
+</p><p>
+If the stellar field is not crowded, the astronomer
+can measure the magnitude of each star by doing
+the digital equivalent of aperture photometry.
+Stellar photometry becomes much more difficult if one wishes to 
+study crowded stellar fields.
+The basic assumptions underlying the simple techniques of CCD aperture 
+photometry are frequently not valid in crowded stellar
+fields and more sophisticated methods like Point-Spread-Function (PSF) 
+model fitting must be used in order to achieve accurate photometry.
+
+</p><p>
+
+</p><h3><a name="SECTION00020000000000000000">
+<span class="arabic">2</span>. CCD Aperture Stellar Photometry</a>
+</h3>
+
+<p>
+The process of determining the apparent magnitude 
+of a star can be surprisingly complex even with a 
+technique as simple as CCD aperture photometry.
+We start by assuming that our CCD observations 
+have already been flat-fielded and calibrated.
+The basic process of aperture stellar photometry is, 
+in principle, quite simple:
+
+</p><p></p>
+
+<ol>
+<li>Find the star.</li>
+<li>Center an aperture of 
+<span class="MATH"><i>N</i><sub><i>A</i></sub></span>
+pixels on the star.</li>
+<li>Add up the electrons within the aperture: 
+<span class="MATH"><i>S</i><sub><i>A</i></sub></span>&nbsp;(units: electrons e<span class="MATH"><sup>-</sup></span>).</li>
+<li>Determine the nearby background flux: 
+<span class="MATH"><i>B</i></span> &nbsp;(units: e<span class="MATH"><sup>-</sup></span>pixel<span class="MATH"><sup>-1</sup></span>).</li>
+<li>Determine the instrumental magnitude:
+
+<!-- MATH
+ $m^\prime = -2.5\log\left[({S_A - N_AB})/1\,\mbox{e$^-$}\right]$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img4.gif" alt="$m^\prime = -2.5\log\left[({S_A - N_AB})/1\,\mbox{e$^-$}\right]$" border="0" height="34" width="225" align="MIDDLE"></span>.</li>
+<li>Determine the aperture correction: 
+
+<!-- MATH
+ $\Delta m^\prime$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img5.gif" alt="$\Delta m^\prime$" border="0" height="17" width="35" align="BOTTOM"></span> &nbsp;(units: mag).</li>
+<li>Compute the aperture-corrected instrumental magnitude:
+
+<!-- MATH
+ $m = m^\prime + \Delta m^\prime$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img6.gif" alt="$m = m^\prime + \Delta m^\prime$" border="0" height="32" width="104" align="MIDDLE"></span>.</li>
+</ol>
+
+<p></p>
+The important process of transforming instrumental magnitudes to a standard 
+system is extensively described in the literature and will not covered
+in this contribution due to space limitations.
+
+<p>
+
+</p><h3><a name="SECTION00021000000000000000">
+<span class="arabic">2</span>.<span class="arabic">1</span> Finding Stars</a>
+</h3>
+
+<p>
+There are many techniques available for the detection of astronomical
+objects in CCD observations (see, e.g.,
+Fischer &amp; Kochanski 1994,
+Secker 1995,
+and references therein).
+The following is a short introduction
+to some of the techniques that can be used to detect stars in 
+CCD observations.
+
+</p><p>
+The signal of a noisy digital image can frequently be enhanced by
+suppressing high spatial frequency noise in the image.
+For modern CCD stellar observations, this generally means suppressing
+photon and CCD readout noise.
+This can frequently be accomplished by using small digital low-pass
+filters like
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{\bf {LP}}_{3\times3}
+=
+\left(
+\begin{array}{ccc}
+1/16 & 1/8 & 1/16\\
+1/8  & 1/4 & 1/8\\
+1/16 & 1/8 & 1/16
+\end{array}
+\right)
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img7.gif" alt="\begin{displaymath}
+\mbox{\bf {LP}}_{3\times3}
+=
+\left(
+\begin{array}{ccc}
+1/16 ...
+.../16\\
+1/8 &amp; 1/4 &amp; 1/8\\
+1/16 &amp; 1/8 &amp; 1/16
+\end{array}\right)
+\end{displaymath}" border="0" height="59" width="212">
+</div>
+<br clear="ALL">
+<p></p>
+which is commonly used in digital image processing for this purpose.
+Small digital low-pass filters are useful in finding stars
+in digital stellar observations that have had the background sky
+removed (Irwin 1985).
+The background sky of an image can frequently be approximated
+by using small median filters.  Combining low-pass filters with 
+median filters can be very useful; the <small>LPD</small> 
+(low-pass difference) filter,
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{\bf {LPD}}_{3\times3}({\cal F})
+=
+\mbox{\bf {LP}}_{3\times3}({\cal F})
+-
+\mbox{\bf {MEDIAN}}_{5\times5}
+\left[
+\mbox{\bf {LP}}_{3\times3}({\cal F})
+\right]
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img8.gif" alt="\begin{displaymath}
+\mbox{\bf {LPD}}_{3\times3}({\cal F})
+=
+\mbox{\bf {LP}}_{3\t...
+...{5\times5}
+\left[
+\mbox{\bf {LP}}_{3\times3}({\cal F})
+\right]
+\end{displaymath}" border="0" height="27" width="366">
+</div>
+<br clear="ALL">
+<p></p>
+works well with <i class="slanted"> Hubble Space Telescope</i> WF/PC and WFPC2 images,
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img9.gif" alt="${\cal F}$" border="0" height="16" width="17" align="BOTTOM"></span>,
+for the purpose of detecting stars and other point sources
+(Appendix A of Mighell &amp; Rich 1995).
+The <small>LPD</small> filter
+is a high-pass frequency filter which is effectively a digital analog
+of Malin's unsharp photographic masking technique
+(Malin 1977, 1981, and references therein).
+
+<p>
+The following listing, for example,
+is a <small>FORTRAN</small> implementation of a simple peak detector algorithm
+which identifies any pixel that is greater than any of its eight neighbors:
+
+</p><p></p>
+ 
+
+<pre>
+C
+C A Simple Peak Detector Algorithm 
+C
+C Copyleft (L) 1998 Kenneth J. Mighell (Kitt Peak National Observatory)
+C
+      SUBROUTINE PEAKER(IMAGE,NX,NY,PEAKMIN,PEAKMAX)
+      INTEGER NX, NY, X, Y, XX, YY
+      REAL    IMAGE(NX,NY), PEAKMIN, PEAKMAX, PIXEL, NEIGHBOR
+      LOGICAL BINGO
+      DO Y = 2,(NY-1)
+      DO X = 2,(NX-1)
+      PIXEL = IMAGE(X,Y)
+      IF ((PIXEL.GE.PEAKMIN).AND.(PIXEL.LT.PEAKMAX)) THEN
+        BINGO = .TRUE.
+        DO YY = (Y-1),(Y+1)
+        DO XX = (X-1),(X+1)
+          IF (BINGO) THEN
+            NEIGHBOR = IMAGE(XX,YY)
+            IF (NEIGHBOR.GT.PIXEL) THEN
+              BINGO = .FALSE.
+            ELSE IF (NEIGHBOR.EQ.PIXEL) THEN
+              IF ((XX.NE.X).OR.(YY.NE.Y)) THEN
+                IF (((XX.LE.X).AND.(YY.LE.Y))
+     &amp;             .OR.((XX.GT.X).AND.(YY.LT.Y))) BINGO = .FALSE.
+              ENDIF
+            ENDIF
+          ENDIF
+        ENDDO
+        ENDDO
+        IF (BINGO) WRITE (*,*) 
+     &amp; 'Found a peak at position (',X,',',Y,') with a value of',PIXEL
+      ENDIF
+      ENDDO
+      ENDDO
+      RETURN 
+      END
+C23456
+</pre>
+
+This algorithm works particularly well with 
+CCD stellar observations that have had the background sky
+removed (e.g., <small>LPD</small>-filtered images).
+
+<p>
+
+</p><h3><a name="SECTION00022000000000000000">
+<span class="arabic">2</span>.<span class="arabic">2</span> Determining the Centers of Stars</a>
+</h3>
+
+<p>
+Many CCD aperture photometry programs require the user to give 
+the position of the star on the CCD frame.  
+Most of these programs offer a choice of centering 
+algorithms to determine the center of a star when provided with only a
+rough estimate.
+The review article of 
+Stone (1989) 
+compares the 
+performance of five different digital
+centering algorithms under a wide range of atmospheric seeing and 
+background-level conditions.
+It may be useful to create your own centroid algorithm based upon the
+special requirements of your particular analysis problem.  
+The following listing, for example,
+is a <small>FORTRAN</small> implementation of a centroid algorithm
+which produces robust estimates without requiring an estimate of the
+the nearby ``sky'' background:
+
+</p><p></p>
+ 
+
+<pre>
+C
+C A Simple Centroid Algorithm
+C
+C A modification of the Modified Moment Method (Stone 1989,AJ,97,1227)
+C that works well with small apertures.
+C
+C Copyleft (L) 1998 Kenneth J. Mighell (Kitt Peak National Observatory)
+C
+      SUBROUTINE CENTROID(X,Z,NN,N,X_IN,X_OUT)
+      INTEGER          N, NN ! &lt;-- assumes that 1 &lt;= N &lt;= NN
+      REAL             X(NN), Z(NN), X_IN, X_OUT, BIG
+      DOUBLE PRECISION DELTA, SUM1, SUM2, DIFF, XX
+      DOUBLE PRECISION INTENSITY, POSITION, MINIMUM
+      INTEGER          I, J , NITERATIONS
+      PARAMETER        (BIG=1E30,NITERATIONS=10)
+      MINIMUM = BIG
+      DO I = 1,N
+        INTENSITY = Z(I) ! &lt;-- Z(I) is the intensity at the position X(I)
+        MINIMUM = MIN(INTENSITY,MINIMUM)
+      ENDDO
+      XX = X_IN
+      DELTA = 0D0
+      DO J = 1,NITERATIONS
+        XX = XX + DELTA
+        SUM1 = 0D0
+        SUM2 = 0D0
+        DO I = 1,N
+          POSITION = X(I)
+          INTENSITY = Z(I)
+          DIFF = MAX((INTENSITY-MINIMUM),0D0)
+          SUM1 = SUM1 + (POSITION-XX)*DIFF
+          SUM2 = SUM2 + DIFF
+        ENDDO
+        DELTA = SUM1/SUM2
+      ENDDO
+      X_OUT = XX
+      RETURN
+      END
+C23456
+</pre>
+
+<p></p>
+This algorithm is a simplified version of the one used by my
+<a name="tex2html2" href="http://www.noao.edu/staff/mighell/ccdcap/"><small>CCDCAP</small> aperture stellar photometry
+package</a>.
+If precise absolute or relatives positions from CCD observations
+are required, then one should investigate the extensive literature
+dedicated to CCD astrometry.
+
+<p>
+
+</p><h3><a name="SECTION00023000000000000000">
+<span class="arabic">2</span>.<span class="arabic">3</span> Determining the Nearby Background</a>
+</h3>
+
+<p>
+The background (``sky'') flux associated with a star is generally determined 
+by analyzing the distribution of intensities of nearby background pixels.
+In the case of circular aperture photometry, 
+the background flux is typically determined by analyzing the pixels
+in an annulus beyond the stellar aperture.  
+The inner radius of the sky annulus
+is typically several FWHM<a name="tex2html3" href="#foot80"><sup><span class="arabic">1</span></sup></a>distant from the center of the aperture
+in order to avoid the inclusion of contaminating light from the star itself.
+The width of the annulus is typically large enough 
+so that the annulus contains between <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>50 and 
+a few hundred pixels.
+
+</p><p>
+Many aperture photometry programs allow the user to set the
+background flux to be the modal value
+of the background intensity distribution.
+The mode of the background distribution is frequently estimated 
+by using the following useful approximation,
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{mode} 
+\approx
+3\!\times\!\mbox{median} 
+- 
+2\!\times\!\mbox{mean}
+~~~\mbox{(for median$\,\leq\,$mean)}
+,
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img11.gif" alt="\begin{displaymath}
+\mbox{mode}
+\approx
+3\!\times\!\mbox{median}
+-
+2\!\times\!\mbox{mean}
+~~~\mbox{(for median$\,\leq\,$mean)}
+,
+\end{displaymath}" border="0" height="27" width="357">
+</div>
+<br clear="ALL">
+<p></p>
+(Wells 1979; Kendall &amp; Stuart 1958; Haldane 1942; Pearson 1895).
+This approximation, unfortunately, is known to produce
+background estimates that are biased towards higher values
+(e.g., Newberry 1992).
+Better methods for the estimation of the background
+are available.
+Modal estimates of the background distribution 
+<em> after</em>
+the iterative rejection of outlier pixel intensities beyond 2.5-3.0
+standard deviations of the mean generally produce reasonable results
+(Da Costa 1992).  
+
+<p>
+Many algorithms are available and
+most aperture photometry programs offer the user a choice of several
+methods to determine the background flux.
+For example,
+the popular <small>APPHOT</small> aperture photometry <small>IRAF</small> package 
+offers the user the choice of 11 different ways the background can be
+estimated (Davis 1987).
+As always when using analysis software,
+the astronomer is strongly advised to carefully read the user documentation 
+in order to understand which methodology will produce the best results for 
+a given CCD observation or application.
+
+</p><p>
+
+</p><h3><a name="SECTION00024000000000000000">
+<span class="arabic">2</span>.<span class="arabic">4</span> Determining the Stellar Signal within an Aperture</a>
+</h3>
+
+<p>
+The fundamental task of a CCD aperture photometry program
+is to accurately measure all the electrons,
+<span class="MATH"><i>S</i><sub><i>A</i></sub></span>, 
+that fall within an aperture placed on a CCD image.
+Unless the background flux, <span class="MATH"><i>B</i></span>, is exactly zero
+electrons per pixel, one can never directly measure 
+the number of electrons, <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img12.gif" alt="$S_\star$" border="0" height="30" width="20" align="MIDDLE"></span>, from a star within the
+aperture.
+One measures, instead, the quantity
+
+<!-- MATH
+ $S_A = S_\star + N_{\!A} B$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img13.gif" alt="$S_A = S_\star + N_{\!A} B$" border="0" height="30" width="111" align="MIDDLE"></span>,
+where <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img14.gif" alt="$N_{\!A}$" border="0" height="30" width="24" align="MIDDLE"></span> is the aperture of the aperture (in pixels).
+The instrumental magnitude of an
+aperture measurement of a CCD observation of a star
+can thus be defined as
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+m
+\equiv
+-2.5 \log\left[ \frac{S_\star}{1\,\mbox{e$^-$}} \right]
+=
+-2.5 \log\left[ \frac{S_A - N_{\!A} B}{1\,\mbox{e$^-$}} \right]
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img15.gif" alt="\begin{displaymath}
+m
+\equiv
+-2.5 \log\left[ \frac{S_\star}{1\,\mbox{e$^-$}} \ri...
+....5 \log\left[ \frac{S_A - N_{\!A} B}{1\,\mbox{e$^-$}} \right]
+\end{displaymath}" border="0" height="42" width="297">
+</div>
+<br clear="ALL">
+<p></p>
+where the final form on the right is in terms of observable quantities.
+By this definition, a stellar intensity of one electron 
+would have an instrumental magnitude of zero.  
+The estimated error of the instrumental magnitude is approximately
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\Delta m 
+\approx
+1.0857\left[\frac{\Delta S_\star}{S_\star}\right]
+\nonumber
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img16.gif" alt="\begin{displaymath}
+\Delta m
+\approx
+1.0857\left[\frac{\Delta S_\star}{S_\star}\right]
+\nonumber
+\end{displaymath}" border="0" height="42" width="135">
+</div>
+<br clear="ALL">
+<p></p>
+where 
+<!-- MATH
+ $\Delta S_\star$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img17.gif" alt="$\Delta S_\star$" border="0" height="30" width="33" align="MIDDLE"></span> is the measurement error (in electrons) of the
+estimated number of electrons from the star within the aperture.
+
+<p>
+It is clearly important to determine the observable quantities
+<span class="MATH"><i>S</i><sub><i>A</i></sub></span>, <span class="MATH"><i>B</i></span>, and <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img14.gif" alt="$N_{\!A}$" border="0" height="30" width="24" align="MIDDLE"></span> as accurately as possible.
+Let us consider the aperture area, <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img14.gif" alt="$N_{\!A}$" border="0" height="30" width="24" align="MIDDLE"></span>, first.
+If <span class="MATH"><i>a</i><sub><i>j</i></sub></span> is the area of the <span class="MATH"><i>j</i></span>th aperture pixel, then
+the total area of the aperture, <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img14.gif" alt="$N_{\!A}$" border="0" height="30" width="24" align="MIDDLE"></span>, is simply
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+N_{\!A} = \sum_{j = 1}^{A} a_j\ ,
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img18.gif" alt="\begin{displaymath}
+N_{\!A} = \sum_{j = 1}^{A} a_j\ ,
+\end{displaymath}" border="0" height="55" width="86">
+</div>
+<br clear="ALL">
+<p></p>
+where <span class="MATH"><i>A</i></span> indicates that the summation includes all pixels or partial pixels
+within the aperture.
+The area of the <span class="MATH"><i>j</i></span>th aperture pixel will be exactly one pixel
+only when the pixel is completely within the aperture, otherwise
+only a fraction of the pixel lies within the aperture and 
+the value of <span class="MATH"><i>a</i><sub><i>j</i></sub></span> is between zero and one
+(
+<!-- MATH
+ $0\!<\!a_j\!<\!1$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img19.gif" alt="$0\!&lt;\!a_j\!&lt;\!1$" border="0" height="29" width="64" align="MIDDLE"></span> pixel).
+The area of a <em> circular</em> aperture is 
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img20.gif" alt="$A = \pi r^2$" border="0" height="18" width="60" align="BOTTOM"></span> pixels where the radius of the aperture is <span class="MATH"><i>r</i></span> pixels.
+Although it is not difficult to exactly determine the partial pixel
+areas with square pixels and circular apertures (e.g., Fig. <a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#Fig-T6.1-1">1</a>),
+several standard CCD aperture photometry programs
+only approximate the partial pixel areas.  
+For example, 
+the popular <small>PHOT</small> task of the 
+<small>APPHOT</small> package 
+approximates the circular aperture by an irregular polygon (Davis 1987).
+While this approximation is generally fine with large apertures,
+it can sometimes produce large systematic measurement errors for 
+small aperture radii.
+
+<p>
+
+</p><p></p>
+<div align="CENTER"><a name="Fig-T6.1-1"></a><a name="363"></a>
+<table>
+<caption align="BOTTOM"><strong>Figure 1:</strong>
+A circular aperture on an array of square CCD pixels.
+The <em> black</em> pixels are entirely within the aperture 
+and the <em> gray</em> 
+pixels are only partially within the aperture.</caption>
+<tbody><tr><td><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img21.gif" alt="\begin{figure}
+\epsscale{0.4}
+\plotone{mighellkj1.eps}
+\end{figure}" border="0" height="308" width="296"></td></tr>
+</tbody></table>
+</div><p></p>
+
+<p>
+Let us now consider the sum of all electrons within the aperture (<span class="MATH"><i>S</i><sub><i>A</i></sub></span>).
+If <span class="MATH"><i>z</i><sub><i>j</i></sub></span> is the intensity (in electrons) of the <span class="MATH"><i>j</i></span>th aperture pixel,
+then one simple approximation of <span class="MATH"><i>S</i><sub><i>A</i></sub></span> is
+<br>
+</p><div class="mathdisplay" align="RIGHT">
+
+
+<!-- MATH
+ \begin{equation}
+S_A = \sum_{j = 1}^{A} a_jz_j\ .
+\end{equation}
+ -->
+<a name="badvol"></a>
+<table width="100%" align="CENTER">
+<tbody><tr valign="MIDDLE"><td nowrap="nowrap" align="CENTER"><a name="badvol"></a><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img22.gif" alt="\begin{displaymath}
+S_A = \sum_{j = 1}^{A} a_jz_j\ .
+\end{displaymath}" border="0" height="55" width="98"></td>
+<td class="eqno" width="10" align="RIGHT">
+(<span class="arabic">1</span>)</td></tr>
+</tbody></table>
+<br clear="ALL"></div><p></p>
+This approximation linearly weights the pixel intensity
+with the area of the pixel within the aperture.
+The <small>PHOT</small> task uses a linear pixel weighting
+algorithm that is very similar to this approximation.
+The use of Equation (<a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#badvol">1</a>) implicitly assumes that
+the Point Spread Function is nearly flat at the
+edge of the aperture.
+The PSF is generally nearly flat only at large distances from the center
+of a star where the encircled-energy function is nearly equal to one 
+(i.e., 100%).
+The use of Equation (<a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#badvol">1</a>) is thus generally appropriate for large
+aperture radii.
+Wherever the PSF is a rapidly changing function of radius
+(e.g., at small radii of seeing-optimized CCD observations)
+the use of Equation (<a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#badvol">1</a>) is likely to
+produce large systematic measurement errors.
+
+<p>
+One way of reducing this systematic measurement error is to
+split each pixel into subpixels by using a bilinear pixel
+interpolation algorithm.  One such algorithm is to use the
+two-dimensional analog of the sinc function: <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img23.gif" alt="$J_1(\pi r)/2r$" border="0" height="32" width="71" align="MIDDLE"></span>.
+This function, like many others, has the unfortunate effect
+of degrading the original image by spreading photons (electrons)
+beyond the original pixel.  
+I created created the 
+<small>QUADPX</small>
+bilinear pixel interpolation
+algorithm which splits
+a pixel into 4 subpixels whose sum is always equal to that
+of the original pixel (Appendix B of Mighell &amp; Rich 1995).
+Numerical experiments have shown that using the <small>QUADPX</small> algorithm
+can reduce the systematic measurement error of
+critically-sampled Gaussians 
+by a factor of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>6.
+For example, the photometric error of an aperture radius
+of 2.0 pixels went from 0.068 mag using Equation (<a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#badvol">1</a>) to
+0.011 mag with the <small>CCDCAP</small> package which implements the <small>QUADPX</small> 
+algorithm.
+
+</p><p>
+
+</p><h3><a name="SECTION00025000000000000000">
+<span class="arabic">2</span>.<span class="arabic">5</span> Optimal Aperture Size and Aperture Corrections</a>
+</h3>
+
+<p>
+The best (smallest) stellar photometric errors 
+(i.e.,&nbsp;the largest signal-to-noise ratios)
+are generally obtained with relatively small apertures 
+(see, e.g., Fig. 6 of Howell 1989).
+Analysis of theoretical CCD signal-to-noise-ratio equations
+(see, e.g., 
+Newberry 1991,
+Howell 1992,
+Merline &amp; Howell 1995, 
+Howell <i> et al.</i> 1996,
+and references therein)
+shows that large apertures can have large photometric errors
+when the the total number of stellar photons in the aperture
+becomes comparable with the total number of background photons
+in the aperture.
+Furthermore, 
+a measurement error for the background flux
+as small as just 1 electron per pixel can by itself produce
+large photometric uncertainties at large aperture radii.
+Small apertures, however, can be <em> too</em> small when they allow such 
+a small fraction of the star light to be found within the aperture
+that the photometric error becomes dominated by
+small-number (a.k.a. counting or Poisson) statistics 
+because little or no signal has been measured.
+
+</p><p>
+A Gaussian is a good model for
+the Point Spread Function of a ground-based CCD observation
+since the central core of a ground-based stellar profile is approximately
+Gaussian (King 1971).
+One can easily show that the optimum signal-to-noise ratio
+for a Gaussian PSF is obtained for a circular aperture radius of 
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>1.6<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img24.gif" alt="$\sigma$" border="0" height="15" width="14" align="BOTTOM"></span> 
+(i.e.,&nbsp;
+<!-- MATH
+ $r \approx 0.68\,$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img25.gif" alt="$r \approx 0.68\,$" border="0" height="15" width="62" align="BOTTOM"></span>FWHM)
+which contains about 72% of the encircled-energy.
+Pritchet &amp; Kline (1981) note that 
+the signal-to-noise ratio is fairly insensitive to radius near the 
+``optimal'' radius value <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>1.6<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img26.gif" alt="$\,\sigma$" border="0" height="15" width="16" align="BOTTOM"></span> for a Gaussian PSF;  
+deviations from the optimal radius by as much as 
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img27.gif" alt="$\pm$" border="0" height="29" width="16" align="MIDDLE"></span>50% generally make little difference.
+Since centering errors will be more critical for smaller apertures
+than for larger apertures, it is only prudent to err on the larger side by
+using apertures with radii which are larger than 
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>0.68<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img28.gif" alt="$\,$" border="0" height="16" width="7" align="BOTTOM"></span>FWHM.
+
+</p><p>
+An aperture radius of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img29.gif" alt="$r\approx\,$" border="0" height="15" width="30" align="BOTTOM"></span>FWHM makes an excellent practical
+compromise between concerns about systematic centering errors and 
+diminishing signal-to-noise ratios typically obtained
+with larger aperture radii.
+By analyzing the CCD signal-to-noise ratio equations, one can show that
+brighter stars will have larger optimal aperture sizes than do 
+fainter stars.  
+If one must use only one aperture size, then it is
+clearly advantageous to chose a global aperture size which produces
+the smallest photometric errors for the faintest stars
+(i.e.,&nbsp;use <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img29.gif" alt="$r\approx\,$" border="0" height="15" width="30" align="BOTTOM"></span>FWHM).
+
+</p><p>
+Small apertures frequently do not contain all the flux from a star.
+The amount of the missing star light can found by determining 
+the appropriate aperture correction by measuring nearby bright isolated stars.
+Howell (1989) and Stetson (1990),
+among others,
+describe the process how aperture corrections
+can be accurately determined using the aperture growth-curve method.
+
+</p><p>
+
+</p><h3><a name="SECTION00030000000000000000">
+<span class="arabic">3</span>. CCD PSF-Fitting Stellar Photometry</a>
+</h3>
+
+<p>
+Consider a ground-based CCD
+observation of two stars whose stellar images overlap.
+Assuming we already know the Point Spread Function of the observation,
+a simple model of the observation will have seven parameters:
+peak intensities <span class="MATH">(<i>I</i><sub>1</sub>,<i>I</i><sub>2</sub>)</span>,
+positions 
+<!-- MATH
+ $(X_1,Y_1,X_2,Y_2)$
+ -->
+<span class="MATH">(<i>X</i><sub>1</sub>,<i>Y</i><sub>1</sub>,<i>X</i><sub>2</sub>,<i>Y</i><sub>2</sub>)</span>,
+and the background sky level <span class="MATH"><i>B</i></span> which is assumed to be the
+same for both component images.
+One finds that the parameters are not independent for overlapping
+stars with the presence of photon and readout noise.
+The conservation of photon flux will require that if <span class="MATH"><i>I</i><sub>1</sub></span> increases
+then <span class="MATH"><i>I</i><sub>2</sub></span> must decrease and vice versa for a given value of <span class="MATH"><i>B</i></span>.
+The most accurate photometry possible is obtained when
+these dependent parameters
+are fitted simultaneously.  Any reasonable model of two overlapping
+stellar images will be a non-linear function when the positions and 
+peak intensities are to be determined simultaneously.  The technique
+of non-linear least-squares fitting was developed to provide for
+the simultaneous determination of dependent or independent
+parameters of non-linear model functions.
+
+</p><p>
+Assume that we
+have a calibrated CCD observation with <span class="MATH"><i>N</i></span> pixels
+and that <span class="MATH"><i>z</i><sub><i>i</i></sub></span>
+is the intensity in electrons (e<span class="MATH"><sup>-</sup></span>)
+of the <span class="MATH"><i>i</i></span>th pixel at <span class="MATH">(<i>x</i><sub><i>i</i></sub>,<i>y</i><sub><i>i</i></sub>)</span> with an error
+of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img30.gif" alt="$\sigma_i$" border="0" height="29" width="18" align="MIDDLE"></span>.  Let 
+
+<!-- MATH
+ $\mbox{\em {model}}( x, y,;$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img31.gif" alt="$\mbox{\em {model}}( x, y,;$" border="0" height="32" width="83" align="MIDDLE"></span><span class="MATH"><i>a</i><sub>1</sub>,</span><span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img32.gif" alt="$\ldots,$" border="0" height="29" width="29" align="MIDDLE"></span><span class="MATH"><i>a</i><sub><i>M</i></sub>)</span>
+be a model of the intensity values that has two coordinates
+<span class="MATH">(<i>x</i>,<i>y</i>)</span> and <span class="MATH"><i>M</i></span> parameters.
+For notational convenience, let the vector 
+ <span class="BOLDMATH"><i>r</i></span><span class="BOLDMATH"><sub><i>i</i></sub></span> represent the coordinates <span class="BOLDMATH">(<i>x</i><sub><i>i</i></sub>,<i>y</i><sub><i>i</i></sub>)</span>
+and the vector  <span class="BOLDMATH"><i>a</i></span> represent all the parameters
+[i.e.,&nbsp;
+<!-- MATH
+ $\mbox{\boldmath$a$}\equiv (a_1,\ldots,a_M)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img33.gif" alt="$\mbox{\boldmath$a$}\equiv (a_1,\ldots,a_M)$" border="0" height="32" width="116" align="MIDDLE"></span>].
+Thus the model of intensities will normally be written as
+
+<!-- MATH
+ $\mbox{\em {model}}(\mbox{\boldmath$r$}_i;\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img34.gif" alt="$\mbox{\em {model}}(\mbox{\boldmath$r$}_i;\mbox{\boldmath$a$})$" border="0" height="32" width="85" align="MIDDLE"></span>.
+
+</p><p>
+The measure of the goodness of fit between the
+data and the model, called chi-square,
+is defined as
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{$\chi^2(\mbox{\boldmath$a$})$}\equiv \sum_{i=1}^{N}
+\frac{1}{\sigma_i^2}
+[z_i - \mbox{\em {model}}(\mbox{\boldmath$r$}_i;\mbox{\boldmath$a$})]^2\ \ .
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img35.gif" alt="\begin{displaymath}
+\mbox{$\chi^2(\mbox{\boldmath$a$})$}\equiv \sum_{i=1}^{N}
+\f...
+...em {model}}(\mbox{\boldmath$r$}_i;\mbox{\boldmath$a$})]^2\ \ .
+\end{displaymath}" border="0" height="53" width="240">
+</div>
+<br clear="ALL">
+<p></p>
+The theory of least squares states that the optimum
+value of the parameter vector  <span class="BOLDMATH"><i>a</i></span> 
+is obtained when 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img36.gif" alt="$\chi^2(\mbox{\boldmath$a$})$" border="0" height="34" width="42" align="MIDDLE"></span> 
+is minimized with respect to each parameter simultaneously.
+If the function 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img36.gif" alt="$\chi^2(\mbox{\boldmath$a$})$" border="0" height="34" width="42" align="MIDDLE"></span> is thought of as a surface in the <span class="BOLDMATH"><i>M</i></span>-dimensional
+parameter space and if 
+<!-- MATH
+ $\mbox{\boldmath$a$}_{\mbox{true}}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img37.gif" alt="$\mbox{\boldmath$a$}_{\mbox{true}}$" border="0" height="29" width="42" align="MIDDLE"></span>
+is defined as the optimal parameter vector, then the
+absolute minimum of that surface is 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$}_{\mbox{true}})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img38.gif" alt="$\chi^2(\mbox{\boldmath$a$}_{\mbox{true}})$" border="0" height="34" width="70" align="MIDDLE"></span>.
+The surface of the function 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img36.gif" alt="$\chi^2(\mbox{\boldmath$a$})$" border="0" height="34" width="42" align="MIDDLE"></span> might be very complicated and the 
+fitting algorithm must be able to converge to believable solutions (answers)
+even in ill-defined situations.
+
+<p>
+For some small correction parameter vector 
+<!-- MATH
+ $\mbox{\boldmath$\delta$}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img39.gif" alt="$\mbox{\boldmath$\delta$}$" border="0" height="17" width="13" align="BOTTOM"></span>
+we can approximate 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img40.gif" alt="$\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})$" border="0" height="34" width="70" align="MIDDLE"></span> by its Taylor series
+expansion:
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})
+=
+\sum_{n=0}^{\infty}
+\frac{1}{n!}(\mbox{\boldmath$\delta$}\cdot \nabla)^n \mbox{$\chi^2(\mbox{\boldmath$a$})$}
+\approx
+\mbox{$\chi^2(\mbox{\boldmath$a$})$}
++ \mbox{\boldmath$\delta$}\cdot \nabla\mbox{$\chi^2(\mbox{\boldmath$a$})$}
++ \frac{1}{2} \, \mbox{\boldmath$\delta$}\cdot \mbox{\boldmath$H$}\cdot \mbox{\boldmath$\delta$}
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img41.gif" alt="\begin{displaymath}
+\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})
+=
+\sum_...
+...delta$}\cdot \mbox{\boldmath$H$}\cdot \mbox{\boldmath$\delta$}
+\end{displaymath}" border="0" height="50" width="452">
+</div>
+<br clear="ALL">
+<p></p>
+where
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+[H]_{jk} \equiv \frac{\partial^2\,\mbox{$\chi^2(\mbox{\boldmath$a$})$}}{\partial a_j \partial a_k}
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img42.gif" alt="\begin{displaymath}[H]_{jk} \equiv \frac{\partial^2\,\mbox{$\chi^2(\mbox{\boldmath$a$})$}}{\partial a_j \partial a_k}
+\end{displaymath}" border="0" height="46" width="112">
+</div>
+<br clear="ALL">
+<p></p>
+the <span class="BOLDMATH"><i>jk</i></span>th element of the
+<span class="BOLDMATH"><i>M</i></span><span class="BOLDMATH"> x </span><span class="BOLDMATH"><i>M</i></span> Hessian matrix  <span class="BOLDMATH"><i>H</i></span> of 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img36.gif" alt="$\chi^2(\mbox{\boldmath$a$})$" border="0" height="34" width="42" align="MIDDLE"></span> 
+[see, e.g., Arfken 1970; Press  et al. 1986].
+If 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img40.gif" alt="$\chi^2(\mbox{\boldmath$a$}+\mbox{\boldmath$\delta$})$" border="0" height="34" width="70" align="MIDDLE"></span> is a local minimum of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img43.gif" alt="$\chi^2$" border="0" height="34" width="21" align="MIDDLE"></span>, then it
+can be shown that 
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{\boldmath$H$}\cdot \mbox{\boldmath$\delta$}= -\nabla\mbox{$\chi^2(\mbox{\boldmath$a$})$}\ .
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img44.gif" alt="\begin{displaymath}
+\mbox{\boldmath$H$}\cdot \mbox{\boldmath$\delta$}= -\nabla\mbox{$\chi^2(\mbox{\boldmath$a$})$}\ .
+\end{displaymath}" border="0" height="27" width="127">
+</div>
+<br clear="ALL">
+<p></p>
+By solving this equation for the correction vector  <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img45.gif" alt="$\delta$" border="0" height="17" width="12" align="BOTTOM"></span> 
+it is then possible to determine a better parameter vector
+
+<!-- MATH
+ $\mbox{\boldmath$a$}_{\mbox{new}} = \mbox{\boldmath$a$}_{\mbox{old}} + \mbox{\boldmath$\delta$}\ .$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img46.gif" alt="$
+\mbox{\boldmath$a$}_{\mbox{new}} = \mbox{\boldmath$a$}_{\mbox{old}} + \mbox{\boldmath$\delta$}\ .
+$" border="0" height="30" width="129" align="MIDDLE"></span>
+When the parameter vector ( <span class="BOLDMATH"><i>a</i></span>) is redefined to be the better
+parameter (
+<!-- MATH
+ $\mbox{\boldmath$a$}_{\mbox{new}}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img47.gif" alt="$\mbox{\boldmath$a$}_{\mbox{new}}$" border="0" height="29" width="41" align="MIDDLE"></span>), the Hessian matrix and the
+gradient of 
+<!-- MATH
+ $\chi^2(\mbox{\boldmath$a$})$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img36.gif" alt="$\chi^2(\mbox{\boldmath$a$})$" border="0" height="34" width="42" align="MIDDLE"></span> can then be recalculated to
+determine a new correction vector ( <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img45.gif" alt="$\delta$" border="0" height="17" width="12" align="BOTTOM"></span>).
+This process repeats until  <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img45.gif" alt="$\delta$" border="0" height="17" width="12" align="BOTTOM"></span> is sufficiently small.
+The final parameter vector is called the optimal parameter vector,
+
+<!-- MATH
+ $\mbox{\boldmath$a$}_0$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img48.gif" alt="$\mbox{\boldmath$a$}_0$" border="0" height="29" width="21" align="MIDDLE"></span>, and should be very close to the optimal parameter 
+vector (
+<!-- MATH
+ $\mbox{\boldmath$a$}_{\mbox{true}}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img37.gif" alt="$\mbox{\boldmath$a$}_{\mbox{true}}$" border="0" height="29" width="42" align="MIDDLE"></span>)
+if the fit is good.
+
+<p>
+This method will find the absolute minimum of 
+<!-- MATH
+ $\mbox{$\chi^2(\mbox{\boldmath$a$})$}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img49.gif" alt="$\mbox{$\chi^2(\mbox{\boldmath$a$})$}$" border="0" height="34" width="42" align="MIDDLE"></span> if the original
+guess 
+<!-- MATH
+ $\mbox{\boldmath$a$}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img50.gif" alt="$\mbox{\boldmath$a$}$" border="0" height="15" width="14" align="BOTTOM"></span> is near 
+<!-- MATH
+ $\mbox{\boldmath$a$}_{\mbox{true}}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img37.gif" alt="$\mbox{\boldmath$a$}_{\mbox{true}}$" border="0" height="29" width="42" align="MIDDLE"></span>.
+Unfortunately, the original guess of the parameter vector 
+<!-- MATH
+ $\mbox{\boldmath$a$}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img50.gif" alt="$\mbox{\boldmath$a$}$" border="0" height="15" width="14" align="BOTTOM"></span>
+may not always be very good.  For production stellar photometry software  
+it is important that the search
+for the absolute minimum of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img43.gif" alt="$\chi^2$" border="0" height="34" width="21" align="MIDDLE"></span> be both robust
+and efficient.
+
+</p><p>
+
+</p><h3><a name="SECTION00031000000000000000">
+<span class="arabic">3</span>.<span class="arabic">1</span> Analytical Models</a>
+</h3>
+
+<p>
+One can frequently create a realistic intensity model of a ground-based CCD
+observation of a total of <span class="BOLDMATH"><i>K</i></span> stars on a non-flat background with
+a combination of Moffat (1969) functions on a tilted plane:
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img51.gif" alt="\begin{eqnarray*}
+\mbox{\em {model}}(\mbox{\boldmath$r$};\mbox{\boldmath$a$})
+&amp;\...
+...&amp;\equiv
+&amp;B_0 + B_Xx + B_Yy +
+\sum_{k=1}^{K} I_k \mbox{$\Psi$}_k
+\end{eqnarray*}" border="0" height="79" width="509">
+</div><p></p>
+<br clear="ALL">
+where the
+<span class="BOLDMATH"><i>B</i><sub>0</sub>, <i>B</i><sub><i>X</i></sub>, <i>B</i><sub><i>Y</i></sub></span> terms describe the tilted-plane model of the background
+and <span class="BOLDMATH"><i>I</i><sub><i>k</i></sub></span> is the intensity of the <span class="BOLDMATH"><i>k</i></span>th star which has a Point Spread Function
+of
+<br>
+<div class="mathdisplay" align="RIGHT">
+
+
+<!-- MATH
+ \begin{equation}
+\mbox{$\Psi$}_k
+\equiv
+\int_{x-0.5}^{x+0.5}
+\int_{y-0.5}^{y+0.5}
+\left[
+1+
+\left\{
+\frac{(x-X_k)^2 + (y-Y_k)^2}{\rho_k^2}
+\right\}
+\right]^{-\tau_k}
+\mbox{d}y
+\ 
+\mbox{d}x
+~.
+\end{equation}
+ -->
+<a name="eq:moffat_integral"></a>
+<table width="100%" align="CENTER">
+<tbody><tr valign="MIDDLE"><td nowrap="nowrap" align="CENTER"><a name="eq:moffat_integral"></a><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img52.gif" alt="\begin{displaymath}
+\mbox{$\Psi$}_k
+\equiv
+\int_{x-0.5}^{x+0.5}
+\int_{y-0.5}^{y+...
+...\rho_k^2}
+\right\}
+\right]^{-\tau_k}
+\mbox{d}y
+\
+\mbox{d}x
+~.
+\end{displaymath}" border="0" height="52" width="421"></td>
+<td class="eqno" width="10" align="RIGHT">
+(<span class="arabic">2</span>)</td></tr>
+</tbody></table>
+<br clear="ALL"></div><p></p>
+The partial derivatives of 
+<!-- MATH
+ $\mbox{\em {model}}(r;a)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img53.gif" alt="$\mbox{\em {model}}(r;a)$" border="0" height="32" width="77" align="MIDDLE"></span> must now be determined:
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial B_0}
+= 1,~~~
+\frac{\partial \mbox{\em {model}}}{\partial B_X}
+=
+x,~~~
+\frac{\partial \mbox{\em {model}}}{\partial B_Y}
+=
+y,~~~
+\frac{\partial \mbox{\em {model}}}{\partial I_k}
+=
+\mbox{$\Psi$}_k,
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img54.gif" alt="\begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial B_0}
+= 1,~~~
+\fr...
+...{\partial \mbox{\em {model}}}{\partial I_k}
+=
+\mbox{$\Psi$}_k,
+\end{displaymath}" border="0" height="42" width="396">
+</div>
+<br clear="ALL">
+<p></p>
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial X_k}
+=
+I_k \frac{\partial \mbox{$\Psi$}_k}{\partial X_k},~~
+\frac{\partial \mbox{\em {model}}}{\partial Y_k}
+=
+I_k \frac{\partial \mbox{$\Psi$}_k}{\partial Y_k},~~
+\frac{\partial \mbox{\em {model}}}{\partial \rho_k}
+=
+I_k \frac{\partial \mbox{$\Psi$}_k}{\partial \rho_k},~~
+\frac{\partial \mbox{\em {model}}}{\partial \tau_k}
+=
+I_k \frac{\partial \mbox{$\Psi$}_k}{\partial \tau_k}.
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img55.gif" alt="\begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial X_k}
+=
+I_k \frac...
+...tau_k}
+=
+I_k \frac{\partial \mbox{$\Psi$}_k}{\partial \tau_k}.
+\end{displaymath}" border="0" height="42" width="519">
+</div>
+<br clear="ALL">
+<p></p>
+If the PSF, 
+<!-- MATH
+ $\mbox{$\Psi$}_k$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img56.gif" alt="$\mbox{$\Psi$}_k$" border="0" height="30" width="23" align="MIDDLE"></span>, does not have a general analytical solution, 
+it can usually be approximated numerically.
+For example, if we subdivide a pixel into <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img57.gif" alt="$\eta^2$" border="0" height="34" width="19" align="MIDDLE"></span> subpixels,
+then Equation (<a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#eq:moffat_integral">2</a>)
+can be approximated as 
+
+<!-- MATH
+ $\mbox{$\Psi$}_k \approx \mbox{$\gamma_k^{-\tau_k}$}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img58.gif" alt="$\mbox{$\Psi$}_k \approx \mbox{$\gamma_k^{-\tau_k}$}$" border="0" height="37" width="74" align="MIDDLE"></span>
+where
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\mbox{$\gamma_k^{-\tau_k}$}
+\equiv
+\!\!\frac{1}{\eta^2}
+\sum_{i=1}^{\eta}
+\sum_{j=1}^{\eta}
+\left[
+1
+\!
++
+\!
+\left\{
+\frac{
+([x-\xi+\eta^{-1}i]-\!X_k)^2 
++
+([y-\xi+\eta^{-1}j]-\!Y_k)^2 
+}{\rho_k^2}
+\right\}
+\right]^{-\tau_k}
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img59.gif" alt="\begin{displaymath}
+\mbox{$\gamma_k^{-\tau_k}$}
+\equiv
+\!\!\frac{1}{\eta^2}
+\sum...
+...i+\eta^{-1}j]-\!Y_k)^2
+}{\rho_k^2}
+\right\}
+\right]^{-\tau_k}
+\end{displaymath}" border="0" height="56" width="503">
+</div>
+<br clear="ALL">
+<p></p>
+and 
+<!-- MATH
+ $\xi\equiv(\eta+1)/(2\eta)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img60.gif" alt="$\xi\equiv(\eta+1)/(2\eta)$" border="0" height="32" width="114" align="MIDDLE"></span>.
+The new partial derivatives of 
+<!-- MATH
+ $\mbox{\em {model}}(r;a)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img53.gif" alt="$\mbox{\em {model}}(r;a)$" border="0" height="32" width="77" align="MIDDLE"></span> can now be determined as follows
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial I_k}
+\approx
+\mbox{$\gamma_k^{-\tau_k}$},~~~
+\frac{\partial \mbox{\em {model}}}{\partial X_k}
+\approx
+\frac{2 I_k \tau_k}{\rho_k^2} \frac{(x-X_k)}{\gamma_k^{\tau_k+1}},~~~
+\frac{\partial \mbox{\em {model}}}{\partial Y_k}
+\approx
+\frac{2 I_k \tau_k}{\rho_k^2} \frac{(y-Y_k)}{\gamma_k^{\tau_k+1}},
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img61.gif" alt="\begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial I_k}
+\approx
+\mb...
+...c{2 I_k \tau_k}{\rho_k^2} \frac{(y-Y_k)}{\gamma_k^{\tau_k+1}},
+\end{displaymath}" border="0" height="47" width="488">
+</div>
+<br clear="ALL">
+<p></p>
+<br><p></p>
+<div class="mathdisplay" align="CENTER">
+
+<!-- MATH
+ \begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial \rho_k}
+\approx
+\frac{2 I_k \tau_k}{\rho_k^3} 
+\frac{[(x-X_k)^2+(y-Y_k)^2]}{\gamma_k^{\tau_k+1}},~~~
+\frac{\partial \mbox{\em {model}}}{\partial \tau_k}
+\approx
+-I_k \mbox{$\gamma_k^{-\tau_k}$}\ln(\gamma_k)\,.
+\end{displaymath}
+ -->
+
+
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img62.gif" alt="\begin{displaymath}
+\frac{\partial \mbox{\em {model}}}{\partial \rho_k}
+\approx
+...
+...au_k}
+\approx
+-I_k \mbox{$\gamma_k^{-\tau_k}$}\ln(\gamma_k)\,.
+\end{displaymath}" border="0" height="48" width="463">
+</div>
+<br clear="ALL">
+<p></p>
+Simulations and practical experience 
+has demonstrated that the 
+<!-- MATH
+ $\gamma_k^{-\tau_k}$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img63.gif" alt="$\gamma_k^{-\tau_k}$" border="0" height="37" width="35" align="MIDDLE"></span> approximation
+with the Levenberg-Marquardt method of non-linear least squares
+(Levenberg 1944, 
+Marquardt 1963)
+produces accurate and precise CCD stellar photometry
+(Mighell 1989, 1990).
+
+<p>
+
+</p><h3><a name="SECTION00032000000000000000">
+<span class="arabic">3</span>.<span class="arabic">2</span> Digital Models</a>
+</h3>
+
+<p>
+One can create a realistic intensity model of a
+<i class="slanted"> Hubble Space Telescope</i> (<i class="slanted"> HST</i>)
+CCD observation of <span class="BOLDMATH"><i>K</i></span> stars on a non-flat background with
+a combination of 
+<em> digital</em> Point Spread Functions
+on a tilted plane:
+<br></p><p></p>
+<div class="mathdisplay" align="CENTER">
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img64.gif" alt="\begin{eqnarray*}
+\mbox{\em {model}}(\mbox{\boldmath$r$};\mbox{\boldmath$a$})
+&amp;\...
+...v
+&amp;B_0 + B_Xx + B_Yy +
+\sum_{k=1}^{K}
+I_k \Psi_k (x-X_k,y-Y_k)
+\end{eqnarray*}" border="0" height="79" width="505">
+</div><p></p>
+<br clear="ALL">
+where the
+<span class="BOLDMATH"><i>B</i><sub>0</sub>, <i>B</i><sub><i>X</i></sub>, <i>B</i><sub><i>Y</i></sub></span> terms describe the tilted-plane model of the background
+and <span class="BOLDMATH"><i>I</i><sub><i>k</i></sub></span> is the intensity of the <span class="BOLDMATH"><i>k</i></span>th star which has a
+digital PSF, <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img65.gif" alt="$\Psi_k$" border="0" height="30" width="23" align="MIDDLE"></span>,
+that is represented with matrix of numbers with a sum of one.
+If the <span class="BOLDMATH"><i>k</i></span>th star is isolated and on a flat background, then 
+the digital PSF, 
+<!-- MATH
+ $\mbox{$\Psi$}_k$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img56.gif" alt="$\mbox{$\Psi$}_k$" border="0" height="30" width="23" align="MIDDLE"></span>, can be easily derived from the actual image.
+Alternatively, 
+<!-- MATH
+ $\mbox{$\Psi$}_k$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img56.gif" alt="$\mbox{$\Psi$}_k$" border="0" height="30" width="23" align="MIDDLE"></span> could be a synthetic PSF computed
+by PSF modeling software
+[e.g., the <a name="tex2html6" href="ftp://ftp.stsci.edu/pub/software/tinytim/"><small>TINY TIM</small> package</a>
+of Krist (1993, Krist &amp; Hook 1997)].
+With a digital PSF in hand, one can then easily determine the
+partial derivatives with respect to <span class="BOLDMATH"><i>x</i></span> and <span class="BOLDMATH"><i>y</i></span>
+using standard numerical differentiation techniques (see Fig. <a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#Fig-T6.1-2">2</a>).
+The art of CCD photometry with digital Point Spread Functions
+lies in the implementation details.
+While the mathematics is the same as for the case of analytical PSFs,
+the software engineering issues are significantly more challenging. 
+
+<p>
+
+</p><p></p>
+<div align="CENTER"><a name="Fig-T6.1-2"></a><a name="406"></a>
+<table>
+<caption align="BOTTOM"><strong>Figure 2:</strong>
+Typical Point Spread Functions (<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img1.gif" alt="$\Psi $" border="0" height="16" width="16" align="BOTTOM"></span>) of the 
+<i class="slanted">Hubble Space Telescope</i> WFPC2 <em>(left)</em> and WF/PC
+<em>(right)</em> instruments (M star, F555W filter) and their respective
+partial derivatives with respect to the directions <span class="BOLDMATH"><i>x</i></span> 
+<!-- MATH
+ $(\partial \Psi
+/ \partial x)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img2.gif" alt="$(\partial \Psi / \partial x)$" border="0" height="32" width="63" align="MIDDLE"></span> and <span class="BOLDMATH"><i>y</i></span> 
+<!-- MATH
+ $(\partial \Psi / \partial y)$
+ -->
+<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img3.gif" alt="$(\partial \Psi / \partial y)$" border="0" height="32" width="62" align="MIDDLE"></span>.  These PSFs
+were synthesized using <small>TINY TIM </small><small class="FOOTNOTESIZE"><small>VERSION
+4.0B</small></small> (Krist 1994).</caption>
+<tbody><tr><td><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img66.gif" alt="\begin{minipage}[h]{\textwidth} %5.25truein\}
+\vspace*{-105truemm}
+\hspace*{-5...
+...textwidth}
+{\bf {\hskip 26truemm}{WFPC2}{\hskip 49truemm}{WF/PC}}
+\end{minipage}" border="0" height="257" width="504" align="BOTTOM"></td></tr>
+</tbody></table>
+</div><p></p>
+
+<p>
+
+</p><h3><a name="SECTION00033000000000000000">
+<span class="arabic">3</span>.<span class="arabic">3</span> Recent Advances</a>
+</h3>
+
+<p>
+Traditional PSF-fitting CCD photometric reduction packages like 
+<small>DAOPHOT</small>
+(Stetson 1987) use analytical functions to represent the Point Spread Function.
+All the major partial derivative
+computations are computed on the analytical model of the PSF.
+Any deviations of the real-world PSF from the analytical PSF
+are then generally stored in a residual matrix which is only used
+to determine the <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img43.gif" alt="$\chi^2$" border="0" height="34" width="21" align="MIDDLE"></span> goodness-of-fit.
+
+</p><p>
+I have recently demonstrated the feasibility
+of doing accurate CCD stellar photometry with 
+digital Point Spread Functions.
+I have developed a new digital PSF-fitting algorithm which
+does not require a residual matrix because
+all partial derivative computations are done on the digital
+PSF itself using standard numerical differentiation 
+techniques.
+This algorithm has
+already passed the proof-of-principle stage
+with the successful
+reduction of simulated 
+<i class="slanted"> Next Generation Space Telescope</i> 
+<i class="slanted"> (NGST)</i> 
+CCD stellar observations (see Fig. <a href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#Fig-T6.1-3">3.</a>).
+
+</p><p>
+I investigated the performance of CCD stellar
+photometry with a 1.5-micron diffraction-limited 8-m Next Generation Space
+Telescope. These simulations used artificial Point Spread Functions for
+three different 8-m NGST design concepts which were kindly provided by John
+Krist. Assuming that the 8-m NGST primary mirror has 1/13 wave RMS errors at
+1.5 micron, I determined that 
+90% of the light from a star falls within an
+aperture radius of 0.1 arcsec -- 
+the size of one WF pixel of the Hubble
+Space Telescope WFPC2 instrument. 
+The three NGST design concepts have nearly
+identical V-band encircled-energy functions; 
+the degradation caused by the
+differences between the three <i class="slanted"> NGST</i>
+design concepts is quite negligible
+when state-of-the-art digital-PSF photometric reduction software is used to
+analyze uncrowded stellar fields. 
+
+</p><p>
+
+</p><p></p>
+<div align="CENTER"><a name="Fig-T6.1-3"></a><a name="397"></a>
+<table>
+<caption align="BOTTOM"><strong>Figure 3:</strong>
+Measured signal-to-noise ratios of
+simulated <i class="slanted"> NGST</i> CCD stellar observations using the
+Levenberg-Marquardt method of non-linear least squares fitting with
+<em> digital</em> Point Spread Functions.  Each mark represents the
+average signal-to-noise ratio of 100 stars that were simulated using
+using synthetic <span class="BOLDMATH"><i>V</i></span>-band PSFs on a flat background of 300 electrons
+per pixel.  The filled circles show the result using a critically
+sampled <span class="BOLDMATH"><i>V</i></span>-band PSF for a perfect 0.5-<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img67.gif" alt="$\mu$" border="0" height="29" width="14" align="MIDDLE"></span>m diffraction-limited 8-m
+<i class="slanted"> NGST</i> mirror.  The <span class="BOLDMATH"><i>V</i></span>-band results for three different 8-m <i class="slanted">
+NGST</i> design concepts of a 1.5-<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img67.gif" alt="$\mu$" border="0" height="29" width="14" align="MIDDLE"></span>m diffraction-limited
+mirror.</caption>
+<tbody><tr><td><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img68.gif" alt="\begin{figure}
+\epsscale{0.4}
+\plotone{mighellkj3.eps}
+\end{figure}" border="0" height="351" width="358"></td></tr>
+</tbody></table>
+</div><p></p>
+All the V-band PSFs used in these
+simulations were sampled at 0.0064 arcsec pixel<span class="BOLDMATH"><sup>-1</sup></span>
+which is the critical V-band
+sampling rate of a perfect 0.5-micron diffraction-limited 8-m NGST. Better
+photometric performance for all three NGST design concepts could be obtained
+by using larger CCD pixels: 
+a pixel size of <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>0.013 (<span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>
+<!-- MATH
+ $2 \times 0.0064$
+ -->
+<span class="BOLDMATH">2 x 0.0064</span>)
+arcsec pixel<span class="BOLDMATH"><sup>-1</sup></span>
+should provide an optimal pixel sampling when the 8-m primary
+mirror is diffraction-limited at 1.5 micron.
+
+<p>
+ 
+</p><h3>References</h3>
+
+<p>
+ 
+</p><p>
+Arfken, G. 1970, Mathematical Methods for Physicists (2nd ed.),
+(New York: Academic Press)
+
+</p><p>
+ 
+</p><p>
+Da Costa, G. S. 1992, in ASP Conf. Ser., Vol. 23,
+Astronomical CCD Observing and Reduction Techniques,
+ed. S. B. Howell, (San Francisco: ASP), 90
+
+</p><p>
+ 
+</p><p>
+Davis, L. 1987, ``Specifications for the Aperture
+Photometry Package'', National Optical Astronomy Observatories,
+<a name="tex2html8" href="ftp://iraf.noao.edu/iraf/docs/apspec.ps.Z">ftp://iraf.noao.edu/iraf/docs/apspec.ps.Z</a>
+</p><p>
+ 
+</p><p>
+Fischer, P. &amp; Kochanski, G. P. 1994, AJ, 107, 802
+
+</p><p>
+ 
+</p><p>
+Haldane, J. B. S. 1943, Biometrika, 32, 294
+
+</p><p>
+ 
+</p><p>
+Howell, S. B. 1989, PASP, 101, 616
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1992, in ASP Conf. Ser., Vol. 23,
+Astronomical CCD Observing and Reduction Techniques,
+ed. S. B. Howell, (San Francisco: ASP), 105
+
+</p><p>
+ 
+</p><p>
+Howell, S. B., Koehn, B., Bowell, E., &amp; Hoffman, M. 1996, AJ, 112, 1302
+
+</p><p>
+ 
+</p><p>
+Irwin, M. J. 1985, MNRAS, 214, 575
+
+</p><p>
+ 
+</p><p>
+Kendall, M. G. &amp; Stuart A. 1958, The Advanced Theory of Statistics,
+Vol. I, (London: Charles Griffin &amp; Co.)
+pp. 39 and 179
+
+</p><p>
+ 
+</p><p>
+King, I. R. 1971, PASP, 83, 199
+
+</p><p>
+ 
+</p><p>
+Krist, J. 1993, in ASP Conf. Ser., Vol.&nbsp;52, Astronomical Data 
+Analysis
+Software and Systems II, ed.&nbsp;R.&nbsp;J.&nbsp;Hanisch, 
+R.&nbsp;J.&nbsp;V.&nbsp;Brissenden, &amp; J.&nbsp;Barnes (San Francisco:
+ ASP), 530
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1994, Tiny Tim User's Manual (Ver. 4.0)
+
+</p><p>
+ 
+</p><p>
+Krist, J. &amp; Hook, R. 1997, Tiny Tim User's Guide (Ver. 4.4)
+
+</p><p>
+ 
+</p><p>
+Levenberg, K. 1944, Quart. of Appl. Math., 2, 164
+
+</p><p>
+ 
+</p><p>
+Malin, D. 1977, AAS Photo-Bull., No. 16, 10
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1981, J. Phot. Sci., 29(5), 199
+
+</p><p>
+ 
+</p><p>
+Marquardt, D. 1963, J. SIAM, 11, 431
+
+</p><p>
+ 
+</p><p>
+Merline, W. J. &amp; Howell, S. B. 1995, Exp. Astron., 6, 163
+
+</p><p>
+ 
+</p><p>
+Mighell, K. J. 1989, MNRAS, 238, 807
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1990, A&amp;AS, 82, 1
+
+</p><p>
+ 
+</p><p>
+Mighell, K. J. &amp; Rich, R. M. 1995, AJ, 110, 1649
+
+</p><p>
+ 
+</p><p>
+Moffat, A. F. J. 1969, A&amp;A, 3, 455
+
+</p><p>
+ 
+</p><p>
+Newberry, M. V. 1991, PASP, 103, 122
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1992, in ASP Conf. Ser., Vol.&nbsp;25, Astronomical Data Analysis
+Software and Systems I, ed.&nbsp;D.&nbsp;M.&nbsp; Worrall, C.&nbsp;Biemesderfer, &amp;
+J.&nbsp;Barnes (San Francisco: ASP), 307
+
+</p><p>
+ 
+</p><p>
+Pearson, K. 1895, Phil. Trans., 186, 343
+
+</p><p>
+ 
+</p><p>
+Press, W. H., Flannery, B. P., Teukolsky, S. A., &amp;
+Vetterling, W. T. 1986, Numerical Recipes,
+(Cambridge: Cambridge Univ. Press)
+
+</p><p>
+ 
+</p><p>
+Pritchet, C. &amp; Kline, M. I. 1981, AJ, 86, 1859
+
+</p><p>
+ 
+</p><p>
+Secker, J. 1995, PASP, 107, 496
+
+</p><p>
+ 
+</p><p>
+Stetson, P. B. 1987, PASP, 99, 191
+
+</p><p>
+ 
+</p><p>
+<img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img69.gif" alt="\ibid" border="0" height="2" width="80" align="BOTTOM"> , 1990, PASP, 102, 932
+
+</p><p>
+ 
+</p><p>
+Stone, R. C. 1989, AJ, 97, 1227 
+
+</p><p>
+ 
+</p><p>
+Wells, D.C. 1979, in SPIE Proc., Vol.&nbsp;172, Instrumentation in Astronomy III, ed. D. L. Crawford, (Bellingham: SPIE), 418
+
+</p><p>
+
+</p><p>
+<br></p><hr><h4>Footnotes</h4>
+<dl>
+<dt><a name="foot80">... FWHM</a><a name="foot80" href="http://www.adass.org/adass/proceedings/adass98/mighellkj/mighellkj.html#tex2html3"><sup><span class="arabic">1</span></sup></a>
+</dt><dd>The 
+Full-Width-at-Half-Maximum
+of a critically-sampled Gaussian distribution is <span class="MATH"><img src="Algorithms%20for%20CCD%20Stellar%20Photometry_files/img10.gif" alt="$\sim$" border="0" height="16" width="16" align="BOTTOM"></span>2.35 pixels.
+
+</dd></dl><hr>© Copyright 1999 <a href="http://www.aspsky.org/">Astronomical Society of the Pacific</a>, 390 Ashton Avenue, San Francisco, California 94112, USA
+<hr>
+<font size="-1"><strong>Next:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/grechnevvv2">Joint Processing of Radio Data Produced by the SSRT Together With Data of Other Spectral Ranges</a> <br>
+<strong>Up:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/Analysis.html">Data Analysis and Processing Techniques</a> <br>
+<strong>Previous:</strong> <a href="http://www.adass.org/adass/proceedings/adass98/puetterrc">The Pixon Method of Image Reconstruction</a> <br>
+<strong>
+<a href="http://www.adass.org/adass/proceedings/adass98/toc.html">Table of Contents</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/index_subj.html">Subject Index</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/index_auth.html">Author Index</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/Search.html">Search</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/reprints/mighellkj.ps.gz">PS reprint</a> - 
+<a href="http://www.adass.org/adass/proceedings/adass98/reprints/mighellkj.pdf">PDF reprint</a>
+</strong></font><hr>
+
+<!--End of Navigation Panel-->
+<address>
+<a href="mailto:adass@ncsa.uiuc.edu">adass@ncsa.uiuc.edu</a>
+</address>
+
+
+</body></html>

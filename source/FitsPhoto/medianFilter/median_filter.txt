@@ -1,0 +1,11 @@
+INTERESTING MEDIAN FILTER ALGORITHMS
+
+=== SMALL KERNELS ===
+- Wirth Method 
+- Quick Select - Numerical Recipies
+
+
+=== LARGE KERNELS ===
+- Histogram
+- Tree
+[see: HUANG ET AL]

@@ -2,7 +2,7 @@
 
 #include "FitsPhoto.h"
 #include "QFitsListWidgetItem.h"
-#include "astroAnalizer.h"
+#include "astroAnalyzer.h"
 #include "QTextInfoWindow.h"
 #include <vector>
 #include <sstream>

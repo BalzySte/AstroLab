@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd source
+qmake
+make

@@ -1,4 +1,4 @@
-#include "astroAnalizer.h"
+#include "astroAnalyzer.h"
 
 #include "settings.h"
 #include <sstream>

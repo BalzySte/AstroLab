@@ -4,7 +4,7 @@
 
 #include <QtGui>
 #include "FitsPhoto.h"
-#include "astroAnalizer.h"
+#include "astroAnalyzer.h"
 
 
 //#include "common.h"

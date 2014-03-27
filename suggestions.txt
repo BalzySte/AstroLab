@@ -24,3 +24,6 @@ MODIFICHE / PROBLEMI / OTTIMIZZAZIONI NECESSARIE
   sua chiusura
 
 - Potrebbe essere utile usare una lista per contenere gli oggetti star
+
+- La libreria CCFits ha dei problemi ad aprire fits con nomi particolari
+  (es: contenenti #) quando dalla finestra open si seleziona più di un file

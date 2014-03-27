@@ -14,13 +14,14 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto&
 	int pixelNum = fitImage.getPixelNum();
 	
 	pixelT stretch = std::abs(top - bottom);	
+	std::valarray<pixelT> &imgArrayRef = fitImage.getImageArray();
 	
 	pixelT pixelValue;
 
 	if (top > bottom)
 		for (int px = 0; px < pixelNum; ++px)
 		{
-			pixelValue = fitImage.getImageArray()[px];
+			pixelValue = imgArrayRef[px];
 			if (pixelValue >= top)
 			{
 				grayImage[px] = 255;
@@ -40,7 +41,7 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage, FitsPhoto&
 	else if (top < bottom)
 		for (int px = 0; px < pixelNum; ++px)
 		{
-			pixelValue = fitImage.getImageArray()[px];
+			pixelValue = imgArrayRef[px];
 			if (pixelValue <= top)
 			{
 				grayImage[px] = 255;
@@ -73,16 +74,17 @@ void FitsTo8BitScale(std::vector<uchar>& grayImage,
 	pixelT imageMax = fitImage.getImageMaxValue();
 		
 	pixelT stretch = (imageMax - imageMin);
+	std::valarray<pixelT> &imgArrayRef = fitImage.getImageArray();
 	
 	if (reversed == false)
 		for (int px = 0; px < pixelNum; ++px)
 			grayImage[px] = static_cast<uchar> (
-				(255*(fitImage.getImageArray()[px]-imageMin)/stretch));
+				(255*(imgArrayRef[px]-imageMin)/stretch));
 	
 	else if (reversed == true)
 		for (int px = 0; px < pixelNum; ++px)
 			grayImage[px] = 255 - static_cast<uchar> (
-				(255*(fitImage.getImageArray()[px]-imageMin)/stretch));
+				(255*(imgArrayRef[px]-imageMin)/stretch));
 }
 
 

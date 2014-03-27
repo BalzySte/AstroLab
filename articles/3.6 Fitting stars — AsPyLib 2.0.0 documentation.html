@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>3.6 Fitting stars — AsPyLib 2.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/default.css" type="text/css">
+    <link rel="stylesheet" href="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/pygments.css" type="text/css">
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/jquery.js"></script>
+    <script type="text/javascript" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/underscore.js"></script>
+    <script type="text/javascript" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/doctools.js"></script>
+    <link rel="top" title="AsPyLib 2.0.0 documentation" href="http://www.aspylib.com/doc/index.html">
+    <link rel="up" title="3. AsPyLib.astro : the main module" href="http://www.aspylib.com/doc/using_aspylib.html">
+    <link rel="next" title="4. Script for accurate photometry" href="http://www.aspylib.com/doc/using_photometry_script.html">
+    <link rel="prev" title="3.5 Selecting objects" href="http://www.aspylib.com/doc/aspylib_select.html"> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="http://www.aspylib.com/doc/genindex.html" title="General Index" accesskey="I">index</a></li>
+        <li class="right">
+          <a href="http://www.aspylib.com/doc/using_photometry_script.html" title="4. Script for accurate photometry" accesskey="N">next</a> |</li>
+        <li class="right">
+          <a href="http://www.aspylib.com/doc/aspylib_select.html" title="3.5 Selecting objects" accesskey="P">previous</a> |</li>
+        <li><a href="http://www.aspylib.com/doc/aspylib.html">AsPyLib 2.0.0 documentation</a> »</li>
+          <li><a href="http://www.aspylib.com/doc/using_aspylib.html" accesskey="U">3. AsPyLib.astro : the main module</a> »</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fitting-stars">
+<h1>3.6 Fitting stars<a class="headerlink" href="#fitting-stars" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="simple-script-for-stars-fitting">
+<h2>Simple script for stars fitting<a class="headerlink" href="#simple-script-for-stars-fitting" title="Permalink to this headline">¶</a></h2>
+<p>Once the coordinates of a star are known, a small part of the image 
+around the star can be defined, and used to perform a PSF fitting on the
+ star.
+In AsPyLib, the following PSF models are available:</p>
+<ul class="simple">
+<li>circular gaussian</li>
+<li>elliptical gaussian</li>
+<li>circular moffat</li>
+<li>elliptical moffat</li>
+</ul>
+<p>Here is a simple script that can be used to fit stars on an image with a 2D circular gaussian</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># -*- coding: iso_8859_1 -*-</span>
+<span class="kn">from</span> <span class="nn">aspylib</span> <span class="kn">import</span> <span class="n">astro</span>
+
+<span class="c">#--- loads image data ---</span>
+<span class="n">Image</span> <span class="o">=</span> <span class="p">[</span><span class="s">"C:</span><span class="se">\\</span><span class="s">Images</span><span class="se">\\</span><span class="s">Image-1.fit"</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">get_imagedata</span><span class="p">(</span><span class="n">Image</span><span class="p">)</span>
+
+<span class="c">#--- display image ---</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">print</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">fit_gauss_circular</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">11</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="mi">11</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">"floor (in ADU)   ="</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">"height (in ADU)  ="</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">"x0 (in pixels)   ="</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">"y0 (in pixels)   ="</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">"fwhm (in pixels) ="</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="nb">raw_input</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>After right-clicking on two objects, the text displayed in the console looks like:</p>
+<div class="highlight-python"><pre>--- loading FITS image ---
+Image-1.fit
+
+x= 251 y= 55
+floor (in ADU) = 193.484201821
+height (in ADU) = 19014.3851849
+x0 (in pixels) = 251.888470768
+y0 (in pixels) = 55.9261718203
+fwhm (in pixels) = 2.06287051386
+
+x= 369 y= 661
+floor (in ADU) = 163.311263174
+height (in ADU) = 6601.31089411
+x0 (in pixels) = 367.875223306
+y0 (in pixels) = 660.94550699
+fwhm (in pixels) = 2.1845135079</pre>
+</div>
+</div>
+<div class="section" id="circular-gaussian-psf">
+<h2>Circular gaussian PSF<a class="headerlink" href="#circular-gaussian-psf" title="Permalink to this headline">¶</a></h2>
+<p>The traditional equation for a circular gaussian PSF is:</p>
+<img alt="_images/gauss1.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/gauss1.png">
+<p>To fit a star with a circular gaussian, AsPyLib is using a slightly different form of this equation:</p>
+<img alt="_images/gauss2.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/gauss2.png">
+<p>The fit is performed by optimising 5 parameters: S0, S1, x0, y0, w. 
+This equation has been chosen because it involves less calculation than 
+the other one.
+This helps to reduce the execution time. It is also important to take 
+the absolute value of w to avoid positive exponentials.</p>
+<p>The following instruction is used to make the fit:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">fit_gauss_circular</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">11</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="mi">11</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>When the calculation is finished, astro.fit_gauss_circular() returns 6 parameters:</p>
+<ul class="simple">
+<li>results[0] is just the maximum pixel value in the selected subimage, not a fit parameter but a useful information.</li>
+<li>results[1] = S0 is the level of the sky background</li>
+<li>results[2] = S1 is the amplitude of the gaussian PSF</li>
+<li>results[3] = x0 and results[4] = y0 give the star position along x and y directions.</li>
+<li>results[5] = fwhm is the PSF full width half maximum and is calculated from w with the equations below</li>
+</ul>
+<img alt="_images/gauss6.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/gauss6.png">
+</div>
+<div class="section" id="elliptical-gaussian-psf">
+<h2>Elliptical gaussian PSF<a class="headerlink" href="#elliptical-gaussian-psf" title="Permalink to this headline">¶</a></h2>
+<p>The equation for the elliptical gaussian is traditionally defined with matrices:</p>
+<img alt="_images/gauss3.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/gauss3.png">
+<p>This equation is equivalent to:</p>
+<img alt="_images/gauss5.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/gauss5.png">
+<p>The fit is performed by AsPyLib by optimising 7 parameters: S0, S1, x0, y0, sigma1, sigma2, phi.
+The following instruction is used:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">fit_gauss_elliptical</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">11</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="mi">11</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>When the calculation is finished, astro.fit_gauss_elliptical() returns 8 parameters:</p>
+<ul class="simple">
+<li>results[0] is just the maximum pixel value in the selected subimage, not a fit parameter but a useful information.</li>
+<li>results[1] = S0 is the level of the sky background</li>
+<li>results[2] = S1 is the amplitude of the gaussian PSF</li>
+<li>results[3] = x0 and results[4] = y0 give the star position along x and y directions</li>
+<li>results[5] and results[6] give the smallest and largest star full 
+width half maximum (FWHM) sizes. The FWHMs are calculated from sigma1 
+and sigma2 with the same equation as for the circular gaussian</li>
+<li>results[7] = phi is the angle, in degrees, that gives the direction 
+of the largest FWHM, measured starting from x (vertical direction) in 
+the clockwise direction. This angle is between -90 deg and +90 deg.</li>
+</ul>
+</div>
+<div class="section" id="circular-moffat-psf">
+<h2>Circular moffat PSF<a class="headerlink" href="#circular-moffat-psf" title="Permalink to this headline">¶</a></h2>
+<p>For the circular moffat PSF, AsPyLib is using this equation:</p>
+<img alt="_images/moffat1.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/moffat1.png">
+<p>The fit is performed by AsPyLib by optimising 6 parameters: S0, S1, x0, y0, fwhm, beta.
+The following instruction is used:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">fit_moffat_circular</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">11</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="mi">11</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>When the calculation is finished, astro.fit_moffat_circular() returns 7 parameters:</p>
+<ul class="simple">
+<li>results[0] is just the maximum pixel value in the selected subimage, not a fit parameter but a useful information.</li>
+<li>results[1] = S0 is the level of the sky background</li>
+<li>results[2] = S1 is the amplitude of the moffat PSF</li>
+<li>results[3] = x0 and results[4] = y0 give the star position along x and y directions</li>
+<li>results[5] = fwhm is the PSF full width half maximum</li>
+<li>results[6] = beta.</li>
+</ul>
+</div>
+<div class="section" id="elliptical-moffat-psf">
+<h2>Elliptical moffat PSF<a class="headerlink" href="#elliptical-moffat-psf" title="Permalink to this headline">¶</a></h2>
+<p>For the elliptical moffat PSF, AsPyLib is using this equation:</p>
+<img alt="_images/moffat2.png" src="3.6%20Fitting%20stars%20%E2%80%94%20AsPyLib%202.0.0%20documentation_files/moffat2.png">
+<p>The fit is performed by AsPyLib by optimising 6 parameters: S0, S1, x0, y0, fwhm1, fwhm2, phi, beta.
+The parameters fwhm1 and fwhm2 are calculated from alpha1, alpha2 and beta with the same equation as for the circular moffat.
+To perform the fit the following instruction is used:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">astro</span><span class="o">.</span><span class="n">fit_moffat_elliptical</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">11</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="mi">11</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>When the calculation is finished, astro.fit_moffat_elliptical() returns 9 parameters:</p>
+<ul class="simple">
+<li>results[0] is just the maximum pixel value in the selected subimage, not a fit parameter but a useful information.</li>
+<li>results[1] = S0 is the level of the sky background</li>
+<li>results[2] = S1 is the amplitude of the moffat PSF</li>
+<li>results[3] = x0 and results[4] = y0 give the star position along x and y directions</li>
+<li>results[5] and results[6] give respectively the smallest and largest star full width half maximum (FWHM) sizes</li>
+<li>results[7] = phi is the angle, in degrees, that gives the direction 
+of the largest FWHM, measured starting from x (vertical direction) in 
+the clockwise direction. This angle is between -90 deg and +90 deg.</li>
+<li>results[8] = beta.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="http://www.aspylib.com/doc/aspylib.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.6 Fitting stars</a><ul>
+<li><a class="reference internal" href="#simple-script-for-stars-fitting">Simple script for stars fitting</a></li>
+<li><a class="reference internal" href="#circular-gaussian-psf">Circular gaussian PSF</a></li>
+<li><a class="reference internal" href="#elliptical-gaussian-psf">Elliptical gaussian PSF</a></li>
+<li><a class="reference internal" href="#circular-moffat-psf">Circular moffat PSF</a></li>
+<li><a class="reference internal" href="#elliptical-moffat-psf">Elliptical moffat PSF</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="http://www.aspylib.com/doc/aspylib_select.html" title="previous chapter">3.5 Selecting objects</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="http://www.aspylib.com/doc/using_photometry_script.html" title="next chapter">4. Script for accurate photometry</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="http://www.aspylib.com/doc/_sources/aspylib_fitting.txt" rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input name="q" type="text">
+      <input value="Go" type="submit">
+      <input name="check_keywords" value="yes" type="hidden">
+      <input name="area" value="default" type="hidden">
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="http://www.aspylib.com/doc/genindex.html" title="General Index">index</a></li>
+        <li class="right">
+          <a href="http://www.aspylib.com/doc/using_photometry_script.html" title="4. Script for accurate photometry">next</a> |</li>
+        <li class="right">
+          <a href="http://www.aspylib.com/doc/aspylib_select.html" title="3.5 Selecting objects">previous</a> |</li>
+        <li><a href="http://www.aspylib.com/doc/aspylib.html">AsPyLib 2.0.0 documentation</a> »</li>
+          <li><a href="http://www.aspylib.com/doc/using_aspylib.html">3. AsPyLib.astro : the main module</a> »</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        © Copyright 2013, J.Caron.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  
+
+</body></html>

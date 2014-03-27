@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <sstream>
 
+// Quickselect ANSI C function for median filter
+extern "C"
+{
+	#include "quickselect.c"
+}
 
 // Default Constructor, sets image position to default value (0,0)
 // Unless performing particular operations, such as aligning images
@@ -345,31 +350,44 @@ pixelT FitsPhoto::getImageMinValue() const
 
 
 // Filters
-
+// ATTENTION: FUNCTION IS OPTIMISED FOR SMALL ARBITRARY KERNELS
+// 			  SHOULD IMPLEMENT FILTER SPECIFIC FOR EACH SMALL
+//			  SPECIFIC VALUE AND AN HISTOGRAM ALGORITHM FOR LARGE KERNELS
 FitsPhoto FitsPhoto::extractMedianFiltered(int dim) const
 {
 	int n = (dim - 1) / 2;
+	
 	// ATTENTION: With this implementation borders are not processed
+	
 	FitsPhoto medianImage;
 	medianImage.create(_width, _height);	//Image position is not reported but instead set to (0,0)
-	int medianIndex = dim*dim/2;
+	int cellsNumber = dim*dim;
+// 	int medianIndex = cellsNumber/2;
 	// Applying N x N Median filter to imageArray to obtain backgroundArray
-	std::vector<pixelT> subArray;
+	
+	pixelT *subArray = new pixelT[cellsNumber];
+// 	std::vector<pixelT> subArray;
 
 	for (int x = n; x < _width - n; ++x)
 		for (int y = n; y < _height - n; ++y)
 		{
+			int index = 0;
 			for (int subX = -n; subX <= n; ++subX)
 				for (int subY = -n; subY <= n; ++subY)
 				{
-					subArray.push_back(_imageArray[(x + subX) + (y + subY) * _width]);
+					subArray[index] = _imageArray[(x + subX) + (y + subY) * _width];
+					++index;
+// 					subArray.push_back(_imageArray[(x + subX) + (y + subY) * _width]);
 				}
 				
-				std::sort(subArray.begin(), subArray.end());
-			medianImage._imageArray[x + (y * _width)] = subArray[medianIndex];	// Median value
-			subArray.clear();
+// 				std::sort(subArray.begin(), subArray.end());
+			
+			medianImage._imageArray[x + (y * _width)] = quick_select(subArray, cellsNumber);
+// 			medianImage._imageArray[x + (y * _width)] = subArray[medianIndex];	// Median value
+// 			subArray.clear();
 		}
 	
+	delete[] subArray;
 	return medianImage;
 }
 
