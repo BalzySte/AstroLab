@@ -261,15 +261,15 @@ FitsPhoto FitsPhoto::operator- (const FitsPhoto& photo) const
 
 	subtrImage.create(subtrWidth, subtrHeight, xSubtrPos, ySubtrPos);
 
-	int x_dst = _x - xSubtrPos;		//x distance of 1st image reference from sumImage reference
-	int y_dst = _y - ySubtrPos;		//y distance of 1st image reference from sumImage reference
+	int x_dst = _x - xSubtrPos;		//x distance of 1st image reference from subtrImage reference
+	int y_dst = _y - ySubtrPos;		//y distance of 1st image reference from subtrImage reference
 	for (int col = 0; col < _width; ++col)
 		for (int line = 0; line < _height; ++line)
 			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] +=
 						getImageArray()[col + (line * _width)];
 
-	x_dst = photo._x - xSubtrPos;		//x distance of 2nd image reference from sumImage reference
-	y_dst = photo._y - ySubtrPos;		//y distance of 2nd image reference from sumImage reference
+	x_dst = photo._x - xSubtrPos;		//x distance of 2nd image reference from subtrImage reference
+	y_dst = photo._y - ySubtrPos;		//y distance of 2nd image reference from subtrImage reference
 	for (int col = 0; col < photo._width; ++col)
 		for (int line = 0; line < photo._height; ++line)
 			subtrImage.getImageArray()[(col+x_dst) + ((line+y_dst) * subtrWidth)] -=
@@ -287,6 +287,120 @@ FitsPhoto FitsPhoto::operator* (double factor) const
 	multipImage._imageArray = _imageArray * factor;
 
 	return multipImage;
+}
+
+
+FitsPhoto FitsPhoto::operator* (const FitsPhoto& photo) const
+{
+	FitsPhoto prodImage;
+	
+	int xProdPos;
+	int xDist;
+	int yProdPos;
+	int yDist;
+	int prodWidth;
+	int prodHeight;
+	
+	if (_x <= photo._x)
+	{
+		xProdPos = _x;
+		xDist = photo._x - _x;
+		prodWidth = std::max<int>(_width, photo._width + xDist);
+	}
+	else
+	{
+		xProdPos = photo._x;
+		xDist = _x - photo._x;
+		prodWidth = std::max<int>(photo._width, _width + xDist);
+	}
+	
+	if (_y <= photo._y)
+	{
+		yProdPos = _y;
+		yDist = photo._y - _y;
+		prodHeight = std::max<int>(_height, photo._height + yDist);
+	}
+	else
+	{
+		yProdPos = photo._y;
+		yDist = _y - photo._y;
+		prodHeight = std::max<int>(photo._height, _height + yDist);
+	}
+	
+	prodImage.create(prodWidth, prodHeight, xProdPos, yProdPos);
+	
+	int x_dst = _x - xProdPos;		//x distance of 1st image reference from prodImage reference
+	int y_dst = _y - yProdPos;		//y distance of 1st image reference from prodImage reference
+	for (int col = 0; col < _width; ++col)
+		for (int line = 0; line < _height; ++line)
+			prodImage.getImageArray()[(col+x_dst) + ((line+y_dst) * prodWidth)] +=
+			getImageArray()[col + (line * _width)];
+		
+		x_dst = photo._x - xProdPos;		//x distance of 2nd image reference from prodImage reference
+		y_dst = photo._y - yProdPos;		//y distance of 2nd image reference from prodImage reference
+		for (int col = 0; col < photo._width; ++col)
+			for (int line = 0; line < photo._height; ++line)
+				prodImage.getImageArray()[(col+x_dst) + ((line+y_dst) * prodWidth)] *=
+				photo.getImageArray()[col + (line * photo._width)];
+			
+			return prodImage;
+}
+
+
+FitsPhoto FitsPhoto::operator/ (const FitsPhoto& photo) const
+{
+	FitsPhoto divImage;
+	
+	int xDivPos;
+	int xDist;
+	int yDivPos;
+	int yDist;
+	int divWidth;
+	int divHeight;
+	
+	if (_x <= photo._x)
+	{
+		xDivPos = _x;
+		xDist = photo._x - _x;
+		divWidth = std::max<int>(_width, photo._width + xDist);
+	}
+	else
+	{
+		xDivPos = photo._x;
+		xDist = _x - photo._x;
+		divWidth = std::max<int>(photo._width, _width + xDist);
+	}
+	
+	if (_y <= photo._y)
+	{
+		yDivPos = _y;
+		yDist = photo._y - _y;
+		divHeight = std::max<int>(_height, photo._height + yDist);
+	}
+	else
+	{
+		yDivPos = photo._y;
+		yDist = _y - photo._y;
+		divHeight = std::max<int>(photo._height, _height + yDist);
+	}
+	
+	divImage.create(divWidth, divHeight, xDivPos, yDivPos);
+	
+	int x_dst = _x - xDivPos;		//x distance of 1st image reference from divImage reference
+	int y_dst = _y - yDivPos;		//y distance of 1st image reference from divImage reference
+	for (int col = 0; col < _width; ++col)
+		for (int line = 0; line < _height; ++line)
+			divImage.getImageArray()[(col+x_dst) + ((line+y_dst) * divWidth)] +=
+			getImageArray()[col + (line * _width)];
+		
+		x_dst = photo._x - xDivPos;		//x distance of 2nd image reference from divImage reference
+		y_dst = photo._y - yDivPos;		//y distance of 2nd image reference from divImage reference
+		for (int col = 0; col < photo._width; ++col)
+			for (int line = 0; line < photo._height; ++line)
+				divImage.getImageArray()[(col+x_dst) + ((line+y_dst) * divWidth)] /=
+				photo.getImageArray()[col + (line * photo._width)];
+			
+			return divImage;
 }
 
 

@@ -52,6 +52,8 @@ public:
 	void move(int xShift, int yShift);
 	FitsPhoto operator+ (const FitsPhoto& photo) const;
 	FitsPhoto operator- (const FitsPhoto& photo) const;
+	FitsPhoto operator* (const FitsPhoto& photo) const;
+	FitsPhoto operator/ (const FitsPhoto& photo) const;
 	FitsPhoto operator* (double factor) const;
 	FitsPhoto operator/ (double divisor) const;
 	FitsPhoto& operator+= (const FitsPhoto& photo);

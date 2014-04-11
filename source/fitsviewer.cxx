@@ -232,7 +232,7 @@ void FitsViewer::subtraction()
 }
 
 
-void FitsViewer::multiplication()
+void FitsViewer::scalarMultiplication()
 {
 	// Checks whether an image is focused
 	if (_currentFitsImage == NULL)
@@ -255,7 +255,7 @@ void FitsViewer::multiplication()
 }
 
 
-void FitsViewer::division()
+void FitsViewer::scalarDivision()
 {
 	// Checks whether an image is focused
 	if (_currentFitsImage == NULL)
@@ -281,6 +281,122 @@ void FitsViewer::division()
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "DivisionImage");
 	}
+}
+
+
+void FitsViewer::multiplication()
+{
+	// TODO: check first whether there are only 2 images opened -> sumImg = img1+img2.
+	QListWidget* selectionList = new QListWidget;
+	
+	// Checks whether an image is focused:
+	if (_currentFitsImage == NULL)
+		return;
+	
+	for (std::list<QFitsWindow*>::iterator it = imageWindowsList.begin(); it != imageWindowsList.end(); ++it)
+	{
+		QFitsListWidgetItem* _imageEntry = new QFitsListWidgetItem((*it)->getImageTitle(), *it);
+		// Becoming selectionList's children
+		// they are destroyed as the function
+		// returns together with their father
+		
+		selectionList->addItem((_imageEntry));
+	}
+	
+	// Selection list was populated, now creating dialog to prompt the user
+	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
+	
+	// Creates a vertical box layout for QDialog
+	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
+	dialog_layout->addWidget(selectionList);
+	
+	// Creates button box with 2 buttons
+	QDialogButtonBox *buttonBox = new QDialogButtonBox();
+	buttonBox->addButton("Continue", QDialogButtonBox::AcceptRole);
+	buttonBox->addButton("Cancel", QDialogButtonBox::RejectRole);
+	
+	// Connects buttonBox signals to their slots
+	connect(buttonBox, SIGNAL(accepted()), imgDialog, SLOT(accept()));
+	connect(buttonBox, SIGNAL(rejected()), imgDialog, SLOT(reject()));
+	
+	dialog_layout->addWidget(buttonBox);
+	
+	imgDialog->setLayout(dialog_layout);
+	int result = imgDialog->exec();
+	
+	if (result == QDialog::Accepted)
+	{
+		// Creates new sum image
+		// TODO: Simplify this unreadable messy assignment.
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() *
+				const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
+				selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+			
+		// Creates new fits image window
+		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "MultipImage");
+	}
+	
+	delete imgDialog;	// Delete image dialog object from heap
+						// together with its children
+}
+
+
+void FitsViewer::division()
+{
+	// TODO: check first whether there are only 2 images opened -> sumImg = img1+img2.
+	QListWidget* selectionList = new QListWidget;
+	
+	// Checks whether an image is focused:
+	if (_currentFitsImage == NULL)
+		return;
+	
+	for (std::list<QFitsWindow*>::iterator it = imageWindowsList.begin(); it != imageWindowsList.end(); ++it)
+	{
+		QFitsListWidgetItem* _imageEntry = new QFitsListWidgetItem((*it)->getImageTitle(), *it);
+		// Becoming selectionList's children
+		// they are destroyed as the function
+		// returns together with their father
+		
+		selectionList->addItem((_imageEntry));
+	}
+	
+	// Selection list was populated, now creating dialog to prompt the user
+	QDialog *imgDialog = new QDialog(this, Qt::Dialog | Qt::FramelessWindowHint);
+	
+	// Creates a vertical box layout for QDialog
+	QVBoxLayout *dialog_layout = new QVBoxLayout(imgDialog);
+	dialog_layout->addWidget(selectionList);
+	
+	// Creates button box with 2 buttons
+	QDialogButtonBox *buttonBox = new QDialogButtonBox();
+	buttonBox->addButton("Continue", QDialogButtonBox::AcceptRole);
+	buttonBox->addButton("Cancel", QDialogButtonBox::RejectRole);
+	
+	// Connects buttonBox signals to their slots
+	connect(buttonBox, SIGNAL(accepted()), imgDialog, SLOT(accept()));
+	connect(buttonBox, SIGNAL(rejected()), imgDialog, SLOT(reject()));
+	
+	dialog_layout->addWidget(buttonBox);
+	
+	imgDialog->setLayout(dialog_layout);
+	int result = imgDialog->exec();
+	
+	if (result == QDialog::Accepted)
+	{
+		// Creates new sum image
+		// TODO: Simplify this unreadable messy assignment.
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() /
+		const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
+			selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+			
+			// Creates new fits image window
+			QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+			newFitsWindow->createFromFitsPhoto(newFitsPhoto, "DivisionImage");
+	}
+	
+	delete imgDialog;	// Delete image dialog object from heap
+	// together with its children
 }
 
 
@@ -434,6 +550,9 @@ void FitsViewer::createMenus()
 	operationsMenu->addAction(subtractAct);
 	operationsMenu->addAction(multiplyAct);
 	operationsMenu->addAction(divideAct);
+	operationsMenu->addSeparator();
+	operationsMenu->addAction(scalarMultiplyAct);
+	operationsMenu->addAction(scalarDivideAct);
 	
 	filtersMenu = new QMenu("Filters", this);
 	filtersMenu->addAction(createMedianFilterAct);
@@ -475,10 +594,16 @@ void FitsViewer::createActions()
 	subtractAct = new QAction("Subtract ...", this);
 	connect(subtractAct, SIGNAL(triggered()), this, SLOT(subtraction()));
 	
-	multiplyAct = new QAction("Multiply ...", this);
+	scalarMultiplyAct = new QAction("Multiply by real ...", this);
+	connect(scalarMultiplyAct, SIGNAL(triggered()), this, SLOT(scalarMultiplication()));
+	
+	scalarDivideAct = new QAction("Divide by real ...", this);
+	connect(scalarDivideAct, SIGNAL(triggered()), this, SLOT(scalarDivision()));
+	
+	multiplyAct = new QAction("Multiply images ...", this);
 	connect(multiplyAct, SIGNAL(triggered()), this, SLOT(multiplication()));
 	
-	divideAct = new QAction("Divide ...", this);
+	divideAct = new QAction("Divide images...", this);
 	connect(divideAct, SIGNAL(triggered()), this, SLOT(division()));
 	
 	createMedianFilterAct = new QAction("Extract Median Filtered ...", this);

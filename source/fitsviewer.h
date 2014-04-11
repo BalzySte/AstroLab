@@ -30,6 +30,8 @@ private slots:
 	void exportImage();
 	void addition();
 	void subtraction();
+	void scalarMultiplication();
+	void scalarDivision();
 	void multiplication();
 	void division();
 	void createMedianFilter();
@@ -52,7 +54,7 @@ private:
 	QFitsStretchDock *stretchDock;
 	QFitsZoomDock *zoomDock;
 	
-	// File menu actions
+	// File menu actionsimgM
 	QAction *openAct;
 	QAction *exportImageAct;
 	QAction *exitAct;
@@ -60,6 +62,8 @@ private:
 	// Operations menu actions
 	QAction *addAct;
 	QAction *subtractAct;
+	QAction *scalarMultiplyAct;
+	QAction *scalarDivideAct;
 	QAction *multiplyAct;
 	QAction *divideAct;
 	

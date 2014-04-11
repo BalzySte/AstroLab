@@ -5,7 +5,8 @@
 
 
 QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
-				QMdiSubWindow(parent), subWindowsList(winList), _zoomFactor(1.)
+				QMdiSubWindow(parent), subWindowsList(winList), _zoomFactor(1.),
+				_xPointedPixel(-1), _yPointedPixel(-1)
 {
 	// Instance must be deleted on close action
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -294,13 +295,15 @@ void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 }
 
 
-void QFitsWindow::focusInEvent(QFocusEvent* focusInEvent)
+void QFitsWindow::focusInEvent(QFocusEvent* focusEvent)
 {
-	// Although not used, focusInEvent parameter is necessary for
+	// Although not used, focusEvent parameter is necessary for
 	// signal - slot connection
 	QObject* tmpMdiArea = (parent())->parent();
-	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
+	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*>(tmpMdiArea->parent());
 	tmpMainWin->setFocusedWindow(this);
+	_imageLabel->setFocus();
+	focusEvent->accept();
 }
 
 
@@ -362,7 +365,9 @@ void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
 	int _height = _image.height();
 	
 	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
-									 static_cast<int>(_height*_zoomFactor), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+									 static_cast<int>(_height*_zoomFactor),
+									 Qt::KeepAspectRatio,
+									 Qt::SmoothTransformation);
 	
 	QVector<QRgb> colorTable(256);
 	for(int i = 0; i < 256; ++i)
@@ -371,7 +376,8 @@ void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
 	scaledImg.setColorCount(256);	
 	scaledImg.setColorTable(colorTable);
 	
-	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	// Assignment from temporary should be
 	// optimised by compiler
 	// QPainter object is used to draw
 	QPainter painter(&imagePixmap);
@@ -406,8 +412,50 @@ void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
 
 QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
 {
+	setFocusPolicy(Qt::ClickFocus);
+//	setAttribute(Qt::WA_NoMousePropagation);	//No propagation of mouse event
+	setMouseTracking(true);		// Always track mouse position inside widget
 	_fitsWindowParent = parent;
 }
+
+
+QPoint QFitsLabel::pointedPixel()
+{
+	return _pointedPixel;
+}
+
+
+/*
+void QFitsLabel::focusInEvent(QFocusEvent *focusEvent)
+{
+}
+*/
+
+#include <iostream>
+// ATTENTION: TODO: pos() is mouse position. It should
+// be converted to image coordinates.
+void QFitsLabel::mouseMoveEvent(QMouseEvent *event)
+{
+	int x = event->x();
+	int y = event->y();
+	
+	if (hasFocus())
+	{
+		// Mouse inside of widget
+		if (this->rect().contains(event->pos())) {
+			_pointedPixel = event->pos();
+			std::cout << x << ' ' << y << std::endl;
+		}
+		// Mouse out of Widget
+		else
+		{
+			_pointedPixel = QPoint(-1, -1);
+			std::cout << x << ' ' << y << std::endl;	
+		}
+	}
+	event->accept();
+}
+
 
 
 // ******* QFitsScrollArea ******* //
@@ -417,13 +465,15 @@ QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 	_fitsWindowParent = fitsWinPtr;		//Useless, should use parent.
 }
 
-
-void QFitsScrollArea::focusInEvent(QFocusEvent* focusInEvent)
+/*
+void QFitsScrollArea::focusInEvent(QFocusEvent* focusEvent)
 {
 	// Although not used, focusInEvent parameter is necessary for
-	// signal - slot connection
+	// signal - slot connection*/
+	/*
 	QObject* tmpMdiArea = (parent()->parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*> (tmpMdiArea->parent());
-
 	tmpMainWin->setFocusedWindow(_fitsWindowParent);	
-}
+	*/
+// 	dynamic_cast<QWidget*>(parent())->focusInEvent(focusEvent);
+// }

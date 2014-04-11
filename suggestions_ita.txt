@@ -1,5 +1,13 @@
 MODIFICHE / PROBLEMI / OTTIMIZZAZIONI NECESSARIE
 
+URGENTE:
+- La classe QFitsWindow dovrebbe rappresentare solamente la "finestra",
+  i dettagli relativi a zoom e stretch sono propri dell'immagine (che non
+  è necessariamente contenuta in una finestra), di conseguenza dovrebbero
+  stare in QFitsLabel.
+
+-------------------------------------------------------------------------
+
 - Efficienza filtro mediana (std::vector sembra essere lento)
 
 - ColorMap definita una sola volta per l'intero programma e non 

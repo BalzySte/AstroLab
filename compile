@@ -2,4 +2,13 @@
 
 cd source
 qmake
-make
+
+echo $1
+if [ "$1" = "-B" ]
+then
+    make -B
+
+else
+    make
+
+fi

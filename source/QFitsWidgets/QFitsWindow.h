@@ -36,6 +36,7 @@ public:
 	// Previews and updates image zoom
 	void previewZoom(double zoomFactor);
 	void updateZoom(double zoomFactor);
+//	void updateMousePosition(int x, int y);
 	
 	// Methods for accessing private FitsPhoto member.
 	FitsPhoto& getFitsPhoto();
@@ -85,10 +86,16 @@ private:
 	// Zoom value
 	double _zoomFactor;
 	
+	// Pointed pixel (mouse position on image)
+	// NOTE: (-1,-1) means mouse is outside image, top left pixel is (0, 0)
+	// 		 this notation is used internally to comply with indexes used by
+	//		 valarrays and other objects. User may see top left pixel as (1, 1). 
+	int _xPointedPixel, _yPointedPixel;
+	
 private slots:	
 	// Slots	
 	void closeEvent(QCloseEvent* closeEvent);
-	void focusInEvent(QFocusEvent* focusInEvent);	
+	void focusInEvent(QFocusEvent* focusEvent);
 };
 
 
@@ -102,12 +109,15 @@ class QFitsLabel : public QLabel	// NOT NECESSARY
 	
 public:
 	QFitsLabel(QFitsWindow* parent);
+	QPoint pointedPixel();
 	
 private:
 	QFitsWindow* _fitsWindowParent;
+	QPoint _pointedPixel;
 	
-private slots:
-	//void focusInEvent(QFocusEvent * focusInEvent);
+protected slots:
+// 	void focusInEvent(QFocusEvent * focusEvent);
+	void mouseMoveEvent(QMouseEvent *event);
 };
 
 
@@ -122,7 +132,7 @@ private:
 	QFitsWindow* _fitsWindowParent;
 	
 private slots:
-	void focusInEvent(QFocusEvent* focusInEvent);	
+// 	void focusInEvent(QFocusEvent* focusEvent);	
 };
 
 #endif // __QFitsWindow_h__
