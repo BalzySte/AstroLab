@@ -7,6 +7,7 @@
 #include "QFitsWindow.h"
 #include "QFitsStretchDock.h"
 #include "QFitsZoomDock.h"
+#include "QMousePointerDock.h"
 
 
 class FitsViewer : public QMainWindow
@@ -22,6 +23,9 @@ public:
 	// Gets currently selected image window
 	QFitsWindow* getFocusedWindow() const;
 	
+	// Updates mouse Pointer Dock
+	void updateMousePointerDock();
+		
 	// Updates stretch dock when focus changes
 //	void updateStretchDock();
   
@@ -38,8 +42,12 @@ private slots:
 	void createLowPassFilter();
 	void findStars();
 	void analyseStar();
+// 	void drawValidArea();
 	void quit();
 	void about();
+	
+	// Mouse move event
+// 	void mouseMoveEvent(QMouseEvent *event);
     
 private:
 	void createMenus();
@@ -53,6 +61,7 @@ private:
 	QBoxLayout *mainLayout;
 	QFitsStretchDock *stretchDock;
 	QFitsZoomDock *zoomDock;
+	QMousePointerDock *mousePointerDock;
 	
 	// File menu actionsimgM
 	QAction *openAct;
@@ -78,6 +87,7 @@ private:
 	QAction *createMedianFilterAct;
 	QAction *createLowPassFilterAct;
 	QAction *starAnalysisAct;
+// 	QAction *drawValidAreaAct;
 
 	// Help Menu actions
 	QAction *aboutAct;
@@ -89,6 +99,14 @@ private:
 	QMenu *filtersMenu;
 	QMenu *analysisMenu;
 	QMenu *helpMenu;
+};
+
+
+
+class QFitsMdiArea : public QMdiArea
+{
+public:
+	QFitsMdiArea(QWidget* parent);
 };
   
 #endif // __fitsviewer_h__

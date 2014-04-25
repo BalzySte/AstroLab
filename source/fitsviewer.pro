@@ -13,6 +13,7 @@ SOURCES       = fitsviewer.cxx \
                 QFitsWidgets/QFitsWindow.cxx \
                 QFitsWidgets/QFitsStretchDock.cxx \
                 QFitsWidgets/QFitsZoomDock.cxx \
+                QFitsWidgets/QMousePointerDock.cxx \
                 QFitsWidgets/QFitsListWidgetItem.cxx \
                 QFitsWidgets/QTextInfoWindow.cxx \
                 AstroAnalyzer/AstroAnalyzer.cxx

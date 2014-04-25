@@ -93,13 +93,14 @@ QFitsStretchDock::QFitsStretchDock(QWidget* parent)
 void QFitsStretchDock::update()
 {
 	// "Asks" to the main program object current active window
-	QFitsWindow* fitsWindow = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
 	
  	// If an image is currently selected, updates min and max shown values
-	if (fitsWindow != NULL)
+		if (currentWindow != NULL)
 	{
-		pixelT maxVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
-		pixelT minVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
+		pixelT maxVal = currentWindow->getImageLabel()->getCurrentMaxStretch();
+		pixelT minVal = currentWindow->getImageLabel()->getCurrentMinStretch();
 		
 		std::stringstream maxStr;
 		std::stringstream minStr;
@@ -148,15 +149,16 @@ void QFitsStretchDock::previewImage()
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
 
-	// Gets current selected image pointer
-	QFitsWindow* currentImage = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
-	
+	// "Asks" to the main program object current active window
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
+		
 	// If an image is currently focused
-	if (currentImage != NULL)
+	if (currentWindow != NULL)
 	{
 		// Gets from selected image last stretch values
-		pixelT currentMax = currentImage->getCurrentMaxStretch();
-		pixelT currentMin = currentImage->getCurrentMinStretch();
+		pixelT currentMax = currentWindow->getImageLabel()->getCurrentMaxStretch();
+		pixelT currentMin = currentWindow->getImageLabel()->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
 		// Calculates stretch variation from current slider positions.
@@ -168,7 +170,7 @@ void QFitsStretchDock::previewImage()
 		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / 1000;
 		
 		// Updates displayed image calling its preview method
-		currentImage->previewStretch(currentMin + minVariation, currentMax + maxVariation);
+		currentWindow->getImageLabel()->previewStretch(currentMin + minVariation, currentMax + maxVariation);
 
 		// Min and Max stretch values are updated
 		pixelT maxVal = currentMax + maxVariation;
@@ -209,27 +211,28 @@ void QFitsStretchDock::updateImage()
 	_stretchImageLabel->setPixmap(_stretchPixmap);
 	_stretchImageLabel->update();
 	
-	// Gets current selected image pointer
-	QFitsWindow* currentImage = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
-	
+	// "Asks" to the main program object current active window
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
+		
 	// If an image is currently focused
 	// Same as 
-	if (currentImage != NULL)
+	if (currentWindow != NULL)
 	{
 		// Same considerations as of QFitsStretchDock::previewImage()
-		pixelT currentMax = currentImage->getCurrentMaxStretch();
-		pixelT currentMin = currentImage->getCurrentMinStretch();
+		pixelT currentMax = currentWindow->getImageLabel()->getCurrentMaxStretch();
+		pixelT currentMin = currentWindow->getImageLabel()->getCurrentMinStretch();
 		pixelT stretch = currentMax - currentMin;
 		
 		pixelT maxVariation = (_topSlider->value() - 500) * stretch / 1000;
 		pixelT minVariation = (_bottomSlider->value() - 500) * stretch / 1000;
 		
 		// Updates displayed image calling its update method
-		currentImage->updateStretch(currentMin + minVariation, currentMax + maxVariation);
+		currentWindow->getImageLabel()->updateStretch(currentMin + minVariation, currentMax + maxVariation);
 		
 		// Min and Max stretch values are updated
-		pixelT maxVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMaxStretch();
-		pixelT minVal = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->getCurrentMinStretch();
+		pixelT maxVal = currentWindow->getImageLabel()->getCurrentMaxStretch();
+		pixelT minVal = currentWindow->getImageLabel()->getCurrentMinStretch();
 		
 		std::stringstream maxStr;
 		std::stringstream minStr;

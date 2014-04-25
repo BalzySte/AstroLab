@@ -56,12 +56,13 @@ QFitsZoomDock::QFitsZoomDock(QWidget* parent)
 void QFitsZoomDock::update()
 {
 	// "Asks" to the main program object current active window
-	QFitsWindow* fitsWindow = dynamic_cast<FitsViewer*>(parent())->getFocusedWindow();
-	
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
+		
 	// If an image is currently selected brings zoom bar to image's zoom value
-	if (fitsWindow != NULL)
+	if (currentWindow != NULL)
 	{
-		_zoomSlider->setValue(static_cast<int>(250 * (fitsWindow->getCurrentZoom() - 1) + 200));
+		_zoomSlider->setValue(static_cast<int>(250 * (currentWindow->getImageLabel()->getCurrentZoom() - 1) + 200));
 	}
 	// Or just sets it to 100 %
 	else
@@ -76,9 +77,13 @@ void QFitsZoomDock::previewImage()
 	// Calculates new zoom value
 	double newZoomValue = 1 + ((_zoomSlider->value() - 200)/250.);
 	
+	// "Asks" to the main program object current active window
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
+	
 	// If an image is focused previews zoomed image
-	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
-		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->previewZoom(newZoomValue);
+	if (currentWindow != NULL)
+		currentWindow->getImageLabel()->previewZoom(newZoomValue);
 }
 
 
@@ -87,9 +92,13 @@ void QFitsZoomDock::updateImage()
 	// Calculates new zoom value
 	double newZoomValue = 1 + ((_zoomSlider->value() - 200)/250.);
 	
-	// If an image is focused updates zoomed image
-	if (dynamic_cast<FitsViewer*>(parent())->getFocusedWindow() != NULL)
-		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow()->updateZoom(newZoomValue);
+	// "Asks" to the main program object current active window
+	QFitsWindow* currentWindow = dynamic_cast<QFitsWindow*>(
+		dynamic_cast<FitsViewer*>(parent())->getFocusedWindow());
+	
+		// If an image is focused previews zoomed image
+		if (currentWindow != NULL)
+			currentWindow->getImageLabel()->updateZoom(newZoomValue);
 }
 
 

@@ -9,10 +9,19 @@
 #include <iomanip>
 
 
+QFitsMdiArea::QFitsMdiArea(QWidget* parent) : QMdiArea(parent)
+{
+//  	setMouseTracking(true);		// Always track mouse position
+}
+
+
+
 FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 {
+//   	setMouseTracking(true);		// Always track mouse position inside application
+	
 	// Creates main area, containing Fits images Windows
-	workspace = new QMdiArea(this);
+	workspace = new QFitsMdiArea(this);
 	workspace->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	// Connects signals to slots and creates menus
@@ -25,6 +34,9 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 	// Creates zoom dock
 	zoomDock = new QFitsZoomDock(this);
 	
+	// Creates text info dock
+	mousePointerDock = new QMousePointerDock(this);
+	
 	// Adds created widget to the main window
 	setCentralWidget(workspace);
 	
@@ -34,6 +46,7 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 	// Adds docks
 	addDockWidget(Qt::RightDockWidgetArea, stretchDock);
 	addDockWidget(Qt::BottomDockWidgetArea, zoomDock);
+	addDockWidget(Qt::BottomDockWidgetArea, mousePointerDock);
 	
 	setWindowTitle("Fits Viewer");
 	
@@ -56,6 +69,13 @@ QFitsWindow* FitsViewer::getFocusedWindow() const
 {
 	return _currentFitsImage;
 }
+
+
+void FitsViewer::updateMousePointerDock()
+{
+ 	if (_currentFitsImage != NULL)
+	 	mousePointerDock->update();
+} 
 
 
 void FitsViewer::open()
@@ -112,7 +132,7 @@ void FitsViewer::exportImage()
 		QString filename = QFileDialog::getSaveFileName(this, "Export to file",
 		QDir::currentPath(), filter, &filter);
 		if (filename != QString())
-			_currentFitsImage->exportPixmapToFile(filename);
+			_currentFitsImage->getImageLabel()->exportPixmapToFile(filename);
 			
 	}
 }
@@ -162,9 +182,9 @@ void FitsViewer::addition()
 	{
 		// Creates new sum image
 		// TODO: Simplify this unreadable messy assignment.
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() +
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto() +
 				const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
-				selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+				selectionList->currentItem())->getFitsWindowPtr())->getImageLabel()->getFitsPhoto();
 		
 		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -220,8 +240,9 @@ void FitsViewer::subtraction()
 	{
 		// Creates new difference image
 		// TODO: Simply this unreadable messy assignment.
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() - const_cast<const QFitsWindow*>(dynamic_cast<
-		QFitsListWidgetItem*>(selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto()
+			- const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(selectionList->currentItem())->
+			getFitsWindowPtr())->getImageLabel()->getFitsPhoto();
 		
 		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -246,7 +267,7 @@ void FitsViewer::scalarMultiplication()
 	if (ok)		//Checks if user confirms operation
 	{
 		// Creates multiplied new image
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() * factor;
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto() * factor;
 		
 		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -276,7 +297,7 @@ void FitsViewer::scalarDivision()
 			return;
 		}
 
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() / divisor;
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto() / divisor;
 		
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
 		newFitsWindow->createFromFitsPhoto(newFitsPhoto, "DivisionImage");
@@ -328,9 +349,9 @@ void FitsViewer::multiplication()
 	{
 		// Creates new sum image
 		// TODO: Simplify this unreadable messy assignment.
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() *
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto() *
 				const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
-				selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+				selectionList->currentItem())->getFitsWindowPtr())->getImageLabel()->getFitsPhoto();
 			
 		// Creates new fits image window
 		QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -386,9 +407,9 @@ void FitsViewer::division()
 	{
 		// Creates new sum image
 		// TODO: Simplify this unreadable messy assignment.
-		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto() /
+		FitsPhoto newFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto() /
 		const_cast<const QFitsWindow*>(dynamic_cast<QFitsListWidgetItem*>(
-			selectionList->currentItem())->getFitsWindowPtr())->getFitsPhoto();
+			selectionList->currentItem())->getFitsWindowPtr())->getImageLabel()->getFitsPhoto();
 			
 			// Creates new fits image window
 			QFitsWindow *newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -407,8 +428,8 @@ void FitsViewer::createMedianFilter()
 		return;
 	
 	// Gets image width and height. Minimum between them is definitely the maximum median matrix size
-	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getWidth(),
-						 const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto().getHeight());
+	int maxN = std::min<int>(const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto().getWidth(),
+							 const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto().getHeight());
 	bool ok = 0;
 	int n = QInputDialog::getInt(this, "Insert square matrix dimension (odd integer value)",
 								 tr("Value:"), 1, 1, maxN, 3, &ok);
@@ -427,7 +448,7 @@ void FitsViewer::createMedianFilter()
 		}
 		
 		// Generates filtered photo
-		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractMedianFiltered(n);
+		FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto()).extractMedianFiltered(n);
 
 		// Creates new image window
 		QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -447,7 +468,7 @@ void FitsViewer::createLowPassFilter()
 		return;
 
 	// Generates filtered photo
-	FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto()).extractLowPassFilter3x3();
+	FitsPhoto newFitsPhoto = (const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto()).extractLowPassFilter3x3();
 	
 	// Creates new image window
 	QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
@@ -470,10 +491,10 @@ void FitsViewer::findStars()
 	if (ok)		//Checks if user confirms operation
 	{			
 		// Gets star vector returned by detectStars function
-		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), threshold);
+		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto(), threshold);
 		
 		// Calls circleStars QFitsWindow's method to circle them
-		_currentFitsImage->circleStars(starVector, 10);
+		_currentFitsImage->getImageLabel()->circleStars(starVector, 10);
 	}		
 }
 
@@ -489,10 +510,10 @@ void FitsViewer::analyseStar()
 	if (ok)		//Checks if user confirms operation
 	{			
 		// Gets star vector returned by detectStars function
-		std::vector<star> starVector = extractStarProfiles(const_cast<const QFitsWindow*>(_currentFitsImage)->getFitsPhoto(), threshold);
+		std::vector<star> starVector = extractStarProfiles(const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto(), threshold);
 		
 		// Calls circleNumberStars QFitsWindow's method to circle them and assing a number
-		_currentFitsImage->circleNumberStars(starVector, 10);
+		_currentFitsImage->getImageLabel()->circleNumberStars(starVector, 10);
 		
 		// Creates Information String
 		std::stringstream infoStream;
@@ -511,6 +532,17 @@ void FitsViewer::analyseStar()
  		infoWindow->setText(infoStream.str());
 	}		
 }
+
+
+/*
+void FitsViewer::drawValidArea()
+{
+	if (_currentFitsImage == NULL)
+		return;
+	
+	_currentFitsImage->getImageLabel()->drawValidArea();
+}
+*/
 
 
 void FitsViewer::quit()
@@ -561,6 +593,7 @@ void FitsViewer::createMenus()
 	analysisMenu = new QMenu("Analysis", this);
 	analysisMenu->addAction(findStarsAct);
 	analysisMenu->addAction(starAnalysisAct);
+// 	analysisMenu->addAction(drawValidAreaAct);
 	
 	helpMenu = new QMenu("Help", this);
 	helpMenu->addAction(aboutAct);
@@ -618,6 +651,9 @@ void FitsViewer::createActions()
 	starAnalysisAct = new QAction("Star Analysis ...", this);
 	connect(starAnalysisAct, SIGNAL(triggered()), this, SLOT(analyseStar()));
 	
+// 	drawValidAreaAct = new QAction("Draw Valid Area", this);
+// 	connect(drawValidAreaAct, SIGNAL(triggered()), this, SLOT(drawValidArea()));
+	
 /*
 	zoomInAct = new QAction("Zoom In (25%)", this);
 	zoomInAct->setShortcut(tr("Ctrl++"));
@@ -643,3 +679,9 @@ void FitsViewer::createActions()
 	aboutAct = new QAction(tr("About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
+
+/*
+void FitsViewer::mouseMoveEvent(QMouseEvent *event)
+{
+	mousePointerDock->update();
+}*/

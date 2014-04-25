@@ -156,7 +156,7 @@ std::string star::printIntensity() const
 		value << std::setprecision(prec) << std::fixed << intensity;
 	}
 	else
-		// otherwise
+	// otherwise
 	{
 		//Numbers are shown using scientific notation
 		value << std::setprecision(2) << std::scientific << intensity;

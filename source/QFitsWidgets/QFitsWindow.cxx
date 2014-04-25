@@ -5,25 +5,28 @@
 
 
 QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
-				QMdiSubWindow(parent), subWindowsList(winList), _zoomFactor(1.),
-				_xPointedPixel(-1), _yPointedPixel(-1)
+				QMdiSubWindow(parent), subWindowsList(winList)
 {
+	setMouseTracking(true);		// Always track mouse position inside widget
+	
 	// Instance must be deleted on close action
 	setAttribute(Qt::WA_DeleteOnClose);
 	
 	// Created object is added to image windows list
 	subWindowsList.push_back(this);
 	
+	// Adds a scroll area containing the label
+	_scrollArea = new QFitsScrollArea(this);
+	_scrollArea->setBackgroundRole(QPalette::Dark);
+	
 	// Creates image label for showing image
-	_imageLabel = new QFitsLabel(this);
+	_imageLabel = new QFitsLabel(_scrollArea);
 	_imageLabel->setBackgroundRole(QPalette::Base);
 	_imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
  	_imageLabel->setScaledContents(true);	// Adapts to image size
 	
-	// Adds a scroll area containing the label
-	_scrollArea = new QFitsScrollArea(this);
-	_scrollArea->setBackgroundRole(QPalette::Dark);
-	_scrollArea->setWidget(_imageLabel);
+	// Adds image label to scroll area
+ 	_scrollArea->setWidget(_imageLabel);
 	
 	// Adds scroll area to the window
 	setWidget(_scrollArea);
@@ -31,10 +34,45 @@ QFitsWindow::QFitsWindow(std::list<QFitsWindow*>& winList, QWidget* parent) :
 
 
 void QFitsWindow::open(QString filename)
-{	
+{
 	// TODO: Should rename images with same name.
-	_imageTitle = filename.section('/' , -1, -1);
+	_windowTitle = filename.section('/' , -1, -1);
+	setWindowTitle(_windowTitle);
 	
+	_imageLabel->open(filename);
+	
+	resize(300, 250);
+	show();
+}
+
+
+void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
+{
+	// TODO: Should rename images with same name.
+	_windowTitle = imageName;
+	setWindowTitle(_windowTitle);
+	
+	_imageLabel->createFromFitsPhoto(fitsPhoto);
+	
+	resize(300, 250);
+	show();
+}
+
+
+const QFitsLabel* QFitsWindow::getImageLabel() const
+{
+	return _imageLabel;	
+}
+
+
+QFitsLabel* QFitsWindow::getImageLabel()
+{
+	return _imageLabel;
+}
+
+
+void QFitsLabel::open(QString filename)
+{		
 	// Open fit file with fitsPhoto lib.
 	_fitsPhoto.open(filename.toStdString());
 
@@ -64,22 +102,23 @@ void QFitsWindow::open(QString filename)
 	QPixmap imagePixmap = QPixmap::fromImage(_image);
 	
 	// Apply QPixmap to label and adjust its size
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 		
-	setWindowTitle(_imageTitle);
-	resize(300, 250);
-	show();
-}	void _exportPixmapToFile(QString filename);
-
-
-void QFitsWindow::exportPixmapToFile(QString filename)
-{
-	_imageLabel->pixmap()->toImage().convertToFormat(QImage::Format_ARGB32).save(filename);
 }
 
 
-void QFitsWindow::previewStretch(pixelT min, pixelT max)
+// TODO: DELETE THIS 2 LINES
+// void QFitsWindow::exportPixmapToFile(QString filename);
+
+
+void QFitsLabel::exportPixmapToFile(QString filename)
+{
+	pixmap()->toImage().convertToFormat(QImage::Format_ARGB32).save(filename);
+}
+
+
+void QFitsLabel::previewStretch(pixelT min, pixelT max)
 {
 	// See QFitsWindow::open() for detailed description
 	// Populates 8 bit shades vector with restretched image
@@ -101,14 +140,14 @@ void QFitsWindow::previewStretch(pixelT min, pixelT max)
 	
 	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
 	
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();
 }
 
 
-void QFitsWindow::updateStretch(pixelT min, pixelT max)
+void QFitsLabel::updateStretch(pixelT min, pixelT max)
 {
 	// See QFitsWindow::open() for detailed description
 	
@@ -135,14 +174,14 @@ void QFitsWindow::updateStretch(pixelT min, pixelT max)
 	
 	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
 	
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();
 }
 
 
-void QFitsWindow::previewZoom(double zoomFactor)
+void QFitsLabel::previewZoom(double zoomFactor)
 {
 	// See QFitsWindow::open() for detailed description
 	int _width = _image.width();
@@ -159,14 +198,14 @@ void QFitsWindow::previewZoom(double zoomFactor)
 	scaledImg.setColorTable(colorTable);
 	
 	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();
 }
 
 
-void QFitsWindow::updateZoom(double zoomFactor)
+void QFitsLabel::updateZoom(double zoomFactor)
 {
 	// See QFitsWindow::open() for detailed description
 	_zoomFactor = zoomFactor;
@@ -186,38 +225,35 @@ void QFitsWindow::updateZoom(double zoomFactor)
 	
 	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);	// Assignment from temporary should be
 															// optimised by compiler
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();
 }
 
 
-pixelT QFitsWindow::getCurrentMaxStretch()
+pixelT QFitsLabel::getCurrentMaxStretch()
 {
 	return _currentMaxStretch;
 }
 
 
-pixelT QFitsWindow::getCurrentMinStretch()
+pixelT QFitsLabel::getCurrentMinStretch()
 {
 	return _currentMinStretch;
 }
 
 
-double QFitsWindow::getCurrentZoom()
+double QFitsLabel::getCurrentZoom()
 {
 	return _zoomFactor;
 }
 
 
 // ATTENTION: Function "steals" FitsPhoto parameter through std::move
-void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
+void QFitsLabel::createFromFitsPhoto(FitsPhoto& fitsPhoto)
 {
-	// See QFitsWindow::open() for detailed description
-	// TODO: Should rename images with same name.
-	_imageTitle = imageName;
-	
+	// See QFitsWindow::open() for detailed description	
 	// create new fit image with fitsPhoto lib.
 	_fitsPhoto = std::move(fitsPhoto);
 	
@@ -242,16 +278,12 @@ void QFitsWindow::createFromFitsPhoto(FitsPhoto& fitsPhoto, QString imageName)
 	
 	QPixmap imagePixmap = QPixmap::fromImage(_image);
 		
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
-	
-	setWindowTitle(_imageTitle);
-	resize(300, 250);
-	show();
+	setPixmap(imagePixmap);
+	adjustSize();
 }
 
 
-const FitsPhoto& QFitsWindow::getFitsPhoto() const
+const FitsPhoto& QFitsLabel::getFitsPhoto() const
 {
 	return _fitsPhoto;
 }
@@ -259,21 +291,15 @@ const FitsPhoto& QFitsWindow::getFitsPhoto() const
 
 const QString& QFitsWindow::getImageTitle() const
 {
-	return _imageTitle;
+	return _windowTitle;
 }
 
 
 QString& QFitsWindow::getImageTitle()
 {
-	return _imageTitle;
+	return _windowTitle;
 }
 
-
-/*
-QImage& QFitsWindow::getQImage(pixelT bottom, pixelT top)
-{
-}
-*/
 
 void QFitsWindow::closeEvent(QCloseEvent* closeEvent)
 {
@@ -302,12 +328,11 @@ void QFitsWindow::focusInEvent(QFocusEvent* focusEvent)
 	QObject* tmpMdiArea = (parent())->parent();
 	FitsViewer* tmpMainWin = dynamic_cast<FitsViewer*>(tmpMdiArea->parent());
 	tmpMainWin->setFocusedWindow(this);
-	_imageLabel->setFocus();
 	focusEvent->accept();
 }
 
 
-void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
+void QFitsLabel::circleStars(const std::vector<star>& vector, int radius)
 {
 // Draws blue circles around stars contained in vector.
 // Circles are temporary drawn directly on the image pixmap.
@@ -339,7 +364,7 @@ void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 	int spanAngle = 5760;
 	
 	// For each element in vector draws the circle
-	for (std::vector<star>::iterator it = vector.begin(); it != vector.end(); ++it)
+	for (std::vector<star>::const_iterator it = vector.cbegin(); it != vector.cend(); ++it)
 	{
 		QRectF rectangle((it->x-radius)*_zoomFactor, (it->y-radius)*_zoomFactor, (2*radius)*_zoomFactor, (2*radius)*_zoomFactor);	
 		painter.drawArc(rectangle, startAngle, spanAngle);
@@ -348,14 +373,14 @@ void QFitsWindow::circleStars(std::vector<star>& vector, int radius)
 	// Finished to draw
 	painter.end();
 	
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();
 }
 
 
-void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
+void QFitsLabel::circleNumberStars(const std::vector<star>& vector, int radius)
 {
 	// Works as previous functions but draws also a small number
 	// near the top right corner of the circle to identify the star
@@ -391,7 +416,7 @@ void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
 	
 	// For each element in vector draws the circle
 	int count = 0;
-	for (std::vector<star>::iterator it = vector.begin(); it != vector.end(); ++it)
+	for (std::vector<star>::const_iterator it = vector.cbegin(); it != vector.cend(); ++it)
 	{
 		QRectF rectangle((it->x-radius)*_zoomFactor, (it->y-radius)*_zoomFactor, (2*radius)*_zoomFactor, (2*radius)*_zoomFactor);	
 		painter.drawArc(rectangle, startAngle, spanAngle);
@@ -401,58 +426,130 @@ void QFitsWindow::circleNumberStars(std::vector<star>& vector, int radius)
 	// Finished to draw
 	painter.end();
 	
-	_imageLabel->setPixmap(imagePixmap);
-	_imageLabel->adjustSize();
+	setPixmap(imagePixmap);
+	adjustSize();
 	
 	show();	
 }
 
 
-// --- QFitsLabel ---
+/*
+void QFitsLabel::drawValidArea()
+{	// Conceptually similar to circleStars method.
+	// Draws a coloured rectangle on the image to
+	// highlights the valid area of the image
+	
+	// See QFitsWindow::open() for detailed description on how image is drawn
+	int _width = _image.width();
+	int _height = _image.height();
+	
+	QImage scaledImg = _image.scaled(static_cast<int>(_width*_zoomFactor),
+									 static_cast<int>(_height*_zoomFactor),
+									 Qt::KeepAspectRatio,
+								  Qt::SmoothTransformation);
+	
+	QVector<QRgb> colorTable(256);
+	for(int i = 0; i < 256; ++i)
+		colorTable[i] = qRgb(i,i,i);
+	
+	scaledImg.setColorCount(256);	
+	scaledImg.setColorTable(colorTable);
+	
+	QPixmap imagePixmap = QPixmap::fromImage(scaledImg);
+	// Assignment from temporary should be
+	// optimised by compiler
+	// QPainter object is used to draw
+	QPainter painter(&imagePixmap);
+	// Setting drawing tool (blue pen)
+	painter.setPen(Qt::red);
+	
+	
+	int x1 = _fitsPhoto.validArea().x1;
+	int y1 = _fitsPhoto.validArea().y1;
+	int x2 = _fitsPhoto.validArea().x2;
+	int y2 = _fitsPhoto.validArea().y2;
+	
+	int topLeftX, topLeftY, width, height;
+	
+	if (x1 == 0)
+		topLeftX = 0;
+	else
+		topLeftX = static_cast<int>(x1*_zoomFactor  + 0.5);
+	
+	if (y1 == 0)
+		topLeftY = 0;
+	else
+		topLeftY = static_cast<int>(y1*_zoomFactor  + 0.5);
+	
+	if (x2 ==  _fitsPhoto.getWidth() - 1)
+		width = imagePixmap.width() - 1;
+	else
+		width = static_cast<int>((x2 - x1)*_zoomFactor + 0.5);
+	
+	if (y2 ==  _fitsPhoto.getHeight() - 1)
+		height = imagePixmap.height() - 1;
+	else
+		height = static_cast<int>((y2 - y1)*_zoomFactor + 0.5);
+	
+	// Draws rectangle
+	QRectF rectangle(topLeftX, topLeftY, width, height);	
+	painter.drawRect(rectangle);
+	
+	// Finished to draw
+	painter.end();
+	
+	setPixmap(imagePixmap);
+	adjustSize();
+	
+	show();
+}
+*/
 
-QFitsLabel::QFitsLabel(QFitsWindow* parent) : QLabel()
+
+void QFitsWindow::mouseMoveEvent(QMouseEvent* event)
 {
-	setFocusPolicy(Qt::ClickFocus);
-//	setAttribute(Qt::WA_NoMousePropagation);	//No propagation of mouse event
-	setMouseTracking(true);		// Always track mouse position inside widget
-	_fitsWindowParent = parent;
+	QMdiSubWindow::mouseMoveEvent(event);
+	dynamic_cast<FitsViewer*>(parent()->parent()->parent())->updateMousePointerDock(); // Calls Mouse Pointer dock update method
+	event->accept();
 }
 
 
-QPoint QFitsLabel::pointedPixel()
+// --- QFitsLabel ---
+
+QFitsLabel::QFitsLabel(QWidget* parent) :
+			QLabel(parent), _zoomFactor(1.), _pointedPixel(QPoint(-1,-1))
+{
+	setFocusPolicy(Qt::NoFocus);
+//	setAttribute(Qt::WA_NoMousePropagation);	//No propagation of mouse event
+	setMouseTracking(true);		// Always track mouse position inside widget
+}
+
+
+QPoint QFitsLabel::getPointedPixel()
 {
 	return _pointedPixel;
 }
 
 
-/*
-void QFitsLabel::focusInEvent(QFocusEvent *focusEvent)
+QPoint QFitsLabel::getPointedPixel() const
 {
+	return _pointedPixel;
 }
-*/
 
-#include <iostream>
+
 // ATTENTION: TODO: pos() is mouse position. It should
 // be converted to image coordinates.
 void QFitsLabel::mouseMoveEvent(QMouseEvent *event)
 {
-	int x = event->x();
-	int y = event->y();
+	_pointedPixel = (event->pos() / _zoomFactor);
 	
-	if (hasFocus())
-	{
-		// Mouse inside of widget
-		if (this->rect().contains(event->pos())) {
-			_pointedPixel = event->pos();
-			std::cout << x << ' ' << y << std::endl;
-		}
-		// Mouse out of Widget
-		else
-		{
-			_pointedPixel = QPoint(-1, -1);
-			std::cout << x << ' ' << y << std::endl;	
-		}
-	}
+  	event->ignore();
+}
+
+
+void QFitsLabel::leaveEvent(QEvent *event)
+{
+	_pointedPixel = QPoint(-1, -1);
 	event->accept();
 }
 
@@ -462,12 +559,21 @@ void QFitsLabel::mouseMoveEvent(QMouseEvent *event)
 
 QFitsScrollArea::QFitsScrollArea(QFitsWindow* fitsWinPtr) : QScrollArea()
 {
-	_fitsWindowParent = fitsWinPtr;		//Useless, should use parent.
+	setMouseTracking(true);		// Always track mouse position inside widget
+	setFocusPolicy(Qt::NoFocus);
+	_fitsWindowParent = fitsWinPtr;		// Useless, should use parent.
 }
+
+
+void QFitsScrollArea::mouseMoveEvent(QMouseEvent* event)
+{
+	QScrollArea::mouseMoveEvent(event);
+	event->ignore();
+}
+
 
 /*
 void QFitsScrollArea::focusInEvent(QFocusEvent* focusEvent)
-{
 	// Although not used, focusInEvent parameter is necessary for
 	// signal - slot connection*/
 	/*

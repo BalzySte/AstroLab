@@ -12,7 +12,7 @@ class QFitsZoomDock : public QDockWidget
 	
 public:
 	QFitsZoomDock(QWidget* parent = 0);
-	void update();	// Updates zoom bar position
+	void update();	// Updates zoom bar position when moving to another window image
 	void previewImage();
 	void updateImage();
 	
