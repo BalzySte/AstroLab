@@ -1,14 +1,61 @@
 #!/bin/sh
 
-cd source
-qmake
-
-echo $1
-if [ "$1" = "-B" ]
+# default target platform is linux
+if [ "$1" = "" ]
 then
-    make -B
+    bash compile linux
+    exit 0
+elif [ "$1" = "-B" ]
+then
+    bash compile linux $1
+    exit 0
+fi
 
+if [ "$1" = "all" ]
+then
+    echo "\nCompiling for LINUX\n"
+    bash compile linux $2
+    echo "\nCompiling for WIN-32\n"
+    bash compile win32 $2
+    echo "\nCompiling for WIN-64\n"
+    bash compile win64 $2
+    exit 0
+fi
+
+cd source
+
+BUILD_DIR="../build/"
+WIN32_QMAKE="/opt/mxe/usr/i686-w64-mingw32.static/qt/bin/qmake"
+WIN64_QMAKE="/opt/mxe/usr/x86_64-w64-mingw32.static/qt/bin/qmake"
+
+if [ "$1" = "linux" ]
+then
+    BUILD_DIR="${BUILD_DIR}linux"
+    qmake CONFIG+=linux
+elif [ "$1" = "win32" ]
+then
+    BUILD_DIR="${BUILD_DIR}win32"
+    $WIN32_QMAKE CONFIG+=win32
+elif [ "$1" = "win64" ]
+then
+    BUILD_DIR="${BUILD_DIR}win64"
+    $WIN64_QMAKE CONFIG+=win64
+else
+    echo "No target platform specified. Sintax is:"
+    echo "    ./compile target\n"
+    echo "Possible targets are: linux, win32, win64"
+    exit 1
+fi
+
+mkdir -p $BUILD_DIR
+
+if [ "$2" = "-B" ]
+then
+    rm -f $BUILD_DIR/*
+    make -B
 else
     make
-
 fi
+
+# Deletes object_script.* and Makefile* to keep source directory clean
+rm -f object_script.fitsviewer* Makefile*

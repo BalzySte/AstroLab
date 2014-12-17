@@ -6,6 +6,8 @@ URGENTE:
   è necessariamente contenuta in una finestra), di conseguenza dovrebbero
   stare in QFitsLabel.
 
+- Aggiustare il sistema di riferimento sui pixel: (0, 0) è il primo pixel
+  in alto a sinistra. Partire da (1, 1) genera confusione con gli array.
 -------------------------------------------------------------------------
 
 - Efficienza filtro mediana (std::vector sembra essere lento)

@@ -3,6 +3,8 @@
 
 QTextInfoWindow::QTextInfoWindow(const char* titleString)
 {	
+	setAttribute(Qt::WA_DeleteOnClose, true);
+	
 	_layout = new QGridLayout();
 	
 	_buttonBox = new QDialogButtonBox(this);
@@ -43,5 +45,5 @@ void QTextInfoWindow::setText(std::string text)
 
 void QTextInfoWindow::OkButtonPressed()
 {
-	this->~QTextInfoWindow();
+	this->close();
 }

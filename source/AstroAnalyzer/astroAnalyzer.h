@@ -40,7 +40,11 @@ public:
 
 
 std::vector<star> detectStars(const FitsPhoto& astroImage, double threshold, int medianMatrixSize = 9);
-std::vector<star> extractStarProfiles(const FitsPhoto& astroImage, double threshold, int medianMatrixSize = 9);
+std::vector<star> extractStarProfiles(const FitsPhoto& astroImage, double threshold, bool removeColliding = false, int medianMatrixSize = 9);
+
+// TESTING:
+std::vector<star> extractStarProfiles(const FitsPhoto& astroImage, double topThreshold, double bottomThreshold,
+														bool removeColliding = false, int medianMatrixSize = 9);
 
 
 #endif //__astroAnalizer_h__

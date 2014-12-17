@@ -4,9 +4,12 @@
 #include "QFitsListWidgetItem.h"
 #include "astroAnalyzer.h"
 #include "QTextInfoWindow.h"
+#include "QFitsFocalPlanePanel.h"
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <iostream> //DEBUGGING
+
 
 
 QFitsMdiArea::QFitsMdiArea(QWidget* parent) : QMdiArea(parent)
@@ -491,7 +494,8 @@ void FitsViewer::findStars()
 	if (ok)		//Checks if user confirms operation
 	{			
 		// Gets star vector returned by detectStars function
-		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto(), threshold);
+		std::vector<star> starVector = detectStars(const_cast<const QFitsWindow*>(_currentFitsImage)
+														->getImageLabel()->getFitsPhoto(), threshold);
 		
 		// Calls circleStars QFitsWindow's method to circle them
 		_currentFitsImage->getImageLabel()->circleStars(starVector, 10);
@@ -531,6 +535,56 @@ void FitsViewer::analyseStar()
 		QTextInfoWindow* infoWindow = new QTextInfoWindow("Star Profiles");
  		infoWindow->setText(infoStream.str());
 	}		
+}
+
+
+void FitsViewer::focalPlaneEvaluation()
+{
+	if(_currentFitsImage == NULL)
+		return;
+	
+	bool ok;
+	double threshold = QInputDialog::getDouble(this, "Multiply by:",
+											   tr("Factor:"), 0.4, 0.00001, 1., 5, &ok);
+	
+	// TODO: Show a proper message in case of error
+	
+	if (ok)		//Checks if user confirms operation
+	{
+		std::string fileName = 	const_cast<const QFitsWindow*>(
+			_currentFitsImage)->getImageLabel()->getFitsPhoto().getFileName();
+			
+		std::cout << fileName << std::endl;
+		
+		QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
+		focalPlanePanel->analyseFitsFile(QString::fromStdString(fileName), threshold);
+	}
+	//TODO: FocalPlanePanel should be destroyed upon exit, use Qt::WA_DeleteOnClose
+	
+}
+
+
+void FitsViewer::opticsAlignment()
+{
+	// Prompts user to select working folder
+	QString folderPath = QFileDialog::getExistingDirectory(this,
+						"Select Working Folder", QDir::currentPath());
+	
+	bool ok;
+	double threshold = QInputDialog::getDouble(this, "Multiply by:",
+							   tr("Factor:"), 0.4, 0.00001, 1., 5, &ok);
+	
+	std::cout << folderPath.toStdString() << std::endl;
+	// TODO: Show a proper message in case of error
+	//    QMessageBox::information(this, "Image Viewer",
+	//						QString("Cannot load %1.").arg(fileName));
+		
+	if (ok)		// Checks if user confirms operation
+	{		
+		QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
+		focalPlanePanel->continuousAnalysis(folderPath, threshold);	
+	}
+	//TODO: FocalPlanePanel should be destroyed upon exit, use Qt::WA_DeleteOnClose
 }
 
 
@@ -593,6 +647,8 @@ void FitsViewer::createMenus()
 	analysisMenu = new QMenu("Analysis", this);
 	analysisMenu->addAction(findStarsAct);
 	analysisMenu->addAction(starAnalysisAct);
+	analysisMenu->addAction(focalPlaneEvaluationAct);
+	analysisMenu->addAction(opticsAlignmentAct);
 // 	analysisMenu->addAction(drawValidAreaAct);
 	
 	helpMenu = new QMenu("Help", this);
@@ -650,6 +706,12 @@ void FitsViewer::createActions()
 	
 	starAnalysisAct = new QAction("Star Analysis ...", this);
 	connect(starAnalysisAct, SIGNAL(triggered()), this, SLOT(analyseStar()));
+	
+	focalPlaneEvaluationAct = new QAction("Focal Plane Evaluation ...", this);
+	connect(focalPlaneEvaluationAct, SIGNAL(triggered()), this, SLOT(focalPlaneEvaluation()));
+	
+	opticsAlignmentAct = new QAction("Optics Alignment ...", this);
+	connect(opticsAlignmentAct, SIGNAL(triggered()), this, SLOT(opticsAlignment()));
 	
 // 	drawValidAreaAct = new QAction("Draw Valid Area", this);
 // 	connect(drawValidAreaAct, SIGNAL(triggered()), this, SLOT(drawValidArea()));

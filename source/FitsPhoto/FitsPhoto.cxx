@@ -48,7 +48,7 @@ void FitsPhoto::open(const std::string &filename)
 	
 	_valid = true;	//File opened and read, setting validity flag
 
-	inFitsFile.~FITS();	//Fits object is destroyed
+	inFitsFile.~FITS();	//Fits object is destroyed TODO: probably this is not necessary
 }
 
 
@@ -129,7 +129,7 @@ const std::valarray<pixelT>& FitsPhoto::getImageArray() const
 }
 
 
-std::string FitsPhoto::getFileName()
+std::string FitsPhoto::getFileName() const
 {
 	return _filename;
 }
@@ -460,6 +460,12 @@ pixelT FitsPhoto::getImageMaxValue() const
 pixelT FitsPhoto::getImageMinValue() const
 {	
 	return _imageArray.min();
+}
+
+
+pixelT FitsPhoto::getImageMeanValue() const
+{
+	return _imageArray.sum()/_pixelNumber;
 }
 
 

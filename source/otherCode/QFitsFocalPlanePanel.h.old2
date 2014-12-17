@@ -1,0 +1,50 @@
+#include <QtGui>
+#include <QThread>
+
+#include "qcustomplot.h"
+#include "FitsPhoto.h"
+#include "astroAnalyzer.h"
+#include "QFitsWindow.h"
+
+class QFitsFocalPlanePanel;
+class FocalPanelUpdater;
+
+
+// TODO: THIS WIDGET SHOULD BLOCK PARENT WINDOW AND MEMORY SHOULD BE DEALLOCATED WHEN CLOSED
+class QFitsFocalPlanePanel : public QWidget
+{
+friend class FocalPanelUpdater;
+
+	Q_OBJECT
+
+public:
+	QFitsFocalPlanePanel(QWidget* parent = 0);
+	virtual ~QFitsFocalPlanePanel();
+	void analyseFitsFile(QString filename, double threshold);
+
+private:
+	QGridLayout* panelGrid;
+	QFitsLabel* starFieldImage;
+	QCustomPlot* colorMapPlot;
+	QLabel* numericalInfo;
+	
+	FocalPanelUpdater* _updaterThread;
+	QString _prevFilename;
+};
+
+
+
+class FocalPanelUpdater : public QThread
+{
+	Q_OBJECT
+
+public:
+	FocalPanelUpdater(QString filename, double threshold, QWidget* parent = 0);
+//	virtual ~FocalPanelUpdater();
+	
+protected:
+	QString _filename;
+	double _threshold;
+	void run();
+//	void run();
+};

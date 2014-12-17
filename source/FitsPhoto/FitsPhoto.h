@@ -31,12 +31,14 @@ public:
 	void open(const std::string &filename);
 	void create(int width, int height, int xPos = 0, int yPos = 0);
 	void write(const std::string &filename, bool overwrite);
+	
+	//TODO: Add methods for closing / flushing
 
 	// Private members access methods
 	std::valarray<pixelT>& getImageArray();
 	const std::valarray<pixelT>& getImageArray() const;
 	std::string getHeaderStr();
-	std::string getFileName();
+	std::string getFileName() const;
 
 	// Image keywords access
 	int getBitpix() const;
@@ -68,6 +70,7 @@ public:
 	// Image Useful data
 	pixelT getImageMaxValue() const;
 	pixelT getImageMinValue() const;
+	pixelT getImageMeanValue() const;
 	
 	// Image validity flag. (True if image was read/created and no error occured)
 	bool isValid() const;

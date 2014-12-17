@@ -1,0 +1,187 @@
+﻿#include "QFitsFocalPlanePanel.h"
+#include "focalPlaneRegression.h"
+#include <algorithm>
+//#include <iostream>
+#include <cmath>
+
+#define PI 3.14159265
+
+
+QFitsFocalPlanePanel::QFitsFocalPlanePanel(QWidget* parent) : QWidget(parent)
+{
+	// Creates panel grid to arrange widgets
+	panelGrid = new QGridLayout(this);
+
+	// Creates alignment window widgets
+	starFieldImage = new QFitsLabel(this);
+	colorMapPlot = new QCustomPlot(this);
+	numericalInfo = new QLabel(this);
+
+	// Widgets are placed in grid layout
+//	panelGrid->addWidget(starFieldImage, 0, 0, 1, 1);
+	panelGrid->addWidget(colorMapPlot, 0, 1, 1, 1);
+	panelGrid->addWidget(numericalInfo, 1, 0, 1, 2);
+
+	//this->resize(x, y);
+	resize (1200, 500);
+}
+
+
+void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double threshold)
+{
+	starFieldImage->open(filename);
+	// BEGIN Field Image Setup
+	
+	// Use a blank widget to evaluate space available in window
+	// TODO: replace this trick with some good code
+	QWidget* tempWidget = new QLabel();
+	panelGrid->addWidget(tempWidget, 0, 0, 1, 1);
+	
+//	starFieldImage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//	starFieldImage->setScaledContents(true);		
+	
+	// Gets star vector returned by extractStarProfiles function
+	std::vector<star> starVector = extractStarProfiles(starFieldImage->getFitsPhoto(), threshold, true);
+		
+//	starFieldImage->setFrameShape(QFrame::Box);
+//	starFieldImage->setFrameShadow(QFrame::Raised);
+//	starFieldImage->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+//	starFieldImage->setScaledContents(true);		
+//	fieldImage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			
+	// Field Image stretch is adjusted to display selected stars in bright white 
+//	pixelT brightestStar = starVector.back().intensity;
+	pixelT dimmestStar = starVector.front().intensity;
+	pixelT backgroundIntensity = starFieldImage->getFitsPhoto().extractMedianFiltered(9).getImageMeanValue();
+			// NOTE: This median filter is already applied by Star Detect function 
+			//       therefore this calculation is a waste of resources. Anyway
+			//       that's the price to pay for encapsulation and code reuse.
+			// TODO: In the future all these resource demanding procedures should be
+			//       organized in a proper way to reduce computing power wastes and
+			//       speed up the program.	
+	// END Field Image Setup
+	
+	// BEGIN Color Map Setup
+	colorMapPlot->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	colorMapPlot->yAxis->setRangeReversed(true);
+	colorMapPlot->xAxis->setVisible(false);	
+	colorMapPlot->xAxis2->setVisible(true);
+	colorMapPlot->xAxis2->setTickLabels(true);
+	connect(colorMapPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), colorMapPlot->xAxis2, SLOT(setRange(QCPRange)));
+//	colorMapPlot->xAxis2->setRange(colorMapPlot->xAxis->range());
+	QCPColorMap* colorMap = new QCPColorMap(colorMapPlot->xAxis, colorMapPlot->yAxis);
+	
+	int imageHeight = starFieldImage->getFitsPhoto().getHeight();
+	int imageWidth = starFieldImage->getFitsPhoto().getWidth();
+	
+	// Focal plane equaqtion is calculated with multiple linear regression
+	double focalPlaneCoeff[3];
+	focalPlaneRegression(starVector, focalPlaneCoeff);
+
+	colorMap->data()->setSize(50, 50);		
+	colorMap->data()->setRange(QCPRange(0, imageWidth-1), QCPRange(0, imageHeight-1));
+ 	for (int x=0; x<imageWidth; ++x)
+ 		for (int y=0; y<imageHeight; ++y)
+ 			colorMap->data()->setData(x, y, focalPlaneCoeff[0]+x*focalPlaneCoeff[1]+y*focalPlaneCoeff[2]);
+
+	colorMap->setGradient(QCPColorGradient::gpPolar);
+	colorMap->rescaleDataRange(true);
+	
+	colorMapPlot->addPlottable(colorMap);
+	colorMapPlot->rescaleAxes();
+	
+	//DEBUGGING
+/*	std::cout << "Z = C0 + C1 * X + C2 * Y ;"
+				<< " CO: " << focalPlaneCoeff[0]
+				<< " C1: " << focalPlaneCoeff[1]
+				<< " C2: " << focalPlaneCoeff[2]
+				<< std::endl
+				<< " - thrd:" << threshold
+				<< " - StarNum:" << starVector.size() 
+				<< std::endl;
+*/	
+	// END Color Plot Setup
+	
+	// BEGIN Numerical Info Setup
+	numericalInfo->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+	
+//	QGridLayout* numericalInfoLayout = new QGridLayout(numericalInfo);
+//	QWidget* gradientLabel = new QLabel();
+//	QWidget* gradientLabel2 = new QLabel();
+	double nablaModulus = pow(pow(focalPlaneCoeff[1], 2) + pow(focalPlaneCoeff[2], 2), .5);
+	double nablaTheta = atan2(focalPlaneCoeff[2], focalPlaneCoeff[1]) * 180 / PI;
+	double FWHM_TopLeft = focalPlaneCoeff[0];
+	double FWHM_BottomLeft = focalPlaneCoeff[0] + focalPlaneCoeff[2] * imageHeight;
+	double FWHM_BottomRight = focalPlaneCoeff[0] + focalPlaneCoeff[1] * imageWidth +
+	focalPlaneCoeff[2] * imageHeight;
+	double FWHM_TopRight = focalPlaneCoeff[0] + focalPlaneCoeff[1] * imageWidth;
+	double FWHM_Center = focalPlaneCoeff[0] + focalPlaneCoeff[1] * (imageWidth / 2) +
+												focalPlaneCoeff[2] * (imageHeight/2);
+	
+	QString numericalInfoText = QString(QString::fromUtf8(
+		"\u2207: (%1, %2)       |\u2207|, \u03D1: %3, %4 \u00B0       "
+		"FWHM:  \u25F0: %5    \u25F1: %6    \u25F2: %7    \u25F3: %8    \u25AB : %9"))
+	.arg(focalPlaneCoeff[1], 5, 'E', 3).arg(focalPlaneCoeff[2], 5, 'E', 3)
+	.arg(nablaModulus, 5, 'E', 3).arg(nablaTheta, 5, 'g', 4)
+	.arg(FWHM_TopLeft, 5, 'g', 3).arg(FWHM_BottomLeft, 5, 'g', 3).arg(FWHM_BottomRight, 5, 'g', 3)
+	.arg(FWHM_TopRight, 5, 'g', 3).arg(FWHM_Center, 5, 'g', 3); 
+		
+	numericalInfo->setText(numericalInfoText);
+	QFont font = numericalInfo->font();
+	font.setPointSize(11);
+//	font.setBold(true);
+	numericalInfo->setFont(font);
+//	"Gradient:" "|Grad|, Theta :" "FWHM: top-left: bottom-left: bottom-right: top-right:"
+	
+	
+//	numericalInfoLayout->addWidget(gradientLabel, 0, 0);
+//	numericalInfoLayout->addWidget(gradientLabel2, 0, 1);
+	
+	// END Numerical Info setup
+	
+	// this->show()
+	show();
+	
+	// SETUP starFieldImage
+	// After the layout geometry is set and the parent is visible,
+	// the star field image can be resized according to available space
+	// and the tempWidget is removed from layout.
+	// NOTE: tempWidget is still child of "this" therefore is destroyed
+	//       upon parent destruction.
+	
+	
+	starFieldImage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	
+	//TODO: Put this even in resize event!
+	// get label dimensions
+	int w = panelGrid->cellRect(0, 0).width();
+	int h = panelGrid->cellRect(0, 0).height();
+	
+// 	std::cout << "W: " << w << " H: " << h << std::endl;
+	
+	// set a scaled pixmap to a w x h window keeping its aspect ratio 
+	double zoomFactor = std::min(static_cast<double>(w) / starFieldImage->getFitsPhoto().getWidth(),
+								 static_cast<double>(h) / starFieldImage->getFitsPhoto().getHeight());
+// 	std::cout << zoomFactor << std::endl;
+	//starFieldImage->setPixmap(starFieldImage->pixmap()->scaled(w,h,Qt::KeepAspectRatio));
+	starFieldImage->updateZoom(zoomFactor);
+	
+	// Image is stretched so that all selected stars are 255 white and background
+	// noise is removed (0 black)
+	starFieldImage->updateStretch(backgroundIntensity, dimmestStar+backgroundIntensity); 
+	
+	// Calls circleNumberStars QFitsWindow's method to circle them and assign a number
+	starFieldImage->circleNumberStars(starVector, 10);
+	
+	panelGrid->removeWidget(tempWidget);
+	tempWidget->hide();
+//	delete tempWidget;
+	panelGrid->addWidget(starFieldImage, 0, 0, 1, 1);
+	starFieldImage->show();
+//	dynamic_cast<QLabel*>(tempWidget)->setText("HELLO!");
+//	starFieldImage->setText("YO!");
+// 	QTextInfoWindow* infoWindow = new QTextInfoWindow("Star Profiles");
+// 	infoWindow->setText(infoStream.str());
+	// END starFieldImage
+	show();
+}

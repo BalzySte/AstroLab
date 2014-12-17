@@ -1,0 +1,15 @@
+#!/bin/bash
+
+rm -f ./focalPlane/*
+
+count=0
+
+while true
+do
+	ln ./testImages/ATAMI/0000"$((count%9 + 1))".fit ./focalPlane/0000"$count".fit
+	touch ./focalPlane/0000"$count".fit
+	count=$((count+1))	
+	sleep 10
+
+done
+rm -f ./focalPlane/*

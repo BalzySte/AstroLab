@@ -42,6 +42,8 @@ private slots:
 	void createLowPassFilter();
 	void findStars();
 	void analyseStar();
+	void focalPlaneEvaluation();
+	void opticsAlignment();
 // 	void drawValidArea();
 	void quit();
 	void about();
@@ -87,6 +89,8 @@ private:
 	QAction *createMedianFilterAct;
 	QAction *createLowPassFilterAct;
 	QAction *starAnalysisAct;
+	QAction *focalPlaneEvaluationAct;
+	QAction *opticsAlignmentAct;
 // 	QAction *drawValidAreaAct;
 
 	// Help Menu actions

@@ -73,7 +73,7 @@ public:
 	void exportPixmapToFile(QString filename);
 	
 	
-	// Previews and updates image stretch 
+	// Previews and updates image stretch
 	void previewStretch(pixelT min, pixelT max);
 	void updateStretch(pixelT min, pixelT max);
 	
@@ -88,7 +88,7 @@ public:
 	double getCurrentZoom();
 		
 	// Methods for accessing private FitsPhoto member.
-	FitsPhoto& getFitsPhoto();
+//  	FitsPhoto& getFitsPhoto();
 	const FitsPhoto& getFitsPhoto() const;
 	
 	// Method for accessing pointed pixel
