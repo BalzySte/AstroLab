@@ -17,8 +17,8 @@ friend class QFitsFocalPlaneWorker;
 public:
 	QFitsFocalPlanePanel(QWidget* parent = 0);
 	virtual ~QFitsFocalPlanePanel();
-	void analyseFitsFile(QString filename, double threshold);
-	void continuousAnalysis(QString folderPath, double threshold);
+	void analyseFitsFile(QString filename, double topThreshold, double bottomThreshold);
+	void continuousAnalysis(QString folderPath, double topThreshold, double bottomThreshold);
 	
 protected:
 	virtual void closeEvent(QCloseEvent *event);
@@ -42,7 +42,7 @@ class QFitsFocalPlaneWorker : public QThread
 	Q_OBJECT
 
 public:
-	QFitsFocalPlaneWorker(QString folderPath, double threshold, QWidget* parent = 0);
+	QFitsFocalPlaneWorker(QString folderPath, double topThreshold, double bottomThreshold, QWidget* parent = 0);
 	virtual ~QFitsFocalPlaneWorker();
 	void setQuitFlag();
 
@@ -57,5 +57,6 @@ private:
 	QString _oldFilename;
 	QString _folderPath;
 	QStringList _fileFilters;
-	double _threshold;
+	double _topThreshold;
+	double _bottomThreshold;
 };

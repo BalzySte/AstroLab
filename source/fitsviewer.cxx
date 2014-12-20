@@ -550,8 +550,8 @@ void FitsViewer::focalPlaneEvaluation()
 		return;
 	
 	bool ok;
-	double threshold = QInputDialog::getDouble(this, "Multiply by:",
-											   tr("Factor:"), 0.4, 0.00001, 1., 5, &ok);
+	double topThreshold = QInputDialog::getDouble(this, "Insert decimal number",
+		tr("Max stars intensity\nRelative to brightest"), 0.1, 0.00001, 1., 5, &ok);
 	
 	// TODO: Show a proper message in case of error
 	
@@ -560,13 +560,15 @@ void FitsViewer::focalPlaneEvaluation()
 		std::string fileName = 	const_cast<const QFitsWindow*>(
 			_currentFitsImage)->getImageLabel()->getFitsPhoto().getFileName();
 			
-		std::cout << fileName << std::endl;
-		
-		QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
-		focalPlanePanel->analyseFitsFile(QString::fromStdString(fileName), threshold);
-	}
-	//TODO: FocalPlanePanel should be destroyed upon exit, use Qt::WA_DeleteOnClose
-	
+// 		std::cout << fileName << std::endl;
+		double bottomThreshold = QInputDialog::getDouble(this, "Insert decimal number",
+			tr("Min stars intensity\nRelative to brightest"), topThreshold * 0.7, 0.00001, 1., 5, &ok);
+			if (ok)
+		{
+			QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
+			focalPlanePanel->analyseFitsFile(QString::fromStdString(fileName), topThreshold, bottomThreshold);
+		}
+	}	
 }
 
 
@@ -576,19 +578,28 @@ void FitsViewer::opticsAlignment()
 	QString folderPath = QFileDialog::getExistingDirectory(this,
 						"Select Working Folder", QDir::currentPath());
 	
-	bool ok;
-	double threshold = QInputDialog::getDouble(this, "Multiply by:",
-							   tr("Factor:"), 0.4, 0.00001, 1., 5, &ok);
+	if (folderPath == "")
+		return;
 	
-	std::cout << folderPath.toStdString() << std::endl;
+	bool ok;
+	double topThreshold = QInputDialog::getDouble(this, "Insert decimal number",
+		tr("Max stars intensity\nRelative to brightest"), 0.1, 0.00001, 1., 5, &ok);
+	
+// 	std::cout << folderPath.toStdString() << std::endl;
 	// TODO: Show a proper message in case of error
 	//    QMessageBox::information(this, "Image Viewer",
 	//						QString("Cannot load %1.").arg(fileName));
 		
 	if (ok)		// Checks if user confirms operation
-	{		
-		QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
-		focalPlanePanel->continuousAnalysis(folderPath, threshold);	
+	{	
+		double bottomThreshold = QInputDialog::getDouble(this, "Insert decimal number",
+			tr("Min stars intensity\nRelative to brightest"), topThreshold * 0.7, 0.00001, 1., 5, &ok);
+		
+		if(ok)
+		{
+			QFitsFocalPlanePanel* focalPlanePanel = new QFitsFocalPlanePanel();
+			focalPlanePanel->continuousAnalysis(folderPath, topThreshold, bottomThreshold);
+		}
 	}
 	//TODO: FocalPlanePanel should be destroyed upon exit, use Qt::WA_DeleteOnClose
 }

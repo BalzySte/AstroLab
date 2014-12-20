@@ -95,7 +95,7 @@ void QFitsFocalPlanePanel::closeEvent(QCloseEvent *event)
 }
 
 
-void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double threshold)
+void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double topThreshold, double bottomThreshold)
 {
 	_starFieldImage->open(filename);
 	// BEGIN Field Image Setup
@@ -108,7 +108,7 @@ void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double threshold)
 	// Gets star vector returned by extractStarProfiles function
 	// TESTING:
 //	std::vector<star> starVector = extractStarProfiles(_starFieldImage->getFitsPhoto(), threshold, true);
- 	std::vector<star> starVector = extractStarProfiles(_starFieldImage->getFitsPhoto(), threshold, 0.7*threshold, true);
+	std::vector<star> starVector = extractStarProfiles(_starFieldImage->getFitsPhoto(), topThreshold, bottomThreshold, true);
 	
 	// Field Image stretch is adjusted to display selected stars in bright white 
 	//	pixelT brightestStar = starVector.back().intensity;
@@ -213,10 +213,10 @@ void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double threshold)
 }
 
 
-void QFitsFocalPlanePanel::continuousAnalysis(QString folderPath, double threshold)
+void QFitsFocalPlanePanel::continuousAnalysis(QString folderPath, double topThreshold, double bottomThreshold)
 {
 	_colorMapPlot->addPlottable(_colorMap);
-	_worker = new QFitsFocalPlaneWorker(folderPath, threshold, this);
+	_worker = new QFitsFocalPlaneWorker(folderPath, topThreshold, bottomThreshold, this);
 	qRegisterMetaType<std::vector<star>>("std::vector<star>");
 	qRegisterMetaType<FocalPlane>("FocalPlane");
 	qRegisterMetaType<pixelT>("pixelT");
@@ -348,8 +348,9 @@ void QFitsFocalPlanePanel::updateView(QString fileName, std::vector<star> starVe
 
 
 
-QFitsFocalPlaneWorker::QFitsFocalPlaneWorker(QString folderPath, double threshold, QWidget* parent) :
-		QThread(parent), _quit(false), _oldFilename	(""), _folderPath(folderPath), _threshold(threshold)
+QFitsFocalPlaneWorker::QFitsFocalPlaneWorker(QString folderPath, double topThreshold, double bottomThreshold, QWidget* parent) :
+				QThread(parent), _quit(false), _oldFilename	(""), _folderPath(folderPath),
+				_topThreshold(topThreshold), _bottomThreshold(bottomThreshold)
 {
 	_fileFilters << "*.fit" << "*.fits";
 	setTerminationEnabled(true);
@@ -396,7 +397,7 @@ void QFitsFocalPlaneWorker::run()
 	
 	// Gets star vector returned by extractStarProfiles function
 	// TESTING:
-	std::vector<star> starVector = extractStarProfiles(fitsFile, _threshold, 0.7*_threshold, true);
+	std::vector<star> starVector = extractStarProfiles(fitsFile, _topThreshold, _bottomThreshold, true);
 // 	std::vector<star> starVector = extractStarProfiles(fitsFile, _threshold, true);
 	
 	if (_quit == true)
@@ -427,17 +428,3 @@ QFitsFocalPlaneWorker::~QFitsFocalPlaneWorker()
 	qDebug() << isRunning();	
 	qDebug() << "WORKER DESTROYED";
 }
-
-
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
