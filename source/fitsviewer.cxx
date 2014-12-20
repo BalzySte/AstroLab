@@ -23,6 +23,12 @@ FitsViewer::FitsViewer() : _currentFitsImage(NULL)
 {
 //   	setMouseTracking(true);		// Always track mouse position inside application
 	
+	// Including DejaVuSans font for windows platform
+#ifdef WINDOWS_PLATFORM
+	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+ 	setFont(QFont("DejaVu Sans"));
+#endif
+	
 	// Creates main area, containing Fits images Windows
 	workspace = new QFitsMdiArea(this);
 	workspace->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

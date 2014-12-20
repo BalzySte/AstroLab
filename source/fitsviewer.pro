@@ -100,6 +100,7 @@ win32 {
 	QMAKE_LFLAGS_DEBUG += -pg
 
 	INCLUDEPATH += "."
+	RESOURCES = Resources/win_resources.qrc
 }
 
 
@@ -134,4 +135,5 @@ win64 {
 	QMAKE_LFLAGS_DEBUG += -pg
 
 	INCLUDEPATH += "."
+	RESOURCES = Resources/win_resources.qrc
 }

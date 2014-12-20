@@ -21,6 +21,12 @@
 
 QFitsFocalPlanePanel::QFitsFocalPlanePanel(QWidget* parent) : QWidget(parent), _worker(NULL)
 {	
+	// Including DejaVuSans font for windows platform
+	#ifdef WINDOWS_PLATFORM
+	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+	setFont(QFont("DejaVu Sans"));
+	#endif
+	
 	// Creates panel grid to arrange widgets
 	_panelGrid = new QGridLayout(this);
 	
@@ -139,6 +145,7 @@ void QFitsFocalPlanePanel::analyseFitsFile(QString filename, double threshold)
 	_colorMapPlot->rescaleAxes();
 //	_colorMap->rescaleDataRange(true);
 	_colorMap->setDataRange((QCPRange(plotMinRange, plotMaxRange)));
+	_colorMapPlot->replot();
 	// END Color Plot Setup
 	
 	// BEGIN Numerical Info Setup
