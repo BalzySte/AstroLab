@@ -2,7 +2,7 @@
 #ifndef __QFitsWindow_h__
 #define __QFitsWindow_h__
 
-#include <QtGui>
+#include <QtWidgets>
 #include "FitsPhoto.h"
 #include "astroAnalyzer.h"
 

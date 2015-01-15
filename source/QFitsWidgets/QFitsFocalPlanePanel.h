@@ -2,7 +2,7 @@
 #define __QFitsFocalPlanePanel_h__
 
 
-#include <QtGui>
+#include <QtWidgets>
 #include "qcustomplot.h"
 #include "FitsPhoto.h"
 #include "astroAnalyzer.h"

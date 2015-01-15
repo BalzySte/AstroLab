@@ -1,7 +1,7 @@
 #ifndef __QMousePointerDock_h__
 #define __QMousePointerDock_h__
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include <sstream>
 

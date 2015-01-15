@@ -1,4 +1,7 @@
-QT_SELECT = qt4
+QT_SELECT = qt5
+
+QT += widgets
+QT += printsupport
 
 HEADERS       = fitsviewer.h \
 		QFitsWidgets/QFitsWindow.h \

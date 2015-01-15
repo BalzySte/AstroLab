@@ -1,7 +1,7 @@
 #ifndef __QFitsStretchDock_h__
 #define __QFitsStretchDock_h__
 
-#include <QtGui>
+#include <QtWidgets>
 
 
 class QStretchSlider;	//declaration

@@ -1,7 +1,7 @@
 #ifndef __QFitsZoomDock_h__
 #define __QFitsZoomDock_h__
 
-#include <QtGui>
+#include <QtWidgets>
 
 
 class QZoomSlider;	// Declaration

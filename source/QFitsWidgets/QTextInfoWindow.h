@@ -1,4 +1,4 @@
-#include <QtGui>
+#include <QtWidgets>
 
 
 class QTextInfoWindow : public QWidget
