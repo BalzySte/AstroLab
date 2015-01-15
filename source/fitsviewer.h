@@ -8,6 +8,7 @@
 #include "QFitsStretchDock.h"
 #include "QFitsZoomDock.h"
 #include "QMousePointerDock.h"
+#include "settings.h"
 
 
 class FitsViewer : public QMainWindow
@@ -44,6 +45,7 @@ private slots:
 	void analyseStar();
 	void focalPlaneEvaluation();
 	void opticsAlignment();
+	void openSettingsWindow();
 // 	void drawValidArea();
 	void quit();
 	void about();
@@ -59,11 +61,15 @@ private:
 	std::list<QFitsWindow*> imageWindowsList;
 	QFitsWindow* _currentFitsImage;
 	
+	// Child widgets & docks
 	QMdiArea *workspace;
 	QBoxLayout *mainLayout;
 	QFitsStretchDock *stretchDock;
 	QFitsZoomDock *zoomDock;
 	QMousePointerDock *mousePointerDock;
+	
+	// Settings object
+	QSettings settings;
 	
 	// File menu actionsimgM
 	QAction *openAct;
@@ -93,6 +99,9 @@ private:
 	QAction *opticsAlignmentAct;
 // 	QAction *drawValidAreaAct;
 
+	// Settings Menu actions
+	QAction *openSettingsWindowAct;
+	
 	// Help Menu actions
 	QAction *aboutAct;
 
@@ -102,6 +111,7 @@ private:
 	QMenu *operationsMenu;
 	QMenu *filtersMenu;
 	QMenu *analysisMenu;
+	QMenu *settingsMenu;
 	QMenu *helpMenu;
 };
 

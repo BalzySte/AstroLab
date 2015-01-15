@@ -6,23 +6,24 @@ HEADERS       = fitsviewer.h \
 		QFitsWidgets/QFitsZoomDock.h \
 		QFitsWidgets/QFitsListWidgetItem.h \
 		QFitsWidgets/QTextInfoWindow.h \
-                QFitsWidgets/QFitsFocalPlanePanel.h \
+		QFitsWidgets/QFitsFocalPlanePanel.h \
 		QCustomPlot/qcustomplot.h \
-		MathFunctions/focalPlaneRegression.h
+		MathFunctions/focalPlaneRegression.h \
+		settings.h
 
 SOURCES       = fitsviewer.cxx \
 		main.cxx \
-                FitsPhoto/FitsPhoto.cxx \
-                FitsPhoto/FitsToImage.cxx \
-                FitsPhoto/quickselect.c \
-                QFitsWidgets/QFitsWindow.cxx \
-                QFitsWidgets/QFitsStretchDock.cxx \
-                QFitsWidgets/QFitsZoomDock.cxx \
-                QFitsWidgets/QMousePointerDock.cxx \
-                QFitsWidgets/QFitsListWidgetItem.cxx \
-                QFitsWidgets/QTextInfoWindow.cxx \
-                QFitsWidgets/QFitsFocalPlanePanel.cxx \
-                AstroAnalyzer/AstroAnalyzer.cxx \
+		FitsPhoto/FitsPhoto.cxx \
+		FitsPhoto/FitsToImage.cxx \
+		FitsPhoto/quickselect.c \
+		QFitsWidgets/QFitsWindow.cxx \
+		QFitsWidgets/QFitsStretchDock.cxx \
+		QFitsWidgets/QFitsZoomDock.cxx \
+		QFitsWidgets/QMousePointerDock.cxx \
+		QFitsWidgets/QFitsListWidgetItem.cxx \
+		QFitsWidgets/QTextInfoWindow.cxx \
+		QFitsWidgets/QFitsFocalPlanePanel.cxx \
+		AstroAnalyzer/AstroAnalyzer.cxx \
 		QCustomPlot/qcustomplot.cxx \
 		MathFunctions/focalPlaneRegression.cxx
 
@@ -36,6 +37,7 @@ INCLUDEPATH += "QFitsWidgets"
 INCLUDEPATH += "AstroAnalyzer"
 INCLUDEPATH += "QCustomPlot"
 INCLUDEPATH += "MathFunctions"
+
 
 linux {
 	# PLATFORM DEFINE

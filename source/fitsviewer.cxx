@@ -5,6 +5,7 @@
 #include "astroAnalyzer.h"
 #include "QTextInfoWindow.h"
 #include "QFitsFocalPlanePanel.h"
+#include "settings.h"
 #include <vector>
 #include <sstream>
 #include <iomanip>
@@ -19,7 +20,7 @@ QFitsMdiArea::QFitsMdiArea(QWidget* parent) : QMdiArea(parent)
 
 
 
-FitsViewer::FitsViewer() : _currentFitsImage(NULL)
+FitsViewer::FitsViewer() : _currentFitsImage(NULL), settings(settingsFile, QSettings::IniFormat)
 {
 //   	setMouseTracking(true);		// Always track mouse position inside application
 	
@@ -605,6 +606,12 @@ void FitsViewer::opticsAlignment()
 }
 
 
+void FitsViewer::openSettingsWindow()
+{
+	std::cout << "openSettingsWindow()" << std::endl;
+}
+
+
 /*
 void FitsViewer::drawValidArea()
 {
@@ -667,6 +674,9 @@ void FitsViewer::createMenus()
 	analysisMenu->addAction(focalPlaneEvaluationAct);
 	analysisMenu->addAction(opticsAlignmentAct);
 // 	analysisMenu->addAction(drawValidAreaAct);
+
+	settingsMenu = new QMenu("Settings", this);
+	settingsMenu->addAction(openSettingsWindowAct);
 	
 	helpMenu = new QMenu("Help", this);
 	helpMenu->addAction(aboutAct);
@@ -676,6 +686,7 @@ void FitsViewer::createMenus()
 	menuBar()->addMenu(operationsMenu);
 	menuBar()->addMenu(filtersMenu);
 	menuBar()->addMenu(analysisMenu);
+	menuBar()->addMenu(settingsMenu);
 	menuBar()->addMenu(helpMenu);
 }
 
@@ -729,6 +740,9 @@ void FitsViewer::createActions()
 	
 	opticsAlignmentAct = new QAction("Optics Alignment ...", this);
 	connect(opticsAlignmentAct, SIGNAL(triggered()), this, SLOT(opticsAlignment()));
+	
+	openSettingsWindowAct = new QAction("Settings ..." , this);
+	connect(openSettingsWindowAct, SIGNAL(triggered()), this, SLOT(openSettingsWindow()));
 	
 // 	drawValidAreaAct = new QAction("Draw Valid Area", this);
 // 	connect(drawValidAreaAct, SIGNAL(triggered()), this, SLOT(drawValidArea()));

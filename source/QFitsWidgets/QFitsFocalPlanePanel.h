@@ -1,3 +1,7 @@
+#ifndef __QFitsFocalPlanePanel_h__
+#define __QFitsFocalPlanePanel_h__
+
+
 #include <QtGui>
 #include "qcustomplot.h"
 #include "FitsPhoto.h"
@@ -60,3 +64,5 @@ private:
 	double _topThreshold;
 	double _bottomThreshold;
 };
+
+#endif //__QFitsFocalPlanePanel_h__
