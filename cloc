@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cloc ./source --exclude-dir=Resources,QCustomPlot,otherCode
