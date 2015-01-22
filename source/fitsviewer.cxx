@@ -5,6 +5,7 @@
 #include "astroAnalyzer.h"
 #include "QTextInfoWindow.h"
 #include "QFitsFocalPlanePanel.h"
+#include "QFitsSettingsWindow.h"
 #include "settings.h"
 #include <vector>
 #include <sstream>
@@ -20,9 +21,14 @@ QFitsMdiArea::QFitsMdiArea(QWidget* parent) : QMdiArea(parent)
 
 
 
-FitsViewer::FitsViewer() : _currentFitsImage(NULL), settings(settingsFile, QSettings::IniFormat)
+FitsViewer::FitsViewer() :
+	settings(QCoreApplication::applicationDirPath() + settingsFile),
+	_currentFitsImage(NULL)
 {
 //   	setMouseTracking(true);		// Always track mouse position inside application
+	
+	// Default settings value are set
+	setDefaultSettings();
 	
 	// Including DejaVuSans font for windows platform
 #ifdef WINDOWS_PLATFORM
@@ -608,7 +614,9 @@ void FitsViewer::opticsAlignment()
 
 void FitsViewer::openSettingsWindow()
 {
-	std::cout << "openSettingsWindow()" << std::endl;
+//	std::cout << "openSettingsWindow()" << std::endl;
+	QFitsSettingsWindow* settingsWindow = new QFitsSettingsWindow(this);
+	settingsWindow->show();
 }
 
 
@@ -778,3 +786,38 @@ void FitsViewer::mouseMoveEvent(QMouseEvent *event)
 {
 	mousePointerDock->update();
 }*/
+
+
+void FitsViewer::setDefaultSettings()
+{
+	// All default application settings are set here
+	
+	// userSettings Section
+	settings.beginSection("userSettings");
+
+	
+	// General Section
+	settings.beginSection("General");
+	settings.setDef("applicationLanguage", "English", "");
+	settings.setDef("nightMode", false, "");
+	settings.endSection();
+	
+	// Interface Section
+	settings.beginSection("Interface");
+	settings.setDef("stretchBarsMap", "Linear", "");
+	settings.setDef("stretchBarsMax", 10, "");
+	settings.setDef("stretchBarsMin", 0.01, "");
+	settings.endSection();
+	
+	// Appearance Section
+	settings.beginSection("Interface");
+	settings.setDef("applicationFont", "DejaVuSans", "");
+	settings.setDef("fitsImageShade", "White - Black", "");
+	settings.endSection();
+
+
+	// End userSettings
+	settings.endSection();
+	
+	settings.writeDefaults();
+}

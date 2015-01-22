@@ -15,7 +15,7 @@ typedef unsigned char uchar;
 
 typedef _PhotoArrayType_ pixelT;
 
-const char* const settingsFile = "./settings.ini";
+const char* const settingsFile = "/settings.ini";
 
 // Defaults settings values:
 // #######

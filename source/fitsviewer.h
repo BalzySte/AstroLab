@@ -8,6 +8,7 @@
 #include "QFitsStretchDock.h"
 #include "QFitsZoomDock.h"
 #include "QMousePointerDock.h"
+#include "QFitsSettingsManager.h"
 #include "settings.h"
 
 
@@ -29,7 +30,11 @@ public:
 		
 	// Updates stretch dock when focus changes
 //	void updateStretchDock();
-  
+	
+	// Settings object
+	SettingsManager settings;
+
+	
 private slots:
 	void open();
 	void exportImage();
@@ -56,6 +61,7 @@ private slots:
 private:
 	void createMenus();
 	void createActions();
+	void setDefaultSettings();
 
 	// Fits image windows list and pointer to active window
 	std::list<QFitsWindow*> imageWindowsList;
@@ -67,9 +73,6 @@ private:
 	QFitsStretchDock *stretchDock;
 	QFitsZoomDock *zoomDock;
 	QMousePointerDock *mousePointerDock;
-	
-	// Settings object
-	QSettings settings;
 	
 	// File menu actionsimgM
 	QAction *openAct;

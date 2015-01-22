@@ -10,6 +10,8 @@ HEADERS       = fitsviewer.h \
 		QFitsWidgets/QFitsListWidgetItem.h \
 		QFitsWidgets/QTextInfoWindow.h \
 		QFitsWidgets/QFitsFocalPlanePanel.h \
+		QFitsWidgets/QFitsSettingsManager.h \
+		QFitsWidgets/QFitsSettingsWindow.h \
 		QCustomPlot/qcustomplot.h \
 		MathFunctions/focalPlaneRegression.h \
 		settings.h
@@ -26,9 +28,13 @@ SOURCES       = fitsviewer.cxx \
 		QFitsWidgets/QFitsListWidgetItem.cxx \
 		QFitsWidgets/QTextInfoWindow.cxx \
 		QFitsWidgets/QFitsFocalPlanePanel.cxx \
+		QFitsWidgets/QFitsSettingsManager.cxx \
+		QFitsWidgets/QFitsSettingsWindow.cxx \
 		AstroAnalyzer/AstroAnalyzer.cxx \
 		QCustomPlot/qcustomplot.cxx \
 		MathFunctions/focalPlaneRegression.cxx
+		
+FORMS         = QFitsWidgets/UIs/QFitsSettingsWindow.ui
 
 # LIBRARIES
 LIBS += -lCCfits -lcfitsio -lgsl -lgslcblas
@@ -49,11 +55,11 @@ linux {
 	
 	# COMPILED FILES DESTINATION
 	DESTDIR = ../build
-	TARGET = fitsviewer 
+	TARGET = fitsviewer
 	OBJECTS_DIR = ../build/linux
 	MOC_DIR = ../build/linux
 	RCC_DIR = ../build/linux
-	UI_DIR = ../buildi/linux
+	UI_DIR = ../build/linux
 	                 
 	
 	# FLAGS SETTINGS	
