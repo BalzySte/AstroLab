@@ -3,6 +3,7 @@
 #define __QFitsWindow_h__
 
 #include <QtWidgets>
+
 #include "FitsPhoto.h"
 #include "astroAnalyzer.h"
 

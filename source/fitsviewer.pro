@@ -18,6 +18,7 @@ SOURCES       = fitsviewer.cxx \
 		main.cxx \
 		FitsPhoto/FitsPhoto.cxx \
 		FitsPhoto/FitsToImage.cxx \
+		FitsPhoto/FitsWarp.cxx \
 		FitsPhoto/quickselect.c \
 		QFitsWidgets/QFitsWindow.cxx \
 		QFitsWidgets/QFitsStretchDock.cxx \

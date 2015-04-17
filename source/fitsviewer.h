@@ -39,13 +39,14 @@ private slots:
 	void scalarDivision();
 	void multiplication();
 	void division();
+	void polarWarp();
 	void createMedianFilter();
 	void createLowPassFilter();
 	void findStars();
 	void analyseStar();
 	void focalPlaneEvaluation();
 	void opticsAlignment();
-	void openSettingsWindow();
+// 	void openSettingsWindow();
 // 	void drawValidArea();
 	void quit();
 	void about();
@@ -69,7 +70,7 @@ private:
 	QMousePointerDock *mousePointerDock;
 	
 	// Settings object
-	QSettings settings;
+// 	QSettings settings;
 	
 	// File menu actionsimgM
 	QAction *openAct;
@@ -83,6 +84,8 @@ private:
 	QAction *scalarDivideAct;
 	QAction *multiplyAct;
 	QAction *divideAct;
+	QAction *polarWarpAct;
+
 	
 	/* View menu actions
 	QAction *zoomInAct;
@@ -100,7 +103,7 @@ private:
 // 	QAction *drawValidAreaAct;
 
 	// Settings Menu actions
-	QAction *openSettingsWindowAct;
+// 	QAction *openSettingsWindowAct;
 	
 	// Help Menu actions
 	QAction *aboutAct;
@@ -111,7 +114,7 @@ private:
 	QMenu *operationsMenu;
 	QMenu *filtersMenu;
 	QMenu *analysisMenu;
-	QMenu *settingsMenu;
+// 	QMenu *settingsMenu;
 	QMenu *helpMenu;
 };
 

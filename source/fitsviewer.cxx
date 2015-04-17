@@ -1,6 +1,7 @@
 #include "fitsviewer.h"
 
 #include "FitsPhoto.h"
+#include "FitsWarp.h"
 #include "QFitsListWidgetItem.h"
 #include "astroAnalyzer.h"
 #include "QTextInfoWindow.h"
@@ -9,7 +10,7 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
-#include <iostream> //DEBUGGING
+// #include <iostream> //DEBUGGING
 
 
 
@@ -20,7 +21,7 @@ QFitsMdiArea::QFitsMdiArea(QWidget* parent) : QMdiArea(parent)
 
 
 
-FitsViewer::FitsViewer() : _currentFitsImage(NULL), settings(settingsFile, QSettings::IniFormat)
+FitsViewer::FitsViewer() : _currentFitsImage(NULL)/*, settings(settingsFile, QSettings::IniFormat)*/
 {
 //   	setMouseTracking(true);		// Always track mouse position inside application
 	
@@ -431,6 +432,46 @@ void FitsViewer::division()
 }
 
 
+void FitsViewer::polarWarp()
+{
+	if(_currentFitsImage == NULL)
+		return;
+	
+	const FitsPhoto& fitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto();
+	int fitsPhotoWidth = fitsPhoto.getWidth();
+	int fitsPhotoHeight = fitsPhoto.getHeight();
+	
+	bool ok;
+	int xCenter = QInputDialog::getInt(this, "Center Coordinates",
+		tr("Center X"), fitsPhotoWidth/2, 0, fitsPhotoWidth, 1, &ok);
+	
+	// TODO: Show a proper message in case of error
+	
+	if (ok)		//Checks if user confirms operation
+	{
+		std::string fileName = 	const_cast<const QFitsWindow*>(
+			_currentFitsImage)->getImageLabel()->getFitsPhoto().getFileName();
+		
+		int yCenter = QInputDialog::getInt(this, "Center Coordinates",
+		tr("Center Y"), fitsPhotoHeight/2, 0, fitsPhotoHeight, 1, &ok);
+
+			if (ok)
+			{
+				// Generates filtered photo
+				FitsPhoto newFitsPhoto = FitsManip::polarWarp(fitsPhoto, xCenter, yCenter);
+
+				// Creates new image window
+				QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+
+				// Creates and sets Image title
+				std::stringstream newTitle;
+				newTitle << "PolarTransform";
+				newFitsWindow->createFromFitsPhoto(newFitsPhoto, newTitle.str().c_str()); // no std::string temp var?
+			}
+	}	
+
+}
+
 void FitsViewer::createMedianFilter()
 {	
 	// Checks whether an image is focused
@@ -605,12 +646,12 @@ void FitsViewer::opticsAlignment()
 	//TODO: FocalPlanePanel should be destroyed upon exit, use Qt::WA_DeleteOnClose
 }
 
-
+/*
 void FitsViewer::openSettingsWindow()
 {
 	std::cout << "openSettingsWindow()" << std::endl;
 }
-
+*/
 
 /*
 void FitsViewer::drawValidArea()
@@ -663,6 +704,8 @@ void FitsViewer::createMenus()
 	operationsMenu->addSeparator();
 	operationsMenu->addAction(scalarMultiplyAct);
 	operationsMenu->addAction(scalarDivideAct);
+	operationsMenu->addSeparator();
+	operationsMenu->addAction(polarWarpAct);
 	
 	filtersMenu = new QMenu("Filters", this);
 	filtersMenu->addAction(createMedianFilterAct);
@@ -675,8 +718,8 @@ void FitsViewer::createMenus()
 	analysisMenu->addAction(opticsAlignmentAct);
 // 	analysisMenu->addAction(drawValidAreaAct);
 
-	settingsMenu = new QMenu("Settings", this);
-	settingsMenu->addAction(openSettingsWindowAct);
+// 	settingsMenu = new QMenu("Settings", this);
+// 	settingsMenu->addAction(openSettingsWindowAct);
 	
 	helpMenu = new QMenu("Help", this);
 	helpMenu->addAction(aboutAct);
@@ -686,7 +729,7 @@ void FitsViewer::createMenus()
 	menuBar()->addMenu(operationsMenu);
 	menuBar()->addMenu(filtersMenu);
 	menuBar()->addMenu(analysisMenu);
-	menuBar()->addMenu(settingsMenu);
+// 	menuBar()->addMenu(settingsMenu);
 	menuBar()->addMenu(helpMenu);
 }
 
@@ -723,6 +766,9 @@ void FitsViewer::createActions()
 	divideAct = new QAction("Divide images...", this);
 	connect(divideAct, SIGNAL(triggered()), this, SLOT(division()));
 	
+	polarWarpAct = new QAction("Polar Transform...", this);
+	connect(polarWarpAct, SIGNAL(triggered()), this, SLOT(polarWarp()));
+	
 	createMedianFilterAct = new QAction("Extract Median Filtered ...", this);
 	connect(createMedianFilterAct, SIGNAL(triggered()), this, SLOT(createMedianFilter()));
 	
@@ -741,8 +787,8 @@ void FitsViewer::createActions()
 	opticsAlignmentAct = new QAction("Optics Alignment ...", this);
 	connect(opticsAlignmentAct, SIGNAL(triggered()), this, SLOT(opticsAlignment()));
 	
-	openSettingsWindowAct = new QAction("Settings ..." , this);
-	connect(openSettingsWindowAct, SIGNAL(triggered()), this, SLOT(openSettingsWindow()));
+// 	openSettingsWindowAct = new QAction("Settings ..." , this);
+// 	connect(openSettingsWindowAct, SIGNAL(triggered()), this, SLOT(openSettingsWindow()));
 	
 // 	drawValidAreaAct = new QAction("Draw Valid Area", this);
 // 	connect(drawValidAreaAct, SIGNAL(triggered()), this, SLOT(drawValidArea()));
