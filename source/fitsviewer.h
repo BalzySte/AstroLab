@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
+#include <QCoreApplication>
 
 #include "QFitsWindow.h"
 #include "QFitsStretchDock.h"
@@ -31,23 +32,34 @@ public:
 //	void updateStretchDock();
   
 private slots:
+	// File menu
 	void open();
 	void exportImage();
+	void quit();
+	// Operations menu
 	void addition();
 	void subtraction();
 	void scalarMultiplication();
 	void scalarDivision();
 	void multiplication();
 	void division();
+	// Filters menu
 	void createMedianFilter();
 	void createLowPassFilter();
+	void cometAzAvg();
+	void cometAzMed();
+	void cometAzRenorm();
+	void cometInvRho();
+	void cometRvsf();
+	void cometRvsfMosaic();
+	// Analysis menu
 	void findStars();
 	void analyseStar();
 	void focalPlaneEvaluation();
 	void opticsAlignment();
 // 	void openSettingsWindow();
 // 	void drawValidArea();
-	void quit();
+	// Help menu
 	void about();
 	
 	// Mouse move event
@@ -91,9 +103,20 @@ private:
 	QAction *fitToWindowAct;
 	*/
 	
-	QAction *findStarsAct;
+	// Filters menu actions
 	QAction *createMedianFilterAct;
 	QAction *createLowPassFilterAct;
+	                                 // Cometary filters
+	QAction *cometAzAvgAct;          // Division by Azimuthal Average
+	QAction *cometAzMedAct;          // Division by Azimuthal Median
+	QAction *cometAzRenormAct;       // Azimuthal Renormalization
+	QAction *cometInvRhoAct;         // Division by 1/ρ
+	QAction *cometRvsfAct;           // Radially Variable Spatial Filtering
+	QAction *cometRvsfMosaicAct;     // Radially Variable Spatial Filtering Mosaic
+
+
+	// Analysis menu actions
+	QAction *findStarsAct;
 	QAction *starAnalysisAct;
 	QAction *focalPlaneEvaluationAct;
 	QAction *opticsAlignmentAct;
@@ -104,6 +127,9 @@ private:
 	
 	// Help Menu actions
 	QAction *aboutAct;
+
+	// Sub-menus
+	QMenu *cometaryFilters; // Analysis submenus
 
 	// Menus
 	QMenu *fileMenu;

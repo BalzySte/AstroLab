@@ -490,6 +490,110 @@ void FitsViewer::createLowPassFilter()
 }
 
 
+void FitsViewer::cometAzAvg()          // Division by Azimuthal Average
+{
+}
+
+
+void FitsViewer::cometAzMed()          // Division by Azimuthal Median
+{
+}
+
+
+void FitsViewer::cometAzRenorm()    // Azimuthal Renormalization
+{
+}
+
+
+void FitsViewer::cometInvRho()      // Division by 1/ρ
+{
+	// Checks whether an image is focused
+	if (_currentFitsImage == NULL)
+		return;
+
+	// Creates a temporary working dir and saves focused image there
+	QTemporaryDir dir;
+	if (!(dir.isValid()))
+		return;
+	
+	std::string dirPath = dir.path().toStdString();
+		
+	const FitsPhoto& origFitsPhoto = const_cast<const QFitsWindow*>(_currentFitsImage)->getImageLabel()->getFitsPhoto();
+	origFitsPhoto.write(dirPath + "/original.fits", false);
+	
+	std::string originalTitle = origFitsPhoto.getFileName();
+	int fitsPhotoWidth = origFitsPhoto.getWidth();
+	int fitsPhotoHeight = origFitsPhoto.getHeight();
+	
+	// Prompts the user for comet center
+	bool ok;
+	double xCenter = QInputDialog::getDouble(this, "Comet center Coordinates",
+		tr("Center X"), fitsPhotoWidth/2, 0., fitsPhotoWidth, 1, &ok);
+	
+	// TODO: Show a proper message in case of error
+	if (ok)    //Checks if user confirms operation
+	{
+		double yCenter = QInputDialog::getDouble(this, "Comet center Coordinates",
+			tr("Center Y"), fitsPhotoHeight/2, 0., fitsPhotoHeight, 1, &ok);
+
+		if (ok)    //Checks if user confirms operation
+		{
+			// Prompts the user for other parameters
+					// Creates Information String
+			double xMax = std::max(xCenter - 1, fitsPhotoWidth - xCenter);
+			double yMax = std::max(yCenter - 1, fitsPhotoHeight - yCenter);
+			int rhoResolution = static_cast<int>(
+				sqrt(xMax * xMax + yMax * yMax)); // Maximum incomplete circle
+			
+			std::stringstream paramStream;
+			paramStream << "original.fits" << std::endl
+				<< "unenhanced.fits" << std::endl
+				<< "enhanced.fits" << std::endl
+				<< "output.fits" << std::endl
+				<< std::fixed << std::setprecision(1)
+				<< xCenter << " " << yCenter << std::endl
+				<< 1 << " " << fitsPhotoWidth << std::endl
+				<< 1 << " " << fitsPhotoHeight << std::endl
+				<< rhoResolution << std::endl
+				<< 3600 << std::endl;	//Theta axis pixels
+			
+			// Runs the Fortran application
+// 			std::string command = "cd " + dirPath +
+// 				"; /home/stefano/Development/fitsviewer/build/cometcief_inverserho <<< \"" + paramStream.str() + "\"";
+
+			QString appPath = QCoreApplication::applicationDirPath();
+	
+			std::string command = "cd " + dirPath + "; echo \"" + paramStream.str() +
+				//"\" | /home/stefano/Development/fitsviewer/build/cometcief_inverserho";
+				"\" | " + appPath.toStdString()  +  "/cometcief_inverserho";
+
+			std::cout << command << std::endl;
+			
+			system(command.c_str());
+			
+			// Opens the result from temp dir
+			FitsPhoto outputFits;
+			outputFits.open(dirPath + "/output.fits");
+			
+			// Creates new image window
+			QFitsWindow* newFitsWindow = new QFitsWindow(imageWindowsList, workspace);
+			newFitsWindow->createFromFitsPhoto(outputFits, 
+				QString::fromStdString(originalTitle + " Enhanced - divided by 1/rho"));
+		}
+	}
+}
+
+
+void FitsViewer::cometRvsf()        // Radially Variable Spatial Filtering
+{
+}
+
+
+void FitsViewer::cometRvsfMosaic()  // Radially Variable Spatial Filtering Mosaic
+{
+}
+
+
 void FitsViewer::findStars()
 {
 	if (_currentFitsImage == NULL)
@@ -664,9 +768,18 @@ void FitsViewer::createMenus()
 	operationsMenu->addAction(scalarMultiplyAct);
 	operationsMenu->addAction(scalarDivideAct);
 	
+	cometaryFilters = new QMenu("Cometary Filters"); // Filters submenus
+	cometaryFilters->addAction(cometAzAvgAct);
+	cometaryFilters->addAction(cometAzMedAct);
+	cometaryFilters->addAction(cometAzRenormAct);
+	cometaryFilters->addAction(cometInvRhoAct);
+	cometaryFilters->addAction(cometRvsfAct);
+	cometaryFilters->addAction(cometRvsfMosaicAct);
+
 	filtersMenu = new QMenu("Filters", this);
 	filtersMenu->addAction(createMedianFilterAct);
 	filtersMenu->addAction(createLowPassFilterAct);
+	filtersMenu->addMenu(cometaryFilters);
 	
 	analysisMenu = new QMenu("Analysis", this);
 	analysisMenu->addAction(findStarsAct);
@@ -727,7 +840,25 @@ void FitsViewer::createActions()
 	connect(createMedianFilterAct, SIGNAL(triggered()), this, SLOT(createMedianFilter()));
 	
 	createLowPassFilterAct = new QAction("Extract Low Pass 3x3 Filtered ...", this);
-	connect(createLowPassFilterAct, SIGNAL(triggered()), this, SLOT(createLowPassFilter()));	
+	connect(createLowPassFilterAct, SIGNAL(triggered()), this, SLOT(createLowPassFilter()));
+	
+	cometAzAvgAct = new QAction("Division by Azimuthal Average ...", this);
+	connect(cometAzAvgAct, SIGNAL(triggered()), this, SLOT(cometAzAvg()));
+	
+	cometAzMedAct = new QAction("Division by Azimuthal Median ...", this);
+	connect(cometAzMedAct, SIGNAL(triggered()), this, SLOT(cometAzMed()));
+	
+	cometAzRenormAct = new QAction("Azimuthal Renormalization ...", this);
+	connect(cometAzRenormAct, SIGNAL(triggered()), this, SLOT(cometAzRenorm()));
+
+	cometInvRhoAct = new QAction("Division by 1/ρ ...", this);
+	connect(cometInvRhoAct, SIGNAL(triggered()), this, SLOT(cometInvRho()));
+	
+	cometRvsfAct = new QAction("Radially Variable Spatial Filtering ...", this);
+	connect(cometRvsfAct, SIGNAL(triggered()), this, SLOT(cometRvsf()));
+	
+	cometRvsfMosaicAct = new QAction("Radially Variable Spatial Filtering Mosaic ...", this);
+	connect(cometRvsfMosaicAct, SIGNAL(triggered()), this, SLOT(cometRvsfMosaic()));
 	
 	findStarsAct = new QAction("Find Stars ...", this);
 	connect(findStarsAct, SIGNAL(triggered()), this, SLOT(findStars()));

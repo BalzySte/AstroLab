@@ -30,7 +30,7 @@ public:
 	// File managing methods (Open/New/Save)
 	void open(const std::string &filename);
 	void create(int width, int height, int xPos = 0, int yPos = 0);
-	void write(const std::string &filename, bool overwrite);
+	void write(std::string filename, bool overwrite) const;
 	
 	//TODO: Add methods for closing / flushing
 

@@ -1,0 +1,13 @@
+Cometary Coma Image Enhancement
+===============================
+
+These fortran sources implement some filters used to enhance cometary images.
+
+They were developed by:
+
+Samarasinha, N. H., Martin, M. P., Larson, S. M, 2013. Cometary Coma Image Enhancement Facility, http://www.psi.edu/research/cometimen
+
+fitsiowrap contains a set of subroutines which allow FITS images manipulation.
+
+Developed by:
+Benjamin Weiner, bjw@earth.astro.umd.edu

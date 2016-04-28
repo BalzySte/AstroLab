@@ -2,6 +2,7 @@ QT_SELECT = qt5
 
 QT += widgets
 QT += printsupport
+QT += core
 
 HEADERS       = fitsviewer.h \
 		QFitsWidgets/QFitsWindow.h \
@@ -29,6 +30,28 @@ SOURCES       = fitsviewer.cxx \
 		AstroAnalyzer/AstroAnalyzer.cxx \
 		QCustomPlot/qcustomplot.cxx \
 		MathFunctions/focalPlaneRegression.cxx
+		
+# fortranLibs.input = CometComaEnhance/fitsiowrap.f
+# fortranLibs.output = fitsiowrap.o
+# fortranLibs.dest = ..
+# fortranLibs.commands = gfortran ${QMAKE_FILE_NAME} -c -std=legacy -o ${QMAKE_FILE_OUT}
+		
+# FORTRAN_SOURCES = CometComaEnhance/cometcief_aziaverage.f \
+# 		CometComaEnhance/cometcief_azimedian.f \
+# 		CometComaEnhance/cometcief_azirenorm.f \
+# 		CometComaEnhance/cometcief_inverserho.f \
+# 		CometComaEnhance/cometcief_rvsf.f
+# 		
+# FORTRAN_LIBS = CometComaEnhance/fitsiowrap.f
+
+# gfortran.depends = fitsiowrap.o
+# gfortran.input = FORTRAN_SOURCES FORTRAN_LIBS
+# gfortran.output = ${QMAKE_FILE_BASE}
+# gfortran.commands = gfortran ${QMAKE_FILE_NAME} fitsiowrap.o -std=legacy -o ${QMAKE_FILE_OUT}
+# 
+# QMAKE_EXTRA_TARGETS += fortran
+# QMAKE_EXTRA_COMPILERS = gfortran
+
 
 # LIBRARIES
 LIBS += -lCCfits -lcfitsio -lgsl -lgslcblas

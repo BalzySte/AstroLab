@@ -65,19 +65,19 @@ void FitsPhoto::create(int width, int height, int xPos, int yPos)
 }
 
 
-void FitsPhoto::write(const std::string &filename, bool overwrite)
+void FitsPhoto::write(std::string filename, bool overwrite) const
 {
-	_filename = filename;
-	if (overwrite == true)
-		_filename.insert(0, "!");
+// 	_filename = filename;
+ 	if (overwrite == true)
+ 		filename.insert(0, "!");
 
 	long axes[2] = {_width, _height};
-	CCfits::FITS outFitsFile (_filename, _bitpix, 2, axes);
+	CCfits::FITS outFitsFile (filename, _bitpix, 2, axes);
 	CCfits::PHDU& primaryHDU = outFitsFile.pHDU();
 	primaryHDU.write<pixelT>(1, _pixelNumber, _imageArray);
 	outFitsFile.~FITS();
 
-	_valid = true;  
+// 	_valid = true;  
 }
 
 

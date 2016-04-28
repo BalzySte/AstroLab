@@ -1,0 +1,99 @@
+<html>
+<title>
+FITSIOWRAP
+</title>
+<body>
+<h2>
+FITSIOWRAP
+</h2>
+<h3>
+a wrapper that makes FITSIO look like IMFORT to a calling program
+</h3>
+<p>
+
+<h4>fitsiowrap</h4>
+is a set of Fortran subroutines that look like
+the IMFORT subroutines which access the native IRAF image format, but actually 
+call FITSIO library routines to open and manipulate FITS image files.
+This enables someone with a collection of legacy code (ahem),
+full of IMFORT calls, to keep it alive by using FITS files without
+changing the code.
+<p>
+
+<h4>History</h4>
+Why would anyone want this?  A little history: many astronomers use
+the IRAF package to manipulate their data, especially 2-d CCD images.
+IRAF used to use only its own format for image data, and stored each
+image in two files, header foo.imh and pixel data foo.pix.
+The IRAF people supplied a library of subroutines called IMFORT that
+could be called from FORTRAN (and C if you were ingenious)
+if you wanted to write your own program to manipulate the .imh and
+.pix files.  
+<p>
+
+Later versions of IRAF (v2.10?) became able to handle FITS image files.
+FITS is a widely accepted standard and is far more portable than
+the native IRAF format was (if I recall correctly, the .pix files 
+may have even been raw binaries that got mangled when moving from
+big-endian to little-endian machines).  This was a major step
+forward.  And if you want to write programs to access FITS files,
+you can use the FITSIO library. (add link)
+<p>
+
+<h4>Legacy Code problems</h4> 
+Unfortunately, if you had already written lots of code with more 
+than a trivial number of IMFORT calls, porting it to use FITSIO 
+is a royal pain.  This is what FITSIOWRAP is for.  It is essentially
+an IMFORT lookalike written in Fortran that calls FITSIO routines.
+You just link your code to both it and a FITSIO library.
+<p>
+
+I wrote this a while ago, and there may not be anyone else left
+with a bunch of IMFORT-using legacy code.  I'm putting this up
+in the hope it saves somebody else a headache.  If you're dedicated 
+enough to read this far, you may be one of those people.
+It does not implement all IMFORT subroutines, but most of the
+ones that you need to access 1-d and 2-d images and image headers.
+The code is simply two Fortran files:
+<p>
+
+<pre>
+ fitsiowrap.f - all the subroutines
+ nmax.f       - header file that defines the biggest image you'll use
+                e.g. 2048, 4096, etc. edit to change.
+</pre>
+<p>
+
+FITSIOWRAP is free, copyrighted, and GPL licensed:
+<a href="fitsiowrap.tar">
+fitsiowrap.tar
+</a>
+<p>
+(I can't imagine anyone could actually sell this code, but
+what the heck, I always wanted to give some software away)
+<p>
+
+FITSIOWRAP doesn't include every last IMFORT subroutine.  It has
+the common ones that I've needed.  If there is a subroutine that
+you desperately need and it's not included, contact me and I might
+be able to implement it.
+<p>
+
+<h4>Credits: </h4>
+FITSIOWRAP grew out of a germ of two routines written by
+Dan Kelson.  The bulk of the original version was written by Ben
+Weiner.  Povilas Palunas cleaned some routines up and added several.
+I (BJW) am responsible for the "final" version.  FITSIOWRAP was
+written while I was supported by a fellowship from the Observatories
+of the Carnegie Institution of Washington.
+<p>
+
+Contact: email <tt> bjw </tt> at
+<tt> earth.astro.umd.edu </tt>
+<p>
+
+</body>
+</html>
+
+
+

@@ -28,10 +28,24 @@ BUILD_DIR="../build/"
 WIN32_QMAKE="/opt/mxe/usr/i686-w64-mingw32.static/qt/bin/qmake"
 WIN64_QMAKE="/opt/mxe/usr/x86_64-w64-mingw32.static/qt/bin/qmake"
 
+
+if [ "$2" = "-B" ]
+then
+	rm -rf ${BUILD_DIR}*
+fi
+
+
 if [ "$1" = "linux" ]
 then
-    BUILD_DIR="${BUILD_DIR}linux"
+	# compiling Fortran Comet Coma Executables
+	mkdir -p ${BUILD_DIR}comet-coma-linux
+	gfortran -c CometComaEnhance/fitsiowrap.f -o ${BUILD_DIR}comet-coma-linux/fitsiowrap.o
+	for srcFile in $(ls CometComaEnhance/cometcief_*)
+	do
+		gfortran $srcFile ${BUILD_DIR}comet-coma-linux/fitsiowrap.o CometComaEnhance/libcfitsio.a -lz -lpthread -o ${BUILD_DIR}$(basename $srcFile | cut -f 1 -d '.')
+	done
     qmake CONFIG+=linux
+	
 elif [ "$1" = "win32" ]
 then
     BUILD_DIR="${BUILD_DIR}win32"
@@ -47,15 +61,14 @@ else
     exit 1
 fi
 
-mkdir -p $BUILD_DIR
 
 if [ "$2" = "-B" ]
 then
-    rm -f $BUILD_DIR/*
     make -B
 else
     make
 fi
+
 
 # Deletes object_script.* and Makefile* to keep source directory clean
 rm -f object_script.fitsviewer* Makefile*
